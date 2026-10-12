@@ -18,6 +18,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.Optional;
+import java.time.Instant;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -28,9 +29,27 @@ class ServiceRulesTest {
     @Test void registrationRejectsDuplicateEmail() {
         UserRepository users = mock(UserRepository.class);
         when(users.existsByEmailIgnoreCase("sok@example.com")).thenReturn(true);
-        AuthService service = new AuthService(users, new BCryptPasswordEncoder(), mock(JwtEncoder.class), mock(ApiMapper.class), mock(CurrentUser.class));
-        ApiException error = assertThrows(ApiException.class, () -> service.register(new RegisterRequest("SOK Citizen", "SOK@example.com", "StrongPassword123!")));
-        assertEquals(HttpStatus.CONFLICT, error.getStatus()); verify(users, never()).save(any());
+        RegistrationEmailSender emails = mock(RegistrationEmailSender.class);
+        AuthService service = new AuthService(users, mock(PendingRegistrationRepository.class), new BCryptPasswordEncoder(),
+                mock(JwtEncoder.class), mock(ApiMapper.class), mock(CurrentUser.class), emails);
+        ApiException error = assertThrows(ApiException.class, () -> service.register(new RegisterRequest("SOK@example.com")));
+        assertEquals(HttpStatus.CONFLICT, error.getStatus()); verifyNoInteractions(emails);
+    }
+    @Test void registrationCodesAreHashedAndRateLimited() {
+        UserRepository users = mock(UserRepository.class); PendingRegistrationRepository pending = mock(PendingRegistrationRepository.class);
+        RegistrationEmailSender emails = mock(RegistrationEmailSender.class); BCryptPasswordEncoder passwords = new BCryptPasswordEncoder();
+        AuthService service = new AuthService(users, pending, passwords, mock(JwtEncoder.class), mock(ApiMapper.class), mock(CurrentUser.class), emails);
+        PendingRegistration record = new PendingRegistration();
+        when(pending.findLockedByEmail("sok@example.com")).thenReturn(Optional.of(record));
+        service.register(new RegisterRequest("SOK@example.com"));
+        org.mockito.ArgumentCaptor<String> code = org.mockito.ArgumentCaptor.forClass(String.class);
+        verify(emails).sendCode(eq("sok@example.com"), code.capture());
+        assertTrue(code.getValue().matches("[0-9]{6}"));
+        assertNotEquals(code.getValue(), record.getCodeHash());
+        assertTrue(passwords.matches(code.getValue(), record.getCodeHash()));
+        assertEquals(1, record.getSendsInWindow());
+        assertEquals(HttpStatus.TOO_MANY_REQUESTS, assertThrows(ApiException.class,
+                () -> service.register(new RegisterRequest("sok@example.com"))).getStatus());
     }
     @Test void loginIssuesSignedJwtForCitizen() {
         String secret = "unit-test-secret-with-more-than-thirty-two-characters";
@@ -39,13 +58,38 @@ class ServiceRulesTest {
         User user = citizen(); user.setEmail("sok@example.com"); user.setPasswordHash(new BCryptPasswordEncoder().encode("StrongPassword123!"));
         when(users.findByEmailIgnoreCase("sok@example.com")).thenReturn(Optional.of(user));
         when(mapper.user(user)).thenReturn(new UserResponse(id, user.getNickname(), user.getEmail(), Role.CITIZEN, null));
-        AuthService service = new AuthService(users, new BCryptPasswordEncoder(), new NimbusJwtEncoder(new ImmutableSecret<>(key)), mapper, mock(CurrentUser.class));
+        AuthService service = new AuthService(users, mock(PendingRegistrationRepository.class), new BCryptPasswordEncoder(),
+                new NimbusJwtEncoder(new ImmutableSecret<>(key)), mapper, mock(CurrentUser.class), mock(RegistrationEmailSender.class));
         AuthResponse response = service.login(new LoginRequest("sok@example.com", "StrongPassword123!"));
         Jwt jwt = NimbusJwtDecoder.withSecretKey(key).build().decode(response.token());
         assertEquals(id.toString(), jwt.getSubject()); assertEquals("CITIZEN", jwt.getClaimAsString("role"));
         assertEquals(Role.CITIZEN, response.user().role());
         assertEquals(HttpStatus.UNAUTHORIZED, assertThrows(ApiException.class,
                 () -> service.login(new LoginRequest("sok@example.com", "wrong"))).getStatus());
+    }
+    @Test void correctCodeCreatesAccountAndWrongCodesConsumeAttempts() {
+        String secret = "unit-test-secret-with-more-than-thirty-two-characters";
+        SecretKeySpec key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        BCryptPasswordEncoder passwords = new BCryptPasswordEncoder();
+        UserRepository users = mock(UserRepository.class); PendingRegistrationRepository pending = mock(PendingRegistrationRepository.class);
+        ApiMapper mapper = mock(ApiMapper.class);
+        PendingRegistration record = new PendingRegistration(); record.setEmail("sok@example.com");
+        record.setCodeHash(passwords.encode("123456")); record.setExpiresAt(Instant.now().plusSeconds(600));
+        when(pending.findLockedByEmail("sok@example.com")).thenReturn(Optional.of(record));
+        when(users.saveAndFlush(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(mapper.user(any())).thenAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            return new UserResponse(user.getId(), user.getNickname(), user.getEmail(), user.getRole(), user.getCreatedAt());
+        });
+        AuthService service = new AuthService(users, pending, passwords, new NimbusJwtEncoder(new ImmutableSecret<>(key)),
+                mapper, mock(CurrentUser.class), mock(RegistrationEmailSender.class));
+        assertEquals(HttpStatus.BAD_REQUEST, assertThrows(ApiException.class,
+                () -> service.verifyRegistration(new VerifyRegistrationRequest("SOK Citizen", "sok@example.com", "StrongPassword123!", "000000"))).getStatus());
+        assertEquals(1, record.getAttempts()); verify(users, never()).saveAndFlush(any());
+        AuthResponse response = service.verifyRegistration(new VerifyRegistrationRequest("SOK Citizen", "sok@example.com", "StrongPassword123!", "123456"));
+        assertEquals("sok@example.com", response.user().email());
+        verify(pending).delete(record);
+        assertNotNull(NimbusJwtDecoder.withSecretKey(key).build().decode(response.token()));
     }
     @Test void reportCreationUsesAuthenticatedAuthorAndReportedStatus() {
         ReportRepository reports = mock(ReportRepository.class); CurrentUser current = mock(CurrentUser.class); ApiMapper mapper = mock(ApiMapper.class);

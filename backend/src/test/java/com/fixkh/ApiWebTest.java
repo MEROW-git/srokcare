@@ -47,12 +47,25 @@ class ApiWebTest {
     }
     @Test void registrationValidationAndDuplicateEmail() throws Exception {
         mvc.perform(post("/api/v1/auth/register").contentType("application/json")
-                .content("{\"nickname\":\"\",\"email\":\"bad\",\"password\":\"short\"}"))
+                .content("{\"email\":\"bad\"}"))
                 .andExpect(status().isBadRequest());
+        when(auth.register(any())).thenReturn(new RegistrationPendingResponse("Registration code sent. Check your email"));
+        mvc.perform(post("/api/v1/auth/register").contentType("application/json")
+                .content("{\"email\":\"sok@example.com\"}"))
+                .andExpect(status().isAccepted()).andExpect(jsonPath("$.token").doesNotExist())
+                .andExpect(jsonPath("$.code").doesNotExist());
         when(auth.register(any())).thenThrow(new ApiException(HttpStatus.CONFLICT, "Email already registered"));
         mvc.perform(post("/api/v1/auth/register").contentType("application/json")
-                .content("{\"nickname\":\"SOK Citizen\",\"email\":\"sok@example.com\",\"password\":\"StrongPassword123!\"}"))
+                .content("{\"email\":\"sok@example.com\"}"))
                 .andExpect(status().isConflict()).andExpect(jsonPath("$.message").value("Email already registered"));
+        mvc.perform(post("/api/v1/auth/verify-registration").contentType("application/json")
+                .content("{\"nickname\":\"SOK Citizen\",\"email\":\"sok@example.com\",\"password\":\"StrongPassword123!\",\"code\":\"bad\"}"))
+                .andExpect(status().isBadRequest());
+        when(auth.verifyRegistration(any())).thenReturn(new AuthResponse("signed-jwt",
+                new UserResponse(ID, "SOK Citizen", "sok@example.com", Role.CITIZEN, Instant.now())));
+        mvc.perform(post("/api/v1/auth/verify-registration").contentType("application/json")
+                .content("{\"nickname\":\"SOK Citizen\",\"email\":\"sok@example.com\",\"password\":\"StrongPassword123!\",\"code\":\"123456\"}"))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.token").value("signed-jwt"));
     }
     @Test void jwtRequiredForMeAndLoginIsPublic() throws Exception {
         mvc.perform(get("/api/v1/auth/me")).andExpect(status().isUnauthorized()).andExpect(jsonPath("$.status").value(401));

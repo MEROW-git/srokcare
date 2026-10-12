@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService service;
     public AuthController(AuthService service) { this.service = service; }
-    @PostMapping("/register") @ResponseStatus(HttpStatus.CREATED) @Operation(summary = "Register a citizen account")
-    public AuthResponse register(@Valid @RequestBody RegisterRequest request) { return service.register(request); }
+    @PostMapping("/register") @ResponseStatus(HttpStatus.ACCEPTED) @Operation(summary = "Email a registration code to a new citizen")
+    public RegistrationPendingResponse register(@Valid @RequestBody RegisterRequest request) { return service.register(request); }
+    @PostMapping("/verify-registration") @ResponseStatus(HttpStatus.CREATED) @Operation(summary = "Verify email and create a citizen account")
+    public AuthResponse verifyRegistration(@Valid @RequestBody VerifyRegistrationRequest request) { return service.verifyRegistration(request); }
     @PostMapping("/login") @Operation(summary = "Log in and receive a JWT")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) { return service.login(request); }
     @GetMapping("/me") @Operation(summary = "Get private account profile", security = @SecurityRequirement(name = "bearerAuth"))

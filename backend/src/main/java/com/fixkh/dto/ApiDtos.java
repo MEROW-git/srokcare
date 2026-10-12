@@ -12,10 +12,13 @@ import java.util.UUID;
 public final class ApiDtos {
     private ApiDtos() {}
 
-    public record RegisterRequest(
+    public record RegisterRequest(@NotBlank @Email @Size(max = 320) String email) {}
+    public record VerifyRegistrationRequest(
             @NotBlank @Size(min = 2, max = 50) @Schema(example = "SOK Citizen") String nickname,
             @NotBlank @Email @Size(max = 320) @Schema(example = "sok@example.com") String email,
-            @NotBlank @Size(min = 8, max = 72) @Schema(example = "StrongPassword123!") String password) {}
+            @NotBlank @Size(min = 8, max = 72) @Schema(example = "StrongPassword123!") String password,
+            @NotBlank @jakarta.validation.constraints.Pattern(regexp = "[0-9]{6}") @Schema(example = "123456") String code) {}
+    public record RegistrationPendingResponse(String message) {}
     public record LoginRequest(@NotBlank @Email @Schema(example = "sok@example.com") String email,
             @NotBlank @Schema(example = "StrongPassword123!") String password) {}
     public record UserResponse(@Schema(example = "bb5fc6f1-64c2-4f0f-bec8-a4f3d85d81f4") UUID id,
