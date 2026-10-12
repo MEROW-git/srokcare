@@ -7,6 +7,7 @@ import { MapPin, Eye, EyeOff, ShieldCheck, UserCheck, Sparkles, AlertCircle } fr
 import { toast } from 'sonner'
 import { useTranslation } from '@/contexts/LanguageContext'
 import { useAuth } from '@/contexts/AuthContext'
+import { isMockMode } from '@/services/apiClient'
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -70,11 +71,11 @@ export const LoginPage: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             {t('loginTitle')}
           </h1>
-          <p className="text-sm text-slate-600">{t('loginSubtitle')}</p>
+          <p className="text-sm text-slate-600">{isMockMode() ? t('loginSubtitle') : 'Enter your email and password.'}</p>
         </div>
 
         {/* Quick Demo Access Card */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/80 rounded-3xl p-5 shadow-xs space-y-3">
+        {isMockMode() && <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/80 rounded-3xl p-5 shadow-xs space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-900">
             <Sparkles className="w-4 h-4 text-blue-600" />
             <span>Instant Demo Session</span>
@@ -100,7 +101,7 @@ export const LoginPage: React.FC = () => {
               <span>Moderator Admin</span>
             </button>
           </div>
-        </div>
+        </div>}
 
         {/* Login Form */}
         <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">

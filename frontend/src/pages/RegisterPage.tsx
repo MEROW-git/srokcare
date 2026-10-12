@@ -7,6 +7,13 @@ import { MapPin, Eye, EyeOff, ShieldCheck, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslation } from '@/contexts/LanguageContext'
 import { useAuth } from '@/contexts/AuthContext'
+import { authService } from '@/services/authService'
+import axios from 'axios'
+
+const errorMessage = (error: unknown, fallback: string) =>
+  axios.isAxiosError(error) && typeof error.response?.data?.message === 'string'
+    ? error.response.data.message
+    : fallback
 
 const registerSchema = z
   .object({
@@ -17,7 +24,7 @@ const registerSchema = z
     email: z.string().email({ message: 'Please enter a valid email address' }),
     password: z
       .string()
-      .min(6, { message: 'Password must be at least 6 characters' }),
+      .min(8, { message: 'Password must be at least 8 characters' }),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -29,15 +36,18 @@ type RegisterFormData = z.infer<typeof registerSchema>
 
 export const RegisterPage: React.FC = () => {
   const { t } = useTranslation()
-  const { register: registerAuth } = useAuth()
+  const { register: registerAuth, verifyRegistration } = useAuth()
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null)
+  const [code, setCode] = useState('')
 
   const {
     register,
     handleSubmit,
     watch,
+    getValues,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -54,15 +64,50 @@ export const RegisterPage: React.FC = () => {
   const onSubmit = async (data: RegisterFormData) => {
     setIsSubmitting(true)
     try {
-      await registerAuth({
+      const complete = await registerAuth({
         nickname: data.nickname,
         email: data.email,
         password: data.password,
       })
-      toast.success(`Welcome to FixKH, ${data.nickname}!`)
+      if (complete) {
+        toast.success(`Welcome to FixKH, ${data.nickname}!`)
+        navigate('/feed')
+      } else {
+        setPendingEmail(data.email)
+        toast.success(t('codeSentNotice'))
+      }
+    } catch (error) {
+      toast.error(errorMessage(error, 'Registration failed. Please try again.'))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const onVerify = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!pendingEmail || !/^[0-9]{6}$/.test(code)) return
+    setIsSubmitting(true)
+    try {
+      const details = getValues()
+      await verifyRegistration({ nickname: details.nickname, email: pendingEmail, password: details.password, code })
+      toast.success(`Welcome to FixKH, ${details.nickname}!`)
       navigate('/feed')
-    } catch {
-      toast.error('Registration failed. Please try again.')
+    } catch (error) {
+      toast.error(errorMessage(error, 'Verification failed. Check the code and try again.'))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const resendCode = async () => {
+    if (!pendingEmail) return
+    setIsSubmitting(true)
+    try {
+      await authService.resendRegistrationCode(pendingEmail)
+      setCode('')
+      toast.success(t('codeSentNotice'))
+    } catch (error) {
+      toast.error(errorMessage(error, 'Could not send a new code. Please try again.'))
     } finally {
       setIsSubmitting(false)
     }
@@ -93,7 +138,38 @@ export const RegisterPage: React.FC = () => {
 
         {/* Form Container */}
         <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {pendingEmail ? (
+            <form onSubmit={onVerify} className="space-y-4">
+              <h2 className="text-lg font-bold text-slate-900">{t('verifyEmailTitle')}</h2>
+              <p className="text-sm text-slate-600">{t('verifyEmailHelp')}</p>
+              <p className="text-sm font-medium text-slate-800 break-all">{pendingEmail}</p>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700" htmlFor="registration-code">
+                {t('verificationCodeField')}
+              </label>
+              <input
+                id="registration-code"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                pattern="[0-9]{6}"
+                required
+                value={code}
+                onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))}
+                className="w-full px-4 py-2.5 text-lg tracking-widest text-center bg-slate-50 focus:bg-white rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-hidden"
+              />
+              <button type="submit" disabled={isSubmitting || code.length !== 6}
+                className="w-full py-3 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl disabled:opacity-50">
+                {t('verifyEmailBtn')}
+              </button>
+              <button type="button" onClick={resendCode} disabled={isSubmitting}
+                className="w-full text-sm font-semibold text-blue-600 hover:text-blue-700 disabled:opacity-50">
+                {t('resendCodeBtn')}
+              </button>
+              <button type="button" onClick={() => { setPendingEmail(null); setCode('') }}
+                className="w-full text-xs text-slate-500 hover:text-slate-700">Edit registration details</button>
+            </form>
+          ) : <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Nickname field */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
@@ -145,7 +221,7 @@ export const RegisterPage: React.FC = () => {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   {...register('password')}
-                  placeholder="At least 6 characters"
+                  placeholder="At least 8 characters"
                   className={`w-full px-4 py-2.5 text-sm bg-slate-50 focus:bg-white rounded-xl border ${
                     errors.password ? 'border-rose-300' : 'border-slate-200'
                   } focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-hidden pr-10`}
@@ -202,7 +278,7 @@ export const RegisterPage: React.FC = () => {
             >
               {isSubmitting ? 'Creating account...' : t('registerBtn')}
             </button>
-          </form>
+          </form>}
 
           <div className="mt-6 pt-5 border-t border-slate-100 text-center text-xs text-slate-500">
             {t('alreadyAccount')}{' '}

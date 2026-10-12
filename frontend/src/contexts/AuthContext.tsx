@@ -1,13 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import type { User, LoginInput, RegisterInput } from '@/types/auth'
 import { authService } from '@/services/authService'
+import { isMockMode } from '@/services/apiClient'
 
 interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isAdmin: boolean
   login: (input: LoginInput) => Promise<void>
-  register: (input: RegisterInput) => Promise<void>
+  register: (input: RegisterInput) => Promise<boolean>
+  verifyRegistration: (input: RegisterInput & { code: string }) => Promise<void>
   loginAsDemoUser: () => void
   loginAsAdmin: () => void
   logout: () => void
@@ -22,15 +24,15 @@ const TOKEN_STORAGE_KEY = 'fixkh_auth_token'
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem(USER_STORAGE_KEY)
-    if (saved) {
+    const token = localStorage.getItem(TOKEN_STORAGE_KEY)
+    if (saved && (isMockMode() || (token && !token.startsWith('mock-')))) {
       try {
         return JSON.parse(saved)
       } catch {
-        return authService.getDemoUser()
+        return null
       }
     }
-    // Default to initial demo user for frictionless demo experience
-    return authService.getDemoUser()
+    return isMockMode() ? authService.getDemoUser() : null
   })
 
   useEffect(() => {
@@ -50,17 +52,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (input: RegisterInput) => {
     const res = await authService.register(input)
+    if (!res) return false
+    localStorage.setItem(TOKEN_STORAGE_KEY, res.token)
+    setUser(res.user)
+    return true
+  }
+
+  const verifyRegistration = async (input: RegisterInput & { code: string }) => {
+    const res = await authService.verifyRegistration(input)
     localStorage.setItem(TOKEN_STORAGE_KEY, res.token)
     setUser(res.user)
   }
 
   const loginAsDemoUser = () => {
+    if (!isMockMode()) return
     const demo = authService.getDemoUser()
     localStorage.setItem(TOKEN_STORAGE_KEY, 'mock-jwt-demo-token')
     setUser(demo)
   }
 
   const loginAsAdmin = () => {
+    if (!isMockMode()) return
     const admin = authService.getAdminUser()
     localStorage.setItem(TOKEN_STORAGE_KEY, 'mock-jwt-admin-token')
     setUser(admin)
@@ -89,6 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAdmin,
         login,
         register,
+        verifyRegistration,
         loginAsDemoUser,
         loginAsAdmin,
         logout,

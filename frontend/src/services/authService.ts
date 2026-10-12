@@ -5,7 +5,7 @@ const DEFAULT_DEMO_USER: User = {
   id: 'usr-demo-01',
   nickname: 'SOK Citizen',
   email: 'sok.citizen@fixkh-demo.local',
-  role: 'USER',
+  role: 'CITIZEN',
   createdAt: '2026-09-01T00:00:00Z',
 }
 
@@ -31,21 +31,35 @@ export const authService = {
     return response.data
   },
 
-  async register(input: RegisterInput): Promise<AuthResponse> {
+  async register(input: RegisterInput): Promise<AuthResponse | null> {
     if (isMockMode()) {
       await new Promise((res) => setTimeout(res, 250))
       const user: User = {
         id: `usr-${Date.now().toString(36)}`,
         nickname: input.nickname.trim(),
         email: input.email.trim(),
-        role: 'USER',
+        role: 'CITIZEN',
         createdAt: new Date().toISOString(),
       }
       const mockToken = `mock-jwt-user-${Date.now()}`
       return { token: mockToken, user }
     }
-    const response = await apiClient.post<AuthResponse>('/auth/register', input)
+    await apiClient.post('/auth/register', { email: input.email })
+    return null
+  },
+
+  async verifyRegistration(input: RegisterInput & { code: string }): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>('/auth/verify-registration', {
+      nickname: input.nickname,
+      email: input.email,
+      password: input.password,
+      code: input.code,
+    })
     return response.data
+  },
+
+  async resendRegistrationCode(email: string): Promise<void> {
+    await apiClient.post('/auth/register', { email })
   },
 
   async getCurrentUser(): Promise<User | null> {
