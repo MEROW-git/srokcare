@@ -1,0 +1,2 @@
+package com.fixkh.entity;
+public enum ReportCategory { ROAD_DAMAGE, STREETLIGHT, GARBAGE, FLOODING, DRAINAGE, TRAFFIC_SAFETY, PUBLIC_FACILITY, OTHER }
