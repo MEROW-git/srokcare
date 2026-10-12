@@ -8,10 +8,19 @@ Base URL: `http://localhost:8080/api/v1`. All dates are ISO 8601 UTC. IDs are UU
 POST /api/v1/auth/register
 Content-Type: application/json
 
-{"nickname":"SOK Citizen","email":"sok@example.com","password":"StrongPassword123!"}
+{"email":"sok@example.com"}
 ```
 
-Response `201`:
+Response `202`: `{"message":"Registration code sent. Check your email"}`. The code is sent only by email, expires in 10 minutes, and is never returned by the API. Request a new code through the same endpoint after the cooldown.
+
+```http
+POST /api/v1/auth/verify-registration
+Content-Type: application/json
+
+{"nickname":"SOK Citizen","email":"sok@example.com","password":"StrongPassword123!","code":"123456"}
+```
+
+Response `201` (using the actual emailed code):
 
 ```json
 {"token":"<JWT>","user":{"id":"bb5fc6f1-64c2-4f0f-bec8-a4f3d85d81f4","nickname":"SOK Citizen","email":"sok@example.com","role":"CITIZEN","createdAt":"2026-10-12T09:00:00Z"}}
@@ -83,4 +92,4 @@ An administrator can call `GET /admin/reports`, `PATCH /admin/reports/{id}/statu
 {"timestamp":"2026-10-12T09:20:00Z","status":400,"error":"Bad Request","message":"title: size must be between 5 and 120","path":"/api/v1/reports"}
 ```
 
-Possible statuses: `400` validation, `401` missing/invalid token, `403` insufficient permission, `404` absent resource, `409` duplicate email/support, `413` oversized upload, `500` unexpected error. Responses do not include stack traces or database details.
+Possible statuses: `400` validation or invalid code, `401` missing/invalid token, `403` insufficient permission, `404` absent resource, `409` duplicate email/support, `413` oversized upload, `429` code request or attempt limit, `503` email delivery unavailable, `500` unexpected error. Responses do not include stack traces or database details.

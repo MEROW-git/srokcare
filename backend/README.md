@@ -23,17 +23,19 @@ With a hosted PostgreSQL database, set `DB_URL=postgresql://username:password@ho
 
 Check `http://localhost:8080/api/v1/health`. Swagger UI is at `http://localhost:8080/swagger-ui/index.html`; OpenAPI JSON is at `http://localhost:8080/v3/api-docs`. Flyway migrates the schema on startup and Hibernate validates it.
 
+Registration sends a six-digit code by email. Configure a verified `otp_email` sender plus `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, and `SMTP_PASSWORD` in your private `.env`. For [Brevo SMTP](https://help.brevo.com/hc/en-us/articles/7924908994450-Send-transactional-emails-using-Brevo-SMTP), use `smtp-relay.brevo.com`, port `587`, the SMTP login shown in Brevo, and an SMTP key (not an API key). The sender address must be verified with your provider. Never put SMTP credentials in the frontend environment or commit them to Git. Without valid mail settings, registration returns `503`; other backend endpoints still start normally.
+
 To create a **development-only** administrator, set `SPRING_PROFILES_ACTIVE=dev`, `FIXKH_DEV_ADMIN_EMAIL`, `FIXKH_DEV_ADMIN_PASSWORD` (at least 12 characters), and optionally `FIXKH_DEV_ADMIN_NICKNAME` before startup. Bootstrap creates the account only if the email is unused. Never enable the dev profile or bootstrap credentials in production. Public registration always creates `CITIZEN`.
 
 ## Try the API
 
-Register:
+Request a registration code:
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/auth/register -H 'Content-Type: application/json' -d '{"nickname":"SOK Citizen","email":"sok@example.com","password":"StrongPassword123!"}'
+curl -X POST http://localhost:8080/api/v1/auth/register -H 'Content-Type: application/json' -d '{"email":"sok@example.com"}'
 ```
 
-Log in with `POST /api/v1/auth/login` using `{"email":"sok@example.com","password":"StrongPassword123!"}`. Copy the returned `token` into Swagger's **Authorize** dialog, then create a report with `POST /api/v1/reports` and the body below. Swagger sends `Authorization: Bearer <token>` automatically.
+The API returns `202` and emails a code that expires after 10 minutes. Finish registration with `POST /api/v1/auth/verify-registration` and `{"nickname":"SOK Citizen","email":"sok@example.com","password":"StrongPassword123!","code":"123456"}` using the actual emailed code. This returns a JWT. Codes are hashed in PostgreSQL, allow five guesses, and can be requested at most once per minute and three times per hour per email. Log in later with `POST /api/v1/auth/login` using `{"email":"sok@example.com","password":"StrongPassword123!"}`. Copy the returned `token` into Swagger's **Authorize** dialog, then create a report with `POST /api/v1/reports` and the body below. Swagger sends `Authorization: Bearer <token>` automatically.
 
 ```json
 {
@@ -53,9 +55,10 @@ The new report starts at `REPORTED`. Use `POST /api/v1/reports/{id}/images` with
 
 Set `VITE_API_BASE_URL=http://localhost:8080/api/v1` and `VITE_USE_MOCK_API=false` in the frontend environment. The backend allows `http://localhost:5173` through configurable CORS. The frontend's Axios client already sends the stored Bearer token. Public report and comment responses expose nicknames but no email or author account ID.
 
+With `VITE_USE_MOCK_API=true`, the frontend uses instant demo registration and does not send email codes. Restart the Vite server after changing that value.
+
 The existing frontend contract needs these adjustments in its own development stream:
 
-- Backend account role is `CITIZEN`; the current frontend type and checks use `USER`.
 - To remove support, call `DELETE /reports/{id}/support`; `POST` adds only once and returns 409 for a duplicate. The current frontend toggle always posts.
 - Images are uploaded separately with multipart `files`; `images` URLs in report creation JSON are ignored. Only JPEG and PNG are accepted. The current frontend contract also mentions WebP.
 - `authorId` is intentionally omitted from public reports and comments. The current frontend type allows it, and mock filtering uses it; the live `GET /reports/my` endpoint does not need it.
@@ -66,4 +69,4 @@ See [API examples](docs/API_EXAMPLES.md) for request and response shapes.
 
 ## Tests
 
-Run `./gradlew test` or `.\gradlew.bat test`. The test suite covers validation, duplicate registration and support, JWT protected routes, report creation and ownership, pagination parameters, comment creation, image validation, and admin access. The local application additionally requires PostgreSQL to run; unit and web tests do not require an in-memory database.
+Run `./gradlew test` or `.\gradlew.bat test`. The test suite covers validation, hashed registration codes and limits, login and JWT protected routes, report creation and ownership, pagination parameters, comment creation, image validation, and admin access. The local application additionally requires PostgreSQL to run; unit and web tests do not require an in-memory database or send real email.
