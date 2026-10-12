@@ -1,0 +1,37 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/fixkh}
+    username: ${DB_USERNAME:fixkh}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: ${DB_SCHEMA:fixkh}
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    schemas: ${DB_SCHEMA:fixkh}
+    default-schema: ${DB_SCHEMA:fixkh}
+    create-schemas: true
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 25MB
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+fixkh:
+  jwt-secret: ${JWT_SECRET}
+  cors-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  upload-dir: ${UPLOAD_DIR:./uploads}
+  public-base-url: ${PUBLIC_BASE_URL:http://localhost:8080}
+  dev-admin:
+    email: ${FIXKH_DEV_ADMIN_EMAIL:}
+    password: ${FIXKH_DEV_ADMIN_PASSWORD:}
+    nickname: ${FIXKH_DEV_ADMIN_NICKNAME:FixKH Moderator}
