@@ -9,10 +9,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class OpenApiConfigTest {
     @Test void documentsRelevantErrorResponses() {
-        OpenAPI api = new OpenAPI()
+        OpenApiConfig config = new OpenApiConfig();
+        OpenAPI api = config.openAPI()
                 .path("/api/v1/auth/register", new PathItem().post(new Operation().responses(new ApiResponses())))
                 .path("/api/v1/reports/{id}/images", new PathItem().post(new Operation().responses(new ApiResponses())));
-        new OpenApiConfig().errorResponses().customise(api);
+        config.errorResponses().customise(api);
+        assertNotNull(api.getComponents().getSchemas().get("ErrorResponse"));
+        assertEquals("#/components/schemas/ErrorResponse", api.getPaths().get("/api/v1/auth/register")
+                .getPost().getResponses().get("409").getContent().get("application/json").getSchema().get$ref());
         assertNotNull(api.getPaths().get("/api/v1/auth/register").getPost().getResponses().get("409"));
         assertNull(api.getPaths().get("/api/v1/auth/register").getPost().getResponses().get("401"));
         assertNotNull(api.getPaths().get("/api/v1/reports/{id}/images").getPost().getResponses().get("413"));
