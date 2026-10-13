@@ -20,6 +20,7 @@ export interface PublicProfile {
   coverUrl?: string
   totalReports: number
   resolvedReports: number
+  activeReports: number
 }
 
 export interface AuthResponse {

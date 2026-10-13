@@ -13,24 +13,40 @@ import { Avatar } from '@/components/common/Avatar'
 import { MfaSettings } from '@/components/auth/MfaSettings'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { isMockMode } from '@/services/apiClient'
+import { userService } from '@/services/userService'
 
 export const SettingsPage: React.FC = () => {
   const { t, language, setLanguage } = useTranslation()
-  const { user, updateNickname } = useAuth()
+  const { user, updateUser } = useAuth()
 
   const [nicknameInput, setNicknameInput] = useState(user?.nickname || 'SOK Citizen')
   const [isSaved, setIsSaved] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!nicknameInput.trim()) {
-      toast.error('Nickname cannot be empty.')
+    if (!user) {
+      toast.error('Sign in to save account settings.')
       return
     }
-    updateNickname(nicknameInput.trim())
-    setIsSaved(true)
-    toast.success('Nickname updated successfully!')
-    setTimeout(() => setIsSaved(false), 2500)
+    const nickname = nicknameInput.trim()
+    if (nickname.length < 2 || nickname.length > 50) {
+      toast.error('Nickname must be between 2 and 50 characters.')
+      return
+    }
+    setIsSaving(true)
+    try {
+      const updated = await userService.updateProfile({ nickname })
+      updateUser(updated)
+      setIsSaved(true)
+      toast.success('Nickname updated successfully!')
+      setTimeout(() => setIsSaved(false), 2500)
+    } catch (error: unknown) {
+      const response = error as { response?: { data?: { message?: string } } }
+      toast.error(response.response?.data?.message || 'Could not save nickname.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -46,7 +62,7 @@ export const SettingsPage: React.FC = () => {
         {/* Public Pseudonymous Identity Preview */}
         <div className="p-4 rounded-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <Avatar nickname={nicknameInput} size="lg" />
+            <Avatar nickname={nicknameInput} avatarUrl={user?.avatarUrl} size="lg" />
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
                 {t('publicIdentityPreview')}
@@ -150,10 +166,11 @@ export const SettingsPage: React.FC = () => {
           <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-start gap-3">
             <button
               type="submit"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-sm font-bold text-xs text-white bg-blue-900 hover:bg-blue-950 dark:bg-blue-600 dark:hover:bg-blue-500 shadow-xs transition-colors uppercase tracking-wider border border-blue-950 dark:border-blue-500"
+              disabled={isSaving || !user}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-sm font-bold text-xs text-white bg-blue-900 hover:bg-blue-950 dark:bg-blue-600 dark:hover:bg-blue-500 shadow-xs transition-colors uppercase tracking-wider border border-blue-950 dark:border-blue-500 disabled:opacity-60"
             >
               {isSaved ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Save className="w-3.5 h-3.5" />}
-              <span>{isSaved ? 'Saved!' : t('saveSettings')}</span>
+              <span>{isSaving ? 'Saving...' : isSaved ? 'Saved!' : t('saveSettings')}</span>
             </button>
           </div>
         </form>

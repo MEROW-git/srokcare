@@ -15,7 +15,10 @@ import com.fixkh.service.ImageService;
 import com.fixkh.service.UserService;
 import com.fixkh.storage.ImageStorage;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -66,6 +69,13 @@ class UserProfileTest {
         service = new UserService(users, reports, current, mapper, storage, images);
     }
 
+    @AfterEach
+    void tearDown() {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.clearSynchronization();
+        }
+    }
+
     @Test
     void updateProfileSucceedsWithValidData() {
         UpdateProfileRequest request = new UpdateProfileRequest("Sok Updated", "Volunteering for local roads");
@@ -88,6 +98,15 @@ class UserProfileTest {
     }
 
     @Test
+    void nicknameOnlyUpdatePreservesExistingBio() {
+        testUser.setBio("Existing public bio");
+
+        service.updateProfile(new UpdateProfileRequest("New Nickname", null));
+
+        assertEquals("Existing public bio", testUser.getBio());
+    }
+
+    @Test
     void updateProfileFailsWhenNicknameTooShort() {
         UpdateProfileRequest request = new UpdateProfileRequest("A", "Some bio");
         ApiException ex = assertThrows(ApiException.class, () -> service.updateProfile(request));
@@ -99,8 +118,9 @@ class UserProfileTest {
         when(users.findByNicknameIgnoreCase("Sok Citizen")).thenReturn(Optional.of(testUser));
         when(reports.countByAuthorId(testUser.getId())).thenReturn(5L);
         when(reports.countByAuthorIdAndStatus(testUser.getId(), ReportStatus.RESOLVED)).thenReturn(3L);
-        when(mapper.publicProfile(eq(testUser), eq(5L), eq(3L))).thenReturn(
-                new PublicProfileResponse("Sok Citizen", Role.CITIZEN, testUser.getCreatedAt(), "Bio", "http://avatar", "http://cover", 5L, 3L)
+        when(reports.countByAuthorIdAndStatusIn(eq(testUser.getId()), anyCollection())).thenReturn(1L);
+        when(mapper.publicProfile(eq(testUser), eq(5L), eq(3L), eq(1L))).thenReturn(
+                new PublicProfileResponse("Sok Citizen", Role.CITIZEN, testUser.getCreatedAt(), "Bio", "http://avatar", "http://cover", 5L, 3L, 1L)
         );
 
         PublicProfileResponse profile = service.getPublicProfile("Sok Citizen");
@@ -109,6 +129,7 @@ class UserProfileTest {
         assertEquals(Role.CITIZEN, profile.role());
         assertEquals(5L, profile.totalReports());
         assertEquals(3L, profile.resolvedReports());
+        assertEquals(1L, profile.activeReports());
 
         // Verify that PublicProfileResponse has NO email or account ID getters or fields
         assertFalse(profile.getClass().toGenericString().contains("email"));
@@ -141,6 +162,55 @@ class UserProfileTest {
         assertTrue(testUser.getCoverKey().endsWith(".png"));
         assertEquals("image/png", testUser.getCoverContentType());
         verify(storage).save(eq(testUser.getCoverKey()), eq(validPng));
+    }
+
+    @Test
+    void replacingAvatarDeletesOldFileOnlyAfterCommit() throws IOException {
+        testUser.setAvatarKey("old-avatar.png");
+        byte[] png = createTestImageBytes();
+        when(images.process(any())).thenReturn(new ImageService.Processed(png, "image/png", ".png"));
+        TransactionSynchronizationManager.initSynchronization();
+
+        service.uploadAvatar(new MockMultipartFile("file", "avatar.png", "image/png", png));
+        String newKey = testUser.getAvatarKey();
+        verify(storage, never()).delete(anyString());
+        for (TransactionSynchronization callback : TransactionSynchronizationManager.getSynchronizations()) {
+            callback.afterCommit();
+            callback.afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
+        }
+        verify(storage).delete("old-avatar.png");
+        verify(storage, never()).delete(newKey);
+    }
+
+    @Test
+    void failedAvatarTransactionKeepsOldFileAndRemovesNewFile() throws IOException {
+        testUser.setAvatarKey("old-avatar.png");
+        byte[] png = createTestImageBytes();
+        when(images.process(any())).thenReturn(new ImageService.Processed(png, "image/png", ".png"));
+        TransactionSynchronizationManager.initSynchronization();
+
+        service.uploadAvatar(new MockMultipartFile("file", "avatar.png", "image/png", png));
+        String newKey = testUser.getAvatarKey();
+        for (TransactionSynchronization callback : TransactionSynchronizationManager.getSynchronizations()) {
+            callback.afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
+        }
+        verify(storage).delete(newKey);
+        verify(storage, never()).delete("old-avatar.png");
+    }
+
+    @Test
+    void replacingProfilePhotoChangesItsPublicUrl() {
+        ApiMapper realMapper = new ApiMapper(null, null, null, null, "http://localhost:8080");
+        testUser.setAvatarKey("first.png");
+        testUser.setCoverKey("first-cover.png");
+        String firstAvatar = realMapper.user(testUser).avatarUrl();
+        String firstCover = realMapper.user(testUser).coverUrl();
+
+        testUser.setAvatarKey("second.png");
+        testUser.setCoverKey("second-cover.png");
+        assertNotEquals(firstAvatar, realMapper.user(testUser).avatarUrl());
+        assertNotEquals(firstCover, realMapper.user(testUser).coverUrl());
+        assertTrue(realMapper.user(testUser).avatarUrl().contains("/users/" + testUser.getId() + "/avatar?v="));
     }
 
     private byte[] createTestImageBytes() throws IOException {

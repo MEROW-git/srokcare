@@ -16,13 +16,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.net.URLDecoder;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -60,8 +60,6 @@ public class UserService {
                 throw new ApiException(HttpStatus.BAD_REQUEST, "Bio must be at most 500 characters");
             }
             user.setBio(trimmedBio.isEmpty() ? null : trimmedBio);
-        } else {
-            user.setBio(null);
         }
         User saved = users.saveAndFlush(user);
         return mapper.user(saved);
@@ -81,12 +79,11 @@ public class UserService {
         } catch (IOException e) {
             throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not save avatar image");
         }
+        deleteOnRollback(newKey);
         user.setAvatarKey(newKey);
         user.setAvatarContentType(processed.contentType());
         User saved = users.saveAndFlush(user);
-        if (oldKey != null) {
-            deleteQuietly(oldKey);
-        }
+        deleteAfterCommit(oldKey);
         return mapper.user(saved);
     }
 
@@ -97,9 +94,7 @@ public class UserService {
         user.setAvatarKey(null);
         user.setAvatarContentType(null);
         User saved = users.saveAndFlush(user);
-        if (oldKey != null) {
-            deleteQuietly(oldKey);
-        }
+        deleteAfterCommit(oldKey);
         return mapper.user(saved);
     }
 
@@ -117,12 +112,11 @@ public class UserService {
         } catch (IOException e) {
             throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not save cover image");
         }
+        deleteOnRollback(newKey);
         user.setCoverKey(newKey);
         user.setCoverContentType(processed.contentType());
         User saved = users.saveAndFlush(user);
-        if (oldKey != null) {
-            deleteQuietly(oldKey);
-        }
+        deleteAfterCommit(oldKey);
         return mapper.user(saved);
     }
 
@@ -133,9 +127,7 @@ public class UserService {
         user.setCoverKey(null);
         user.setCoverContentType(null);
         User saved = users.saveAndFlush(user);
-        if (oldKey != null) {
-            deleteQuietly(oldKey);
-        }
+        deleteAfterCommit(oldKey);
         return mapper.user(saved);
     }
 
@@ -144,7 +136,9 @@ public class UserService {
         User user = findUserByIdentifier(identifier);
         long totalReports = reports.countByAuthorId(user.getId());
         long resolvedReports = reports.countByAuthorIdAndStatus(user.getId(), ReportStatus.RESOLVED);
-        return mapper.publicProfile(user, totalReports, resolvedReports);
+        long activeReports = reports.countByAuthorIdAndStatusIn(user.getId(),
+                List.of(ReportStatus.UNDER_REVIEW, ReportStatus.IN_PROGRESS));
+        return mapper.publicProfile(user, totalReports, resolvedReports, activeReports);
     }
 
     @Transactional(readOnly = true)
@@ -187,17 +181,36 @@ public class UserService {
         if (identifier == null || identifier.isBlank()) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "User identifier required");
         }
-        String decoded = URLDecoder.decode(identifier, StandardCharsets.UTF_8).trim();
-        return users.findByNicknameIgnoreCase(decoded)
-                .or(() -> {
-                    try {
-                        UUID id = UUID.fromString(decoded);
-                        return users.findById(id);
-                    } catch (IllegalArgumentException e) {
-                        return Optional.empty();
-                    }
-                })
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User profile not found"));
+        String nameOrId = identifier.trim();
+        try {
+            return users.findById(UUID.fromString(nameOrId))
+                    .or(() -> users.findByNicknameIgnoreCase(nameOrId))
+                    .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User profile not found"));
+        } catch (IllegalArgumentException e) {
+            return users.findByNicknameIgnoreCase(nameOrId)
+                    .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User profile not found"));
+        }
+    }
+
+    private void deleteOnRollback(String key) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override public void afterCompletion(int status) {
+                    if (status != STATUS_COMMITTED) deleteQuietly(key);
+                }
+            });
+        }
+    }
+
+    private void deleteAfterCommit(String key) {
+        if (key == null) return;
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override public void afterCommit() { deleteQuietly(key); }
+            });
+        } else {
+            deleteQuietly(key);
+        }
     }
 
     private void deleteQuietly(String key) {

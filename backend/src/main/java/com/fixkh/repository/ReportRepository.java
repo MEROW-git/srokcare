@@ -11,10 +11,12 @@ import org.springframework.data.jpa.repository.Lock;
 import jakarta.persistence.LockModeType;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Collection;
 public interface ReportRepository extends JpaRepository<Report, UUID>, JpaSpecificationExecutor<Report> {
     Page<Report> findByAuthorId(UUID authorId, Pageable pageable);
     long countByAuthorId(UUID authorId);
     long countByAuthorIdAndStatus(UUID authorId, ReportStatus status);
+    long countByAuthorIdAndStatusIn(UUID authorId, Collection<ReportStatus> statuses);
     @Lock(LockModeType.PESSIMISTIC_WRITE) @Query("select r from Report r where r.id = :id")
     Optional<Report> findLockedById(UUID id);
     long countByStatus(ReportStatus status);

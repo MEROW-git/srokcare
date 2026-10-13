@@ -62,13 +62,14 @@ export const reportService = {
     return response.data
   },
 
-  async getMyReports(userId: string, userNickname: string): Promise<Report[]> {
+  async getMyReports(userId: string, userNickname: string, page = 0, size = 20): Promise<Report[]> {
     if (isMockMode()) {
       await new Promise((res) => setTimeout(res, 100))
       const all = mockStorage.getReports()
       return all.filter((r) => r.authorId === userId || r.authorNickname === userNickname)
+        .slice(page * size, (page + 1) * size)
     }
-    const response = await apiClient.get<Report[]>('/reports/my')
+    const response = await apiClient.get<Report[]>('/reports/my', { params: { page, size } })
     return response.data
   },
 }

@@ -81,6 +81,7 @@ public class AuthService {
         if (request.password().getBytes(StandardCharsets.UTF_8).length > 72)
             throw new ApiException(HttpStatus.BAD_REQUEST, "Password is too long for BCrypt");
         if (users.existsByEmailIgnoreCase(email)) throw new ApiException(HttpStatus.CONFLICT, "Email already registered");
+        if (users.existsByNicknameIgnoreCase(nickname)) throw new ApiException(HttpStatus.CONFLICT, "Nickname is already in use");
         User user = new User();
         user.setNickname(nickname); user.setEmail(email);
         user.setPasswordHash(passwords.encode(request.password())); user.setRole(Role.CITIZEN);

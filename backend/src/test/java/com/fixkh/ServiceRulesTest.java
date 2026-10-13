@@ -86,6 +86,11 @@ class ServiceRulesTest {
         assertEquals(HttpStatus.BAD_REQUEST, assertThrows(ApiException.class,
                 () -> service.verifyRegistration(new VerifyRegistrationRequest("SOK Citizen", "sok@example.com", "StrongPassword123!", "000000"))).getStatus());
         assertEquals(1, record.getAttempts()); verify(users, never()).saveAndFlush(any());
+        when(users.existsByNicknameIgnoreCase("SOK Citizen")).thenReturn(true);
+        assertEquals(HttpStatus.CONFLICT, assertThrows(ApiException.class,
+                () -> service.verifyRegistration(new VerifyRegistrationRequest("SOK Citizen", "sok@example.com", "StrongPassword123!", "123456"))).getStatus());
+        verify(users, never()).saveAndFlush(any());
+        when(users.existsByNicknameIgnoreCase("SOK Citizen")).thenReturn(false);
         AuthResponse response = service.verifyRegistration(new VerifyRegistrationRequest("SOK Citizen", "sok@example.com", "StrongPassword123!", "123456"));
         assertEquals("sok@example.com", response.user().email());
         verify(pending).delete(record);

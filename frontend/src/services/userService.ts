@@ -17,7 +17,7 @@ export const userService = {
       const updated: User = {
         ...current,
         nickname: data.nickname.trim(),
-        bio: data.bio ? data.bio.trim() : undefined,
+        bio: data.bio === undefined ? current.bio : data.bio.trim() || undefined,
       }
       localStorage.setItem('fixkh_auth_user', JSON.stringify(updated))
       return updated
@@ -110,17 +110,24 @@ export const userService = {
     if (isMockMode()) {
       await new Promise((res) => setTimeout(res, 150))
       const allReports = mockStorage.getReports()
+      const saved = localStorage.getItem('fixkh_auth_user')
+      const mockUser: User | null = saved ? JSON.parse(saved) : null
+      const nickname = mockUser?.id === identifier ? mockUser.nickname : identifier
       const userReports = allReports.filter(
-        (r: Report) => r.authorNickname.toLowerCase() === identifier.toLowerCase()
+        (r: Report) => r.authorId === identifier || r.authorNickname.toLowerCase() === nickname.toLowerCase()
       )
       const resolvedCount = userReports.filter((r: Report) => r.status === 'RESOLVED').length
+      const activeCount = userReports.filter((r: Report) => r.status === 'UNDER_REVIEW' || r.status === 'IN_PROGRESS').length
       return {
-        nickname: identifier,
-        role: identifier.toLowerCase().includes('moderator') || identifier.toLowerCase().includes('admin') ? 'ADMIN' : 'CITIZEN',
-        createdAt: '2026-09-01T00:00:00Z',
-        bio: 'FixKH civic community contributor dedicated to improving local public infrastructure.',
+        nickname,
+        role: mockUser?.id === identifier ? mockUser.role : nickname.toLowerCase().includes('moderator') || nickname.toLowerCase().includes('admin') ? 'ADMIN' : 'CITIZEN',
+        createdAt: mockUser?.id === identifier ? mockUser.createdAt || '2026-09-01T00:00:00Z' : '2026-09-01T00:00:00Z',
+        bio: mockUser?.id === identifier ? mockUser.bio : 'FixKH civic community contributor dedicated to improving local public infrastructure.',
+        avatarUrl: mockUser?.id === identifier ? mockUser.avatarUrl : undefined,
+        coverUrl: mockUser?.id === identifier ? mockUser.coverUrl : undefined,
         totalReports: userReports.length,
         resolvedReports: resolvedCount,
+        activeReports: activeCount,
       }
     }
     const response = await apiClient.get<PublicProfile>(`/users/${encodeURIComponent(identifier)}/public-profile`)
@@ -133,7 +140,7 @@ export const userService = {
       const allReports = mockStorage.getReports()
       return allReports.filter(
         (r: Report) => r.authorNickname.toLowerCase() === identifier.toLowerCase()
-      )
+      ).slice(page * size, (page + 1) * size)
     }
     const response = await apiClient.get<Report[]>(`/users/${encodeURIComponent(identifier)}/reports`, {
       params: { page, size },

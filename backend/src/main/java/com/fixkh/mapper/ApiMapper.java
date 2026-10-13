@@ -23,21 +23,21 @@ public class ApiMapper {
     }
     public UserResponse user(User user) {
         String avatarUrl = user.getAvatarKey() != null
-                ? publicBaseUrl + "/api/v1/users/" + java.net.URLEncoder.encode(user.getNickname(), java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20") + "/avatar"
+                ? profileImageUrl(user, "avatar", user.getAvatarKey())
                 : null;
         String coverUrl = user.getCoverKey() != null
-                ? publicBaseUrl + "/api/v1/users/" + java.net.URLEncoder.encode(user.getNickname(), java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20") + "/cover"
+                ? profileImageUrl(user, "cover", user.getCoverKey())
                 : null;
         return new UserResponse(user.getId(), user.getNickname(), user.getEmail(), user.getRole(), user.getCreatedAt(), user.getBio(), avatarUrl, coverUrl);
     }
-    public PublicProfileResponse publicProfile(User user, long totalReports, long resolvedReports) {
+    public PublicProfileResponse publicProfile(User user, long totalReports, long resolvedReports, long activeReports) {
         String avatarUrl = user.getAvatarKey() != null
-                ? publicBaseUrl + "/api/v1/users/" + java.net.URLEncoder.encode(user.getNickname(), java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20") + "/avatar"
+                ? profileImageUrl(user, "avatar", user.getAvatarKey())
                 : null;
         String coverUrl = user.getCoverKey() != null
-                ? publicBaseUrl + "/api/v1/users/" + java.net.URLEncoder.encode(user.getNickname(), java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20") + "/cover"
+                ? profileImageUrl(user, "cover", user.getCoverKey())
                 : null;
-        return new PublicProfileResponse(user.getNickname(), user.getRole(), user.getCreatedAt(), user.getBio(), avatarUrl, coverUrl, totalReports, resolvedReports);
+        return new PublicProfileResponse(user.getNickname(), user.getRole(), user.getCreatedAt(), user.getBio(), avatarUrl, coverUrl, totalReports, resolvedReports, activeReports);
     }
     public ReportResponse report(Report report) {
         var urls = images.findByReportIdOrderByCreatedAt(report.getId()).stream()
@@ -54,5 +54,8 @@ public class ApiMapper {
             imageUrl(image.getReport().getId(), image.getId()), image.getCreatedAt()); }
     private String imageUrl(java.util.UUID reportId, java.util.UUID imageId) {
         return publicBaseUrl + "/api/v1/reports/" + reportId + "/images/" + imageId + "/content";
+    }
+    private String profileImageUrl(User user, String kind, String key) {
+        return publicBaseUrl + "/api/v1/users/" + user.getId() + "/" + kind + "?v=" + key;
     }
 }

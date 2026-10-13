@@ -29,6 +29,8 @@ import { EmptyState } from '@/components/common/EmptyState'
 import type { Report } from '@/types/report'
 import type { PublicProfile } from '@/types/auth'
 
+const REPORTS_PAGE_SIZE = 20
+
 export const ProfilePage: React.FC = () => {
   const { identifier } = useParams<{ identifier?: string }>()
   const { user, isAuthenticated, updateUser } = useAuth()
@@ -40,6 +42,9 @@ export const ProfilePage: React.FC = () => {
   const [reports, setReports] = useState<Report[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [nextPage, setNextPage] = useState(1)
+  const [hasMore, setHasMore] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
 
   // Edit modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -67,30 +72,25 @@ export const ProfilePage: React.FC = () => {
 
     try {
       if (isOwnProfile && user) {
-        // Load own reports from reportService
-        const myReports = await reportService.getMyReports(user.id, user.nickname)
+        const [publicProfile, myReports] = await Promise.all([
+          userService.getPublicProfile(user.id),
+          reportService.getMyReports(user.id, user.nickname, 0, REPORTS_PAGE_SIZE),
+        ])
         const seen = new Set<string>()
         const uniqueReports = myReports.filter((r) => !seen.has(r.id) && seen.add(r.id))
         setReports(uniqueReports)
-
-        const resolvedCount = uniqueReports.filter((r) => r.status === 'RESOLVED').length
-
-        setProfile({
-          nickname: user.nickname,
-          role: user.role,
-          createdAt: user.createdAt || '2026-09-01T00:00:00Z',
-          bio: user.bio,
-          avatarUrl: user.avatarUrl,
-          coverUrl: user.coverUrl,
-          totalReports: uniqueReports.length,
-          resolvedReports: resolvedCount,
-        })
+        setProfile(publicProfile)
+        setNextPage(1)
+        setHasMore(myReports.length === REPORTS_PAGE_SIZE && uniqueReports.length < publicProfile.totalReports)
       } else if (identifier) {
-        // Fetch public profile and reports
-        const pub = await userService.getPublicProfile(identifier)
-        const pubReports = await userService.getPublicReports(identifier)
+        const [pub, pubReports] = await Promise.all([
+          userService.getPublicProfile(identifier),
+          userService.getPublicReports(identifier, 0, REPORTS_PAGE_SIZE),
+        ])
         setProfile(pub)
         setReports(pubReports)
+        setNextPage(1)
+        setHasMore(pubReports.length === REPORTS_PAGE_SIZE && pubReports.length < pub.totalReports)
       }
     } catch (err: unknown) {
       console.error('Failed to load profile:', err)
@@ -109,6 +109,25 @@ export const ProfilePage: React.FC = () => {
 
     loadProfileData()
   }, [identifier, isAuthenticated, navigate, loadProfileData])
+
+  const loadMoreReports = async () => {
+    if (loadingMore || !hasMore || !profile) return
+    setLoadingMore(true)
+    try {
+      const more = isOwnProfile && user
+        ? await reportService.getMyReports(user.id, user.nickname, nextPage, REPORTS_PAGE_SIZE)
+        : await userService.getPublicReports(identifier!, nextPage, REPORTS_PAGE_SIZE)
+      const seen = new Set(reports.map((report) => report.id))
+      const combined = [...reports, ...more.filter((report) => !seen.has(report.id) && seen.add(report.id))]
+      setReports(combined)
+      setNextPage(nextPage + 1)
+      setHasMore(more.length === REPORTS_PAGE_SIZE && combined.length < profile.totalReports)
+    } catch {
+      toast.error('Could not load more reports. Please try again.')
+    } finally {
+      setLoadingMore(false)
+    }
+  }
 
   // Handle image validations
   const validateFile = (file: File): boolean => {
@@ -222,7 +241,7 @@ export const ProfilePage: React.FC = () => {
     try {
       const updatedUser = await userService.updateProfile({
         nickname: trimmed,
-        bio: editBio.trim() || undefined,
+        bio: editBio.trim(),
       })
       updateUser(updatedUser)
       setProfile((prev) =>
@@ -257,11 +276,9 @@ export const ProfilePage: React.FC = () => {
   }
 
   // Status breakdown counts
-  const totalCount = reports.length
-  const resolvedCount = reports.filter((r) => r.status === 'RESOLVED').length
-  const inProgressCount = reports.filter(
-    (r) => r.status === 'IN_PROGRESS' || r.status === 'UNDER_REVIEW'
-  ).length
+  const totalCount = profile?.totalReports ?? 0
+  const resolvedCount = profile?.resolvedReports ?? 0
+  const inProgressCount = profile?.activeReports ?? 0
 
   if (loading) {
     return (
@@ -594,6 +611,7 @@ export const ProfilePage: React.FC = () => {
               />
             </div>
           ) : (
+            <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {reports.map((report) => (
                 <Link
@@ -636,6 +654,19 @@ export const ProfilePage: React.FC = () => {
                 </Link>
               ))}
             </div>
+            {hasMore && (
+              <div className="mt-6 flex justify-center">
+                <button
+                  type="button"
+                  disabled={loadingMore}
+                  onClick={loadMoreReports}
+                  className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-blue-900 dark:text-blue-300 border border-blue-900 dark:border-blue-500 rounded-xs hover:bg-blue-50 dark:hover:bg-slate-800 disabled:opacity-60"
+                >
+                  {loadingMore ? 'Loading...' : 'Load more reports'}
+                </button>
+              </div>
+            )}
+            </>
           )}
         </div>
       </div>

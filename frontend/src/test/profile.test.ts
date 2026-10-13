@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { userService } from '@/services/userService'
+import { reportService } from '@/services/reportService'
 import { apiClient } from '@/services/apiClient'
 import type { User, PublicProfile } from '@/types/auth'
 import type { Report } from '@/types/report'
@@ -43,6 +44,7 @@ describe('Profile & Identity Service', () => {
       coverUrl: 'http://localhost:8080/api/v1/users/SOK%20Citizen/cover',
       totalReports: 12,
       resolvedReports: 8,
+      activeReports: 2,
     }
 
     vi.spyOn(apiClient, 'get').mockResolvedValueOnce({ data: mockPublicProfile })
@@ -88,5 +90,15 @@ describe('Profile & Identity Service', () => {
     })
     expect(result).toHaveLength(1)
     expect(result[0].authorNickname).toBe('SOK Citizen')
+  })
+
+  it('requests later pages of the signed-in user’s reports', async () => {
+    vi.spyOn(apiClient, 'get').mockResolvedValueOnce({ data: [] })
+
+    await reportService.getMyReports('user-id', 'SOK Citizen', 1, 20)
+
+    expect(apiClient.get).toHaveBeenCalledWith('/reports/my', {
+      params: { page: 1, size: 20 },
+    })
   })
 })

@@ -45,7 +45,8 @@ public final class ApiDtos {
             String avatarUrl,
             String coverUrl,
             long totalReports,
-            long resolvedReports) {}
+            long resolvedReports,
+            long activeReports) {}
     @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
     public record AuthResponse(@Schema(example = "eyJhbGciOiJIUzI1NiJ9...") String token, UserResponse user,
             Boolean mfaRequired, String challengeToken) {
