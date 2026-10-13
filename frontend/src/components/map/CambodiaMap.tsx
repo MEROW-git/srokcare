@@ -43,6 +43,7 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
   const navigate = useNavigate()
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
+  const mapThemeRef = useRef(resolvedTheme)
   const markersRef = useRef<maplibregl.Marker[]>([])
   const [activePreviewReport, setActivePreviewReport] = useState<Report | null>(selectedReport || null)
   const [mapError, setMapError] = useState(false)
@@ -53,6 +54,7 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
 
     try {
       const isDark = resolvedTheme === 'dark'
+      mapThemeRef.current = resolvedTheme
       const map = new maplibregl.Map({
         container: mapContainerRef.current,
         style: getMapStyle(isDark),
@@ -81,7 +83,8 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
   // Dynamic style change when resolvedTheme changes
   useEffect(() => {
     const map = mapRef.current
-    if (!map) return
+    if (!map || mapThemeRef.current === resolvedTheme) return
+    mapThemeRef.current = resolvedTheme
     map.setStyle(getMapStyle(resolvedTheme === 'dark'))
   }, [resolvedTheme])
 

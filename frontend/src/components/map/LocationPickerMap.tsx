@@ -22,12 +22,14 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const markerRef = useRef<maplibregl.Marker | null>(null)
+  const mapThemeRef = useRef(resolvedTheme)
   const [isLocating, setIsLocating] = useState(false)
 
   useEffect(() => {
     if (!mapContainerRef.current) return
 
     const isDark = resolvedTheme === 'dark'
+    mapThemeRef.current = resolvedTheme
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
       style: getMapStyle(isDark),
@@ -75,7 +77,8 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
   // Dynamic theme update for map tiles
   useEffect(() => {
     const map = mapRef.current
-    if (!map) return
+    if (!map || mapThemeRef.current === resolvedTheme) return
+    mapThemeRef.current = resolvedTheme
     map.setStyle(getMapStyle(resolvedTheme === 'dark'))
   }, [resolvedTheme])
 

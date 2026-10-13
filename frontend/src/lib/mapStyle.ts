@@ -48,10 +48,8 @@ const fallbackDarkStyle: StyleSpecification = {
 
 export function getMapStyle(isDark: boolean = false): string | StyleSpecification {
   if (mapTilerKey) {
-    const styleId = isDark ? 'dataviz-dark' : 'streets-v4'
+    const styleId = isDark ? 'streets-v4-dark' : 'streets-v4'
     return `https://api.maptiler.com/maps/${styleId}/style.json?key=${encodeURIComponent(mapTilerKey)}`
   }
   return isDark ? fallbackDarkStyle : fallbackLightStyle
 }
-
-export const mapStyle: string | StyleSpecification = getMapStyle(false)
