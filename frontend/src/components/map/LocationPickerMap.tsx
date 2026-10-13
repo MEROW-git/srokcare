@@ -3,6 +3,7 @@ import * as maplibregl from 'maplibre-gl'
 import { MapPin, Navigation } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslation } from '@/contexts/LanguageContext'
+import { mapStyle } from '@/lib/mapStyle'
 
 interface LocationPickerMapProps {
   latitude: number
@@ -26,28 +27,7 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
 
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: {
-        version: 8,
-        sources: {
-          'carto-voyager': {
-            type: 'raster',
-            tiles: [
-              'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
-            ],
-            tileSize: 256,
-            attribution: '&copy; OpenStreetMap &copy; CARTO',
-          },
-        },
-        layers: [
-          {
-            id: 'carto-voyager-layer',
-            type: 'raster',
-            source: 'carto-voyager',
-            minzoom: 0,
-            maxzoom: 20,
-          },
-        ],
-      },
+      style: mapStyle,
       center: [longitude || 104.9282, latitude || 11.5564],
       zoom: 13,
     })
@@ -160,4 +140,3 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
     </div>
   )
 }
-

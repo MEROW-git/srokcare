@@ -23,6 +23,7 @@ import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
 import { formatRelativeTime } from '@/lib/utils'
 import { DisclaimerBanner } from '@/components/common/DisclaimerBanner'
+import { mapStyle } from '@/lib/mapStyle'
 
 export const ReportDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -70,26 +71,7 @@ export const ReportDetailsPage: React.FC = () => {
     try {
       const map = new maplibregl.Map({
         container: mapContainerRef.current,
-        style: {
-          version: 8,
-          sources: {
-            'carto-voyager': {
-              type: 'raster',
-              tiles: ['https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png'],
-              tileSize: 256,
-              attribution: '&copy; OpenStreetMap &copy; CARTO',
-            },
-          },
-          layers: [
-            {
-              id: 'carto-voyager-layer',
-              type: 'raster',
-              source: 'carto-voyager',
-              minzoom: 0,
-              maxzoom: 20,
-            },
-          ],
-        },
+        style: mapStyle,
         center: [report.longitude, report.latitude],
         zoom: 14,
         interactive: true,
@@ -398,4 +380,3 @@ export const ReportDetailsPage: React.FC = () => {
     </div>
   )
 }
-

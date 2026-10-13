@@ -6,6 +6,7 @@ import { useTranslation } from '@/contexts/LanguageContext'
 import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
 import { ThumbsUp, MapPin, ExternalLink } from 'lucide-react'
+import { mapStyle } from '@/lib/mapStyle'
 
 interface CambodiaMapProps {
   reports: Report[]
@@ -51,29 +52,7 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
     try {
       const map = new maplibregl.Map({
         container: mapContainerRef.current,
-        style: {
-          version: 8,
-          sources: {
-            'carto-voyager': {
-              type: 'raster',
-              tiles: [
-                'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
-              ],
-              tileSize: 256,
-              attribution:
-                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            },
-          },
-          layers: [
-            {
-              id: 'carto-voyager-layer',
-              type: 'raster',
-              source: 'carto-voyager',
-              minzoom: 0,
-              maxzoom: 20,
-            },
-          ],
-        },
+        style: mapStyle,
         center,
         zoom,
       })
@@ -244,4 +223,3 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
     </div>
   )
 }
-
