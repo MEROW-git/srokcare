@@ -233,9 +233,16 @@ export const ReportDetailsPage: React.FC = () => {
 
           {/* Author info */}
           <div className="flex items-center gap-3 pt-1">
-            <Avatar nickname={report.authorNickname} size="md" />
+            <Link to={`/profile/${encodeURIComponent(report.authorNickname)}`} className="shrink-0">
+              <Avatar nickname={report.authorNickname} size="md" />
+            </Link>
             <div>
-              <div className="text-xs font-bold text-slate-900 dark:text-slate-100">{report.authorNickname}</div>
+              <Link
+                to={`/profile/${encodeURIComponent(report.authorNickname)}`}
+                className="text-xs font-bold text-slate-900 dark:text-slate-100 hover:underline hover:text-blue-900 dark:hover:text-blue-400 transition-colors"
+              >
+                {report.authorNickname}
+              </Link>
               <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                 <span>
@@ -388,10 +395,17 @@ export const ReportDetailsPage: React.FC = () => {
             ) : (
               comments.map((cmt) => (
                 <div key={cmt.id} className="bg-white dark:bg-slate-900 p-3.5 rounded-sm border border-slate-200 dark:border-slate-800 shadow-2xs flex gap-3">
-                  <Avatar nickname={cmt.authorNickname} size="sm" />
+                  <Link to={`/profile/${encodeURIComponent(cmt.authorNickname)}`} className="shrink-0">
+                    <Avatar nickname={cmt.authorNickname} size="sm" />
+                  </Link>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{cmt.authorNickname}</span>
+                      <Link
+                        to={`/profile/${encodeURIComponent(cmt.authorNickname)}`}
+                        className="text-xs font-bold text-slate-900 dark:text-slate-100 hover:underline hover:text-blue-900 dark:hover:text-blue-400 transition-colors"
+                      >
+                        {cmt.authorNickname}
+                      </Link>
                       <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">
                         {formatRelativeTime(cmt.createdAt)}
                       </span>

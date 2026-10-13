@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.UUID;
 public interface ReportRepository extends JpaRepository<Report, UUID>, JpaSpecificationExecutor<Report> {
     Page<Report> findByAuthorId(UUID authorId, Pageable pageable);
+    long countByAuthorId(UUID authorId);
+    long countByAuthorIdAndStatus(UUID authorId, ReportStatus status);
     @Lock(LockModeType.PESSIMISTIC_WRITE) @Query("select r from Report r where r.id = :id")
     Optional<Report> findLockedById(UUID id);
     long countByStatus(ReportStatus status);

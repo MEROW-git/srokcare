@@ -21,7 +21,24 @@ public class ApiMapper {
         this.images = images; this.comments = comments; this.supports = supports; this.current = current;
         this.publicBaseUrl = publicBaseUrl.replaceAll("/+$", "");
     }
-    public UserResponse user(User user) { return new UserResponse(user.getId(), user.getNickname(), user.getEmail(), user.getRole(), user.getCreatedAt()); }
+    public UserResponse user(User user) {
+        String avatarUrl = user.getAvatarKey() != null
+                ? publicBaseUrl + "/api/v1/users/" + java.net.URLEncoder.encode(user.getNickname(), java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20") + "/avatar"
+                : null;
+        String coverUrl = user.getCoverKey() != null
+                ? publicBaseUrl + "/api/v1/users/" + java.net.URLEncoder.encode(user.getNickname(), java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20") + "/cover"
+                : null;
+        return new UserResponse(user.getId(), user.getNickname(), user.getEmail(), user.getRole(), user.getCreatedAt(), user.getBio(), avatarUrl, coverUrl);
+    }
+    public PublicProfileResponse publicProfile(User user, long totalReports, long resolvedReports) {
+        String avatarUrl = user.getAvatarKey() != null
+                ? publicBaseUrl + "/api/v1/users/" + java.net.URLEncoder.encode(user.getNickname(), java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20") + "/avatar"
+                : null;
+        String coverUrl = user.getCoverKey() != null
+                ? publicBaseUrl + "/api/v1/users/" + java.net.URLEncoder.encode(user.getNickname(), java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20") + "/cover"
+                : null;
+        return new PublicProfileResponse(user.getNickname(), user.getRole(), user.getCreatedAt(), user.getBio(), avatarUrl, coverUrl, totalReports, resolvedReports);
+    }
     public ReportResponse report(Report report) {
         var urls = images.findByReportIdOrderByCreatedAt(report.getId()).stream()
                 .map(image -> imageUrl(report.getId(), image.getId())).toList();

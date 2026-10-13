@@ -6,6 +6,20 @@ export interface User {
   email: string
   role: UserRole
   createdAt?: string
+  bio?: string
+  avatarUrl?: string
+  coverUrl?: string
+}
+
+export interface PublicProfile {
+  nickname: string
+  role: UserRole
+  createdAt: string
+  bio?: string
+  avatarUrl?: string
+  coverUrl?: string
+  totalReports: number
+  resolvedReports: number
 }
 
 export interface AuthResponse {

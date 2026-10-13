@@ -15,6 +15,11 @@ public class User {
     @Enumerated(EnumType.STRING) @Column(nullable = false, length = 20) private Role role = Role.CITIZEN;
     @Column(name = "created_at", nullable = false) private Instant createdAt;
     @Column(name = "updated_at", nullable = false) private Instant updatedAt;
+    @Column(length = 500) private String bio;
+    @Column(name = "avatar_key", length = 100) private String avatarKey;
+    @Column(name = "avatar_content_type", length = 20) private String avatarContentType;
+    @Column(name = "cover_key", length = 100) private String coverKey;
+    @Column(name = "cover_content_type", length = 20) private String coverContentType;
     @Column(name = "mfa_enabled", nullable = false) private boolean mfaEnabled;
     @Column(name = "mfa_secret_ciphertext", length = 512) private String mfaSecretCiphertext;
     @Column(name = "mfa_pending_ciphertext", length = 512) private String mfaPendingCiphertext;

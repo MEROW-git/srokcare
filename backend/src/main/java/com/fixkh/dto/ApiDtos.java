@@ -21,8 +21,31 @@ public final class ApiDtos {
     public record RegistrationPendingResponse(String message) {}
     public record LoginRequest(@NotBlank @Email @Schema(example = "sok@example.com") String email,
             @NotBlank @Schema(example = "StrongPassword123!") String password) {}
-    public record UserResponse(@Schema(example = "bb5fc6f1-64c2-4f0f-bec8-a4f3d85d81f4") UUID id,
-            @Schema(example = "SOK Citizen") String nickname, String email, Role role, Instant createdAt) {}
+    public record UserResponse(
+            @Schema(example = "bb5fc6f1-64c2-4f0f-bec8-a4f3d85d81f4") UUID id,
+            @Schema(example = "SOK Citizen") String nickname,
+            String email,
+            Role role,
+            Instant createdAt,
+            String bio,
+            String avatarUrl,
+            String coverUrl) {
+        public UserResponse(UUID id, String nickname, String email, Role role, Instant createdAt) {
+            this(id, nickname, email, role, createdAt, null, null, null);
+        }
+    }
+    public record UpdateProfileRequest(
+            @NotBlank @Size(min = 2, max = 50) @Schema(example = "SOK Citizen") String nickname,
+            @Size(max = 500) @Schema(example = "Active civic volunteer in Daun Penh.") String bio) {}
+    public record PublicProfileResponse(
+            @Schema(example = "SOK Citizen") String nickname,
+            Role role,
+            Instant createdAt,
+            String bio,
+            String avatarUrl,
+            String coverUrl,
+            long totalReports,
+            long resolvedReports) {}
     @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
     public record AuthResponse(@Schema(example = "eyJhbGciOiJIUzI1NiJ9...") String token, UserResponse user,
             Boolean mfaRequired, String challengeToken) {

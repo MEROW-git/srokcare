@@ -15,6 +15,7 @@ import { ReportDetailsPage } from '@/pages/ReportDetailsPage'
 import { RegisterPage } from '@/pages/RegisterPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { MyReportsPage } from '@/pages/MyReportsPage'
+import { ProfilePage } from '@/pages/ProfilePage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { AdminDashboardPage } from '@/pages/AdminDashboardPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
@@ -44,6 +45,8 @@ export const App: React.FC = () => {
                 <Route path="/reports/:id" element={<ReportDetailsPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/profile/:identifier" element={<ProfilePage />} />
                 <Route path="/my-reports" element={<MyReportsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/admin" element={<AdminDashboardPage />} />

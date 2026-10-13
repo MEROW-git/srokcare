@@ -10,6 +10,8 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmailIgnoreCase(String email);
     boolean existsByEmailIgnoreCase(String email);
+    Optional<User> findByNicknameIgnoreCase(String nickname);
+    boolean existsByNicknameIgnoreCase(String nickname);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select u from User u where lower(u.email) = lower(:email)")
     Optional<User> findLockedByEmail(@Param("email") String email);

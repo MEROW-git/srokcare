@@ -88,12 +88,22 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
         <div className="flex items-start justify-between gap-3">
           {/* Author & Meta */}
           <div className="flex items-center gap-3 min-w-0">
-            <Avatar nickname={report.authorNickname} size="md" />
+            <Link
+              to={`/profile/${encodeURIComponent(report.authorNickname)}`}
+              onClick={(e) => e.stopPropagation()}
+              className="shrink-0"
+            >
+              <Avatar nickname={report.authorNickname} size="md" />
+            </Link>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-sm font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate">
+                <Link
+                  to={`/profile/${encodeURIComponent(report.authorNickname)}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-sm font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate hover:underline hover:text-blue-900 dark:hover:text-blue-400 transition-colors"
+                >
                   {report.authorNickname}
-                </span>
+                </Link>
                 <span className="text-slate-300 dark:text-slate-700 text-xs">•</span>
                 <span className="text-xs text-slate-500 dark:text-slate-400 font-medium font-mono">
                   {formatRelativeTime(report.createdAt)}

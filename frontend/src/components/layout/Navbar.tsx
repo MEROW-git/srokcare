@@ -12,6 +12,7 @@ import {
   LogOut,
   FolderOpen,
   Settings,
+  User as UserIcon,
 } from 'lucide-react'
 import { useTranslation } from '@/contexts/LanguageContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -124,7 +125,7 @@ export const Navbar: React.FC = () => {
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                 className="flex items-center gap-2 p-1 rounded-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-300 dark:hover:border-slate-700"
               >
-                <Avatar nickname={user.nickname} size="sm" />
+                <Avatar nickname={user.nickname} avatarUrl={user.avatarUrl} size="sm" />
                 <span className="hidden lg:inline text-xs font-bold text-slate-900 dark:text-slate-100 max-w-[120px] truncate">
                   {user.nickname}
                 </span>
@@ -148,6 +149,15 @@ export const Navbar: React.FC = () => {
                         {user.role === 'ADMIN' ? 'Civic Moderator' : 'Citizen'}
                       </span>
                     </div>
+
+                    <Link
+                      to="/profile"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      <UserIcon className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                      <span>{t('navViewProfile')}</span>
+                    </Link>
 
                     <Link
                       to="/my-reports"
@@ -265,6 +275,16 @@ export const Navbar: React.FC = () => {
             <PlusCircle className="w-4 h-4" />
             <span>{t('ctaReport')}</span>
           </Link>
+          {isAuthenticated && (
+            <Link
+              to="/profile"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 px-3 py-2 rounded-xs text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
+            >
+              <UserIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+              <span>{t('navProfile')}</span>
+            </Link>
+          )}
           <Link
             to="/my-reports"
             onClick={() => setMobileMenuOpen(false)}

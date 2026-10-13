@@ -95,8 +95,8 @@ public class ImageService {
     }
     private void deleteQuietly(String key) { try { storage.delete(key); } catch (IOException ignored) {} }
     public record ImageData(byte[] bytes, String contentType) {}
-    private record Processed(byte[] bytes, String contentType, String extension) {}
-    private Processed process(MultipartFile file) {
+    public record Processed(byte[] bytes, String contentType, String extension) {}
+    public Processed process(MultipartFile file) {
         if (file.isEmpty()) throw new ApiException(HttpStatus.BAD_REQUEST, "Empty image");
         if (file.getSize() > 5L * 1024 * 1024) throw new ApiException(HttpStatus.PAYLOAD_TOO_LARGE, "Each image must be at most 5 MB");
         try {
