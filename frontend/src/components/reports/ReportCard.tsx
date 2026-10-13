@@ -77,7 +77,7 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
   const hasMultiplePhotos = photos.length > 1
 
   return (
-    <article className="bg-white rounded-md border border-slate-300 shadow-2xs hover:border-slate-400 transition-all duration-150 overflow-hidden flex flex-col group">
+    <article className="bg-white dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-800 shadow-2xs hover:border-slate-400 dark:hover:border-slate-700 transition-all duration-150 overflow-hidden flex flex-col group">
       {/* Header Info */}
       <div className="p-4 sm:p-5 pb-3.5">
         <div className="flex items-start justify-between gap-3">
@@ -86,16 +86,16 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
             <Avatar nickname={report.authorNickname} size="md" />
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-sm font-bold text-slate-900 tracking-tight truncate">
+                <span className="text-sm font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate">
                   {report.authorNickname}
                 </span>
-                <span className="text-slate-300 text-xs">•</span>
-                <span className="text-xs text-slate-500 font-medium font-mono">
+                <span className="text-slate-300 dark:text-slate-700 text-xs">•</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium font-mono">
                   {formatRelativeTime(report.createdAt)}
                 </span>
               </div>
-              <div className="flex items-center gap-1 text-xs text-slate-600 font-medium mt-0.5">
-                <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+              <div className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">
+                <MapPin className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
                 <span className="truncate">
                   {report.district}, {report.province}
                 </span>
@@ -114,12 +114,12 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
           <div className="flex items-center gap-2">
             <ReportCategoryBadge category={report.category} size="sm" />
           </div>
-          <Link to={`/reports/${report.id}`} className="block group-hover:text-blue-900 transition-colors">
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-snug line-clamp-2">
+          <Link to={`/reports/${report.id}`} className="block group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-snug line-clamp-2">
               {report.title}
             </h3>
           </Link>
-          <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed">
+          <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed">
             {report.description}
           </p>
         </div>
@@ -130,7 +130,7 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
         <div className="relative px-4 sm:px-5 pb-3.5">
           <Link
             to={`/reports/${report.id}`}
-            className="block relative rounded-xs overflow-hidden bg-slate-100 aspect-16/9 border border-slate-200 group/img"
+            className="block relative rounded-xs overflow-hidden bg-slate-100 dark:bg-slate-800 aspect-16/9 border border-slate-200 dark:border-slate-800 group/img"
           >
             <img
               src={photos[activePhotoIdx] || photos[0]}
@@ -161,8 +161,8 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
                   }}
                   className={`h-1.5 transition-all rounded-xs ${
                     idx === activePhotoIdx
-                      ? 'w-5 bg-blue-800'
-                      : 'w-2 bg-slate-300 hover:bg-slate-400'
+                      ? 'w-5 bg-blue-800 dark:bg-blue-500'
+                      : 'w-2 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600'
                   }`}
                   aria-label={`View photo ${idx + 1}`}
                 />
@@ -173,7 +173,7 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
       )}
 
       {/* Action Footer Bar */}
-      <div className="mt-auto px-4 sm:px-5 py-3 border-t border-slate-200 flex items-center justify-between gap-2 bg-slate-50/60">
+      <div className="mt-auto px-4 sm:px-5 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 bg-slate-50/60 dark:bg-slate-900/60">
         <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Support Button */}
           <button
@@ -181,8 +181,8 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
             disabled={isSupporting}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-bold uppercase tracking-wider transition-colors border ${
               supportedByMe
-                ? 'bg-blue-800 text-white border-blue-950'
-                : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300 hover:text-slate-900'
+                ? 'bg-blue-800 dark:bg-blue-600 text-white border-blue-950 dark:border-blue-500'
+                : 'bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:text-slate-900 dark:hover:text-white'
             }`}
             title="Support this report to increase visibility"
           >
@@ -200,9 +200,9 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
           {/* Comments Button */}
           <Link
             to={`/reports/${report.id}#comments`}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-bold uppercase tracking-wider bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-bold uppercase tracking-wider bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors"
           >
-            <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
+            <MessageSquare className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
             <span>{report.commentCount}</span>
             <span className="hidden sm:inline font-semibold">{t('comments')}</span>
           </Link>
@@ -210,10 +210,10 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
           {/* Share Button */}
           <button
             onClick={handleShareClick}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-300 transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 transition-colors"
             title="Share report link"
           >
-            <Share2 className="w-3.5 h-3.5 text-slate-500" />
+            <Share2 className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
             <span className="hidden sm:inline font-semibold">{t('share')}</span>
           </button>
         </div>
@@ -221,7 +221,7 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
         {/* View Details Link */}
         <Link
           to={`/reports/${report.id}`}
-          className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-blue-800 hover:text-blue-950 transition-colors"
+          className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-blue-800 dark:text-blue-400 hover:text-blue-950 dark:hover:text-blue-300 transition-colors"
         >
           <span>{t('viewDetails')}</span>
           <ExternalLink className="w-3 h-3" />
@@ -230,4 +230,3 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
     </article>
   )
 }
-

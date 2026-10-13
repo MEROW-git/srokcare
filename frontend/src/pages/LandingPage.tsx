@@ -45,7 +45,7 @@ export const LandingPage: React.FC = () => {
   }, [])
 
   return (
-    <div className="space-y-12 sm:space-y-16 pb-12">
+    <div className="space-y-12 sm:space-y-16 pb-12 transition-colors duration-150">
       {/* Disclaimer Banner on top */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2">
         <DisclaimerBanner />
@@ -57,16 +57,16 @@ export const LandingPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             {/* Left Copy */}
             <div className="lg:col-span-7 space-y-5 text-left">
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-slate-100 border border-slate-300 rounded-xs text-[11px] font-semibold tracking-wider text-slate-800 uppercase">
-                <span className="w-1.5 h-1.5 rounded-xs bg-blue-700"></span>
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xs text-[11px] font-semibold tracking-wider text-slate-800 dark:text-slate-200 uppercase">
+                <span className="w-1.5 h-1.5 rounded-xs bg-blue-700 dark:bg-blue-500"></span>
                 National Civic Ledger • កំណត់ត្រាសហគមន៍កម្ពុជា
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-[1.14]">
-                {t('heroTitle')} <span className="text-blue-700">Together.</span>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-slate-100 tracking-tight leading-[1.14]">
+                {t('heroTitle')} <span className="text-blue-700 dark:text-blue-400">Together.</span>
               </h1>
 
-              <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl font-normal">
+              <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl font-normal">
                 {t('heroSubtitle')}
               </p>
 
@@ -74,7 +74,7 @@ export const LandingPage: React.FC = () => {
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-1">
                 <Link
                   to="/reports/new"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-sm bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white font-bold text-sm shadow-xs transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-sm bg-blue-900 hover:bg-blue-950 dark:bg-blue-600 dark:hover:bg-blue-500 active:bg-blue-950 text-white font-bold text-sm shadow-xs transition-colors border border-blue-950 dark:border-blue-500"
                 >
                   <MapPin className="w-4 h-4 text-amber-400" />
                   <span>{t('ctaReport')}</span>
@@ -83,57 +83,57 @@ export const LandingPage: React.FC = () => {
 
                 <Link
                   to="/map"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-sm bg-white hover:bg-slate-50 text-slate-900 font-bold text-sm border border-slate-300 shadow-2xs transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-sm bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold text-sm border border-slate-300 dark:border-slate-700 shadow-2xs transition-colors"
                 >
-                  <Compass className="w-4 h-4 text-blue-700" />
+                  <Compass className="w-4 h-4 text-blue-700 dark:text-blue-400" />
                   <span>{t('ctaExploreMap')}</span>
                 </Link>
 
                 <Link
                   to="/feed"
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-sm text-slate-700 hover:text-slate-900 font-semibold text-sm hover:bg-slate-100 border border-slate-200 transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-colors"
                 >
                   <span>{t('ctaBrowseFeed')}</span>
                 </Link>
               </div>
 
               {/* Key Highlights Ledger */}
-              <div className="pt-5 border-t border-slate-200 grid grid-cols-3 gap-3">
-                <div className="border-l-2 border-slate-900 pl-3">
-                  <div className="text-xl font-black text-slate-900 font-mono">100%</div>
-                  <div className="text-xs font-semibold text-slate-600 mt-0.5">Pseudonymous</div>
+              <div className="pt-5 border-t border-slate-200 dark:border-slate-800 grid grid-cols-3 gap-3">
+                <div className="border-l-2 border-slate-900 dark:border-slate-400 pl-3">
+                  <div className="text-xl font-black text-slate-900 dark:text-slate-100 font-mono">100%</div>
+                  <div className="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-0.5">Pseudonymous</div>
                 </div>
-                <div className="border-l-2 border-blue-700 pl-3">
-                  <div className="text-xl font-black text-blue-700 font-mono">25</div>
-                  <div className="text-xs font-semibold text-slate-600 mt-0.5">Provinces Covered</div>
+                <div className="border-l-2 border-blue-700 dark:border-blue-500 pl-3">
+                  <div className="text-xl font-black text-blue-700 dark:text-blue-400 font-mono">25</div>
+                  <div className="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-0.5">Provinces Covered</div>
                 </div>
-                <div className="border-l-2 border-emerald-600 pl-3">
-                  <div className="text-xl font-black text-emerald-700 font-mono">Public</div>
-                  <div className="text-xs font-semibold text-slate-600 mt-0.5">Audit Ledger</div>
+                <div className="border-l-2 border-emerald-600 dark:border-emerald-500 pl-3">
+                  <div className="text-xl font-black text-emerald-700 dark:text-emerald-400 font-mono">Public</div>
+                  <div className="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-0.5">Audit Ledger</div>
                 </div>
               </div>
             </div>
 
             {/* Right Visual Architectural Panel */}
             <div className="lg:col-span-5">
-              <div className="bg-white rounded-md border border-slate-300 shadow-xs p-5 space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <div className="bg-white dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-800 shadow-xs p-5 space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-xs bg-slate-900 text-white flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-xs bg-slate-900 dark:bg-slate-800 text-white flex items-center justify-center border border-slate-800 dark:border-slate-700">
                       <Radio className="w-3.5 h-3.5 text-amber-400" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Live Municipal Dispatch</h4>
-                      <p className="text-[10px] text-slate-500 font-mono">11.5564° N, 104.9282° E • PP-04-2026</p>
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">Live Municipal Dispatch</h4>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">11.5564° N, 104.9282° E • PP-04-2026</p>
                     </div>
                   </div>
-                  <span className="px-1.5 py-0.5 text-[10px] font-bold font-mono uppercase bg-emerald-50 text-emerald-800 rounded-xs border border-emerald-300">
+                  <span className="px-1.5 py-0.5 text-[10px] font-bold font-mono uppercase bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 rounded-xs border border-emerald-300 dark:border-emerald-800">
                     Active
                   </span>
                 </div>
 
                 {/* Simulated map graphic snippet */}
-                <div className="relative rounded-xs overflow-hidden bg-slate-100 aspect-16/10 border border-slate-200">
+                <div className="relative rounded-xs overflow-hidden bg-slate-100 dark:bg-slate-800 aspect-16/10 border border-slate-200 dark:border-slate-800">
                   <img
                     src="https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=800&q=80"
                     alt="Civic Issue Example"
@@ -156,12 +156,12 @@ export const LandingPage: React.FC = () => {
                 </div>
 
                 {/* Citizen coordination strip */}
-                <div className="flex items-center justify-between bg-slate-50 p-2.5 rounded-xs border border-slate-200 text-xs text-slate-700">
+                <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xs border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300">
                   <div className="flex items-center gap-2">
-                    <Users className="w-3.5 h-3.5 text-blue-700" />
+                    <Users className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400" />
                     <span className="text-[11px] font-medium">74 citizens confirmed this incident</span>
                   </div>
-                  <Link to="/map" className="font-bold text-[11px] text-blue-700 hover:text-blue-900">
+                  <Link to="/map" className="font-bold text-[11px] text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
                     Inspect Map →
                   </Link>
                 </div>
@@ -173,17 +173,17 @@ export const LandingPage: React.FC = () => {
 
       {/* How It Works Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="border-t border-slate-200 pt-10 mb-8">
+        <div className="border-t border-slate-200 dark:border-slate-800 pt-10 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
             <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 font-mono mb-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono mb-1">
                 CIVIC PROCESS PROTOCOL
               </div>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
                 {t('howItWorksTitle')}
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-slate-600 max-w-md">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-md">
               {t('howItWorksSubtitle')}
             </p>
           </div>
@@ -191,56 +191,56 @@ export const LandingPage: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Step 1 */}
-          <div className="bg-white rounded-md border border-slate-300 p-5 shadow-xs relative">
+          <div className="bg-white dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-800 p-5 shadow-xs relative">
             <div className="flex items-center justify-between mb-4">
-              <span className="font-mono text-xs font-black text-slate-400">STEP 01</span>
-              <div className="w-8 h-8 rounded-xs bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center">
+              <span className="font-mono text-xs font-black text-slate-400 dark:text-slate-500">STEP 01</span>
+              <div className="w-8 h-8 rounded-xs bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
                 <Camera className="w-4 h-4" />
               </div>
             </div>
-            <h3 className="text-sm font-bold text-slate-900 mb-1.5">{t('step1Title')}</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">{t('step1Desc')}</p>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1.5">{t('step1Title')}</h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{t('step1Desc')}</p>
           </div>
 
           {/* Step 2 */}
-          <div className="bg-white rounded-md border border-slate-300 p-5 shadow-xs relative">
+          <div className="bg-white dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-800 p-5 shadow-xs relative">
             <div className="flex items-center justify-between mb-4">
-              <span className="font-mono text-xs font-black text-slate-400">STEP 02</span>
-              <div className="w-8 h-8 rounded-xs bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center">
+              <span className="font-mono text-xs font-black text-slate-400 dark:text-slate-500">STEP 02</span>
+              <div className="w-8 h-8 rounded-xs bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
                 <Users className="w-4 h-4" />
               </div>
             </div>
-            <h3 className="text-sm font-bold text-slate-900 mb-1.5">{t('step2Title')}</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">{t('step2Desc')}</p>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1.5">{t('step2Title')}</h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{t('step2Desc')}</p>
           </div>
 
           {/* Step 3 */}
-          <div className="bg-white rounded-md border border-slate-300 p-5 shadow-xs relative">
+          <div className="bg-white dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-800 p-5 shadow-xs relative">
             <div className="flex items-center justify-between mb-4">
-              <span className="font-mono text-xs font-black text-slate-400">STEP 03</span>
-              <div className="w-8 h-8 rounded-xs bg-slate-100 text-emerald-800 border border-slate-200 flex items-center justify-center">
+              <span className="font-mono text-xs font-black text-slate-400 dark:text-slate-500">STEP 03</span>
+              <div className="w-8 h-8 rounded-xs bg-slate-100 dark:bg-slate-800 text-emerald-800 dark:text-emerald-400 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
-            <h3 className="text-sm font-bold text-slate-900 mb-1.5">{t('step3Title')}</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">{t('step3Desc')}</p>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1.5">{t('step3Title')}</h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{t('step3Desc')}</p>
           </div>
         </div>
       </section>
 
       {/* Categories Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="border-t border-slate-200 pt-10 mb-6">
+        <div className="border-t border-slate-200 dark:border-slate-800 pt-10 mb-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
             <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 font-mono mb-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono mb-1">
                 CIVIC INCIDENT TAXONOMY
               </div>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
                 {t('categoriesTitle')}
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-slate-600">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
               {t('categoriesSubtitle')}
             </p>
           </div>
@@ -253,16 +253,16 @@ export const LandingPage: React.FC = () => {
               <Link
                 key={cat.key}
                 to={`/feed?category=${cat.key}`}
-                className="bg-white rounded-md border border-slate-300 p-3.5 shadow-2xs hover:border-slate-800 transition-colors group flex flex-col justify-between"
+                className="bg-white dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-800 p-3.5 shadow-2xs hover:border-slate-800 dark:hover:border-slate-600 transition-colors group flex flex-col justify-between"
               >
-                <div className="w-8 h-8 rounded-xs bg-slate-50 border border-slate-200 text-slate-700 flex items-center justify-center mb-2.5 group-hover:bg-slate-900 group-hover:text-white transition-colors">
+                <div className="w-8 h-8 rounded-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center mb-2.5 group-hover:bg-slate-900 dark:group-hover:bg-slate-700 group-hover:text-white transition-colors">
                   <CategoryIcon category={cat.key} className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-slate-900 group-hover:text-blue-700 transition-colors">
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
                     {t(key)}
                   </h3>
-                  <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-tight">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-tight">
                     {language === 'km' ? cat.descKm : cat.descEn}
                   </p>
                 </div>
@@ -274,19 +274,19 @@ export const LandingPage: React.FC = () => {
 
       {/* Recent Community Reports Preview */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="border-t border-slate-200 pt-10 mb-6">
+        <div className="border-t border-slate-200 dark:border-slate-800 pt-10 mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 font-mono mb-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono mb-1">
                 PUBLIC INCIDENT LEDGER
               </div>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
                 {t('recentReportsTitle')}
               </h2>
             </div>
             <Link
               to="/feed"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 hover:text-blue-900"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
             >
               <span>{t('viewAllReports')}</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -296,9 +296,9 @@ export const LandingPage: React.FC = () => {
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="h-64 bg-slate-100 rounded-md border border-slate-200 animate-pulse" />
-            <div className="h-64 bg-slate-100 rounded-md border border-slate-200 animate-pulse" />
-            <div className="h-64 bg-slate-100 rounded-md border border-slate-200 animate-pulse" />
+            <div className="h-64 bg-slate-100 dark:bg-slate-800/60 rounded-md border border-slate-200 dark:border-slate-800 animate-pulse" />
+            <div className="h-64 bg-slate-100 dark:bg-slate-800/60 rounded-md border border-slate-200 dark:border-slate-800 animate-pulse" />
+            <div className="h-64 bg-slate-100 dark:bg-slate-800/60 rounded-md border border-slate-200 dark:border-slate-800 animate-pulse" />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -311,7 +311,7 @@ export const LandingPage: React.FC = () => {
 
       {/* Civic Architecture & Trust Framework */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-slate-900 border border-slate-800 text-white rounded-md p-6 sm:p-9 shadow-xs">
+        <div className="bg-slate-900 dark:bg-slate-900/90 border border-slate-800 text-white rounded-md p-6 sm:p-9 shadow-xs">
           <div className="max-w-3xl mb-8">
             <div className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-amber-400 mb-2">
               <Building2 className="w-3.5 h-3.5" />

@@ -22,38 +22,38 @@ export const ReportStatusBadge: React.FC<ReportStatusBadgeProps> = ({
   > = {
     REPORTED: {
       labelKey: 'status_REPORTED',
-      bg: 'bg-slate-100',
-      text: 'text-slate-800',
-      border: 'border-slate-300',
-      icon: <Clock className="w-3 h-3 text-slate-700" />,
+      bg: 'bg-slate-100 dark:bg-slate-800',
+      text: 'text-slate-800 dark:text-slate-200',
+      border: 'border-slate-300 dark:border-slate-700',
+      icon: <Clock className="w-3 h-3 text-slate-700 dark:text-slate-400" />,
     },
     UNDER_REVIEW: {
       labelKey: 'status_UNDER_REVIEW',
-      bg: 'bg-amber-50',
-      text: 'text-amber-900',
-      border: 'border-amber-300',
-      icon: <Eye className="w-3 h-3 text-amber-800" />,
+      bg: 'bg-amber-50 dark:bg-amber-950/60',
+      text: 'text-amber-900 dark:text-amber-200',
+      border: 'border-amber-300 dark:border-amber-700',
+      icon: <Eye className="w-3 h-3 text-amber-800 dark:text-amber-400" />,
     },
     IN_PROGRESS: {
       labelKey: 'status_IN_PROGRESS',
-      bg: 'bg-blue-50',
-      text: 'text-blue-900',
-      border: 'border-blue-300',
-      icon: <Wrench className="w-3 h-3 text-blue-800" />,
+      bg: 'bg-blue-50 dark:bg-blue-950/60',
+      text: 'text-blue-900 dark:text-blue-200',
+      border: 'border-blue-300 dark:border-blue-700',
+      icon: <Wrench className="w-3 h-3 text-blue-800 dark:text-blue-400" />,
     },
     RESOLVED: {
       labelKey: 'status_RESOLVED',
-      bg: 'bg-emerald-50',
-      text: 'text-emerald-900',
-      border: 'border-emerald-300',
-      icon: <CheckCircle2 className="w-3 h-3 text-emerald-800" />,
+      bg: 'bg-emerald-50 dark:bg-emerald-950/60',
+      text: 'text-emerald-900 dark:text-emerald-200',
+      border: 'border-emerald-300 dark:border-emerald-700',
+      icon: <CheckCircle2 className="w-3 h-3 text-emerald-800 dark:text-emerald-400" />,
     },
     REJECTED: {
       labelKey: 'status_REJECTED',
-      bg: 'bg-rose-50',
-      text: 'text-rose-900',
-      border: 'border-rose-300',
-      icon: <XCircle className="w-3 h-3 text-rose-800" />,
+      bg: 'bg-rose-50 dark:bg-rose-950/60',
+      text: 'text-rose-900 dark:text-rose-200',
+      border: 'border-rose-300 dark:border-rose-700',
+      icon: <XCircle className="w-3 h-3 text-rose-800 dark:text-rose-400" />,
     },
   }
 
@@ -68,4 +68,3 @@ export const ReportStatusBadge: React.FC<ReportStatusBadgeProps> = ({
     </span>
   )
 }
-

@@ -18,6 +18,10 @@ export const translations = {
     navLogin: 'Sign In',
     navRegister: 'Join with Nickname',
     navLogout: 'Sign Out',
+    theme: 'Theme',
+    themeLight: 'Light',
+    themeDark: 'Dark',
+    themeSystem: 'System',
 
     // Hero & Landing
     heroTitle: 'Make Your Community Better',
@@ -112,6 +116,7 @@ export const translations = {
     useMyLocation: 'Use My Current Location',
     submitting: 'Submitting Report...',
     submitReport: 'Publish Report',
+    reportSuccess: 'Civic issue report submitted successfully!',
 
     // Report Details
     reportDetailsTitle: 'Report Details',
@@ -190,6 +195,10 @@ export const translations = {
     navLogin: 'ចូលប្រើប្រាស់',
     navRegister: 'ចុះឈ្មោះដោយឈ្មោះហៅក្រៅ',
     navLogout: 'ចាកចេញ',
+    theme: 'រចនាប័ទ្មពណ៌',
+    themeLight: 'ភ្លឺ',
+    themeDark: 'ងងឹត',
+    themeSystem: 'ប្រព័ន្ធ',
 
     // Hero & Landing
     heroTitle: 'រួមគ្នាកែលម្អសហគមន៍យើង',
@@ -284,6 +293,7 @@ export const translations = {
     useMyLocation: 'ប្រើប្រាស់ទីតាំងបច្ចុប្បន្នខ្ញុំ',
     submitting: 'កំពុងបញ្ជូនរបាយការណ៍...',
     submitReport: 'ផ្សព្វផ្សាយរបាយការណ៍',
+    reportSuccess: 'បានចុះផ្សាយរបាយការណ៍សហគមន៍ដោយជោគជ័យ!',
 
     // Report Details
     reportDetailsTitle: 'ព័ត៌មានលម្អិតរបាយការណ៍',

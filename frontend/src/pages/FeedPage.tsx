@@ -158,7 +158,7 @@ export const FeedPage: React.FC = () => {
                 <div className="pt-4 text-center">
                   <button
                     onClick={() => setVisibleCount((prev) => prev + 6)}
-                    className="px-5 py-2 rounded-sm font-semibold text-xs bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 shadow-2xs hover:border-slate-400 transition-colors uppercase tracking-wider font-mono"
+                    className="px-5 py-2 rounded-sm font-semibold text-xs bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 shadow-2xs hover:border-slate-400 dark:hover:border-slate-600 transition-colors uppercase tracking-wider font-mono"
                   >
                     {t('loadMore')} ({reports.length - visibleCount} remaining)
                   </button>

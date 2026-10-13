@@ -85,59 +85,59 @@ export const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="py-8 sm:py-12">
+    <div className="py-8 sm:py-12 transition-colors duration-150">
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Civic Identity Panel */}
           <div className="lg:col-span-6 space-y-6">
             <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-slate-100 border border-slate-300 rounded-xs text-[11px] font-semibold tracking-wider text-slate-800 uppercase">
-                <span className="w-1.5 h-1.5 rounded-xs bg-blue-700"></span>
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xs text-[11px] font-semibold tracking-wider text-slate-800 dark:text-slate-200 uppercase">
+                <span className="w-1.5 h-1.5 rounded-xs bg-blue-700 dark:bg-blue-400"></span>
                 FixKH Civic Portal • ច្រកចូលសហគមន៍
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
                 Direct Citizen-to-Municipality Reporting System
               </h1>
-              <p className="text-sm text-slate-600 leading-relaxed">
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                 Connect directly with provincial administrations, public works departments, and local authorities across Cambodia to report and track infrastructure issues transparently.
               </p>
             </div>
 
             {/* Structured Civic Pillars */}
-            <div className="border border-slate-200 rounded-md bg-white p-5 space-y-4">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2">
+            <div className="border border-slate-200 dark:border-slate-800 rounded-md bg-white dark:bg-slate-900 p-5 space-y-4">
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2">
                 Civic Standards & Protection Charter
               </div>
-              <ul className="space-y-3 text-xs text-slate-700">
+              <ul className="space-y-3 text-xs text-slate-700 dark:text-slate-300">
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                   <span>
-                    <strong className="text-slate-900 font-semibold">Pseudonymous Participation:</strong> Real identities are shielded. Reports are published under your chosen nickname to encourage fearless community improvement.
+                    <strong className="text-slate-900 dark:text-slate-100 font-semibold">Pseudonymous Participation:</strong> Real identities are shielded. Reports are published under your chosen nickname to encourage fearless community improvement.
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <Building2 className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" />
+                  <Building2 className="w-4 h-4 text-blue-700 dark:text-blue-400 shrink-0 mt-0.5" />
                   <span>
-                    <strong className="text-slate-900 font-semibold">25 Provinces Covered:</strong> Direct dispatch routing for potholes, drainage failures, trash build-ups, streetlights, and traffic hazards.
+                    <strong className="text-slate-900 dark:text-slate-100 font-semibold">25 Provinces Covered:</strong> Direct dispatch routing for potholes, drainage failures, trash build-ups, streetlights, and traffic hazards.
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <Lock className="w-4 h-4 text-slate-700 shrink-0 mt-0.5" />
+                  <Lock className="w-4 h-4 text-slate-700 dark:text-slate-400 shrink-0 mt-0.5" />
                   <span>
-                    <strong className="text-slate-900 font-semibold">Two-Factor Security:</strong> Optional TOTP authenticator MFA and verified audit logs for community accountability.
+                    <strong className="text-slate-900 dark:text-slate-100 font-semibold">Two-Factor Security:</strong> Optional TOTP authenticator MFA and verified audit logs for community accountability.
                   </span>
                 </li>
               </ul>
             </div>
 
             {/* Active Coverage Regions */}
-            <div className="bg-slate-50 border border-slate-200 rounded-md p-4 space-y-2">
-              <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
+            <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-md p-4 space-y-2">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                 <span className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-slate-500" />
+                  <MapPin className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                   Major Active Operational Municipalities
                 </span>
-                <span className="text-emerald-700 font-mono text-[10px] bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-xs">
+                <span className="text-emerald-700 dark:text-emerald-300 font-mono text-[10px] bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-1.5 py-0.5 rounded-xs">
                   ONLINE
                 </span>
               </div>
@@ -145,7 +145,7 @@ export const LoginPage: React.FC = () => {
                 {['Phnom Penh', 'Siem Reap', 'Battambang', 'Sihanoukville', 'Kampot', 'Poipet', 'Kandal'].map((city) => (
                   <span
                     key={city}
-                    className="text-[11px] font-medium text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded-xs"
+                    className="text-[11px] font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded-xs"
                   >
                     {city}
                   </span>
@@ -158,30 +158,30 @@ export const LoginPage: React.FC = () => {
           <div className="lg:col-span-6 space-y-4">
             {/* Quick Demo Access Card - ONLY in mock mode */}
             {mock && (
-              <div className="bg-slate-50 border border-slate-300 rounded-md p-4 space-y-3">
+              <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 rounded-md p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-800">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
                     <span className="w-2 h-2 rounded-xs bg-amber-500"></span>
                     <span>Demo Mode Enabled</span>
                   </div>
-                  <span className="text-[11px] font-mono text-slate-500">Mock Sandbox</span>
+                  <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">Mock Sandbox</span>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   Bypass manual input to test civic roles directly in this preview environment:
                 </p>
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <button
                     type="button"
                     onClick={handleQuickDemoUser}
-                    className="px-3 py-2 rounded-sm bg-white hover:bg-slate-100 text-slate-800 font-semibold text-xs border border-slate-300 shadow-2xs transition-colors flex items-center justify-center gap-1.5"
+                    className="px-3 py-2 rounded-sm bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs border border-slate-300 dark:border-slate-700 shadow-2xs transition-colors flex items-center justify-center gap-1.5"
                   >
-                    <UserCheck className="w-3.5 h-3.5 text-blue-700" />
+                    <UserCheck className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400" />
                     <span>SOK Citizen</span>
                   </button>
                   <button
                     type="button"
                     onClick={handleQuickDemoAdmin}
-                    className="px-3 py-2 rounded-sm bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs border border-slate-900 shadow-2xs transition-colors flex items-center justify-center gap-1.5"
+                    className="px-3 py-2 rounded-sm bg-blue-900 hover:bg-blue-950 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold text-xs border border-blue-950 dark:border-blue-500 shadow-2xs transition-colors flex items-center justify-center gap-1.5"
                   >
                     <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
                     <span>Moderator Admin</span>
@@ -191,24 +191,24 @@ export const LoginPage: React.FC = () => {
             )}
 
             {/* Login Card */}
-            <div className="bg-white rounded-md border border-slate-300 p-6 sm:p-7 shadow-xs">
-              <div className="mb-6 pb-4 border-b border-slate-100">
-                <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+            <div className="bg-white dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-800 p-6 sm:p-7 shadow-xs">
+              <div className="mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight">
                   {t('loginTitle')}
                 </h2>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                   {mock ? t('loginSubtitle') : 'Enter your registered credentials to access your civic account.'}
                 </p>
               </div>
 
               {mfaChallenge ? (
                 <form onSubmit={onMfaSubmit} className="space-y-4">
-                  <div className="bg-amber-50 border border-amber-200 rounded-sm p-3 text-xs text-amber-900 space-y-1">
+                  <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-sm p-3 text-xs text-amber-900 dark:text-amber-200 space-y-1">
                     <div className="font-bold">Two-Factor Authentication Required</div>
                     <div>Enter the 6-digit verification code from your authenticator app, or a recovery code.</div>
                   </div>
                   <div>
-                    <label htmlFor="mfa-login-code" className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    <label htmlFor="mfa-login-code" className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
                       Authenticator / Recovery Code
                     </label>
                     <input
@@ -220,20 +220,20 @@ export const LoginPage: React.FC = () => {
                       required
                       autoFocus
                       placeholder="e.g. 123456"
-                      className="w-full px-3 py-2 text-sm bg-slate-50 focus:bg-white rounded-sm border border-slate-300 focus:border-slate-800 outline-hidden font-mono tracking-wider"
+                      className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 rounded-sm border border-slate-300 dark:border-slate-700 focus:border-slate-800 dark:focus:border-blue-500 outline-hidden font-mono tracking-wider text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-sm transition-colors disabled:opacity-50"
+                    className="w-full py-2.5 text-xs font-bold text-white bg-blue-900 hover:bg-blue-950 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-sm transition-colors disabled:opacity-50 border border-blue-950 dark:border-blue-500 uppercase tracking-wider"
                   >
                     {isSubmitting ? 'Verifying...' : 'Verify and Sign In'}
                   </button>
                   <button
                     type="button"
                     onClick={() => { setMfaChallenge(null); setMfaCode('') }}
-                    className="w-full py-1.5 text-xs text-slate-600 hover:text-slate-900 transition-colors"
+                    className="w-full py-1.5 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                   >
                     Return to Password Login
                   </button>
@@ -241,16 +241,16 @@ export const LoginPage: React.FC = () => {
               ) : (
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
                       {t('emailField')}
                     </label>
                     <input
                       type="email"
                       {...register('email')}
                       placeholder="name@example.com"
-                      className={`w-full px-3 py-2 text-sm bg-slate-50 focus:bg-white rounded-sm border ${
-                        errors.email ? 'border-rose-400' : 'border-slate-300'
-                      } focus:border-slate-800 outline-hidden transition-colors`}
+                      className={`w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 rounded-sm border ${
+                        errors.email ? 'border-rose-400' : 'border-slate-300 dark:border-slate-700'
+                      } focus:border-slate-800 dark:focus:border-blue-500 outline-hidden transition-colors text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500`}
                     />
                     {errors.email && (
                       <p className="text-xs text-rose-600 mt-1 flex items-center gap-1">
@@ -261,7 +261,7 @@ export const LoginPage: React.FC = () => {
 
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                         {t('passwordField')}
                       </label>
                     </div>
@@ -270,14 +270,14 @@ export const LoginPage: React.FC = () => {
                         type={showPassword ? 'text' : 'password'}
                         {...register('password')}
                         placeholder="••••••••"
-                        className={`w-full px-3 py-2 text-sm bg-slate-50 focus:bg-white rounded-sm border ${
-                          errors.password ? 'border-rose-400' : 'border-slate-300'
-                        } focus:border-slate-800 outline-hidden transition-colors pr-9`}
+                        className={`w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 rounded-sm border ${
+                          errors.password ? 'border-rose-400' : 'border-slate-300 dark:border-slate-700'
+                        } focus:border-slate-800 dark:focus:border-blue-500 outline-hidden transition-colors pr-9 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500`}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1"
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -292,16 +292,16 @@ export const LoginPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 active:bg-slate-950 rounded-sm shadow-xs transition-colors disabled:opacity-50 mt-1"
+                    className="w-full py-2.5 text-xs font-bold text-white bg-blue-900 hover:bg-blue-950 dark:bg-blue-600 dark:hover:bg-blue-500 active:bg-blue-950 rounded-sm shadow-xs transition-colors disabled:opacity-50 mt-1 border border-blue-950 dark:border-blue-500 uppercase tracking-wider"
                   >
                     {isSubmitting ? 'Signing in...' : t('loginBtn')}
                   </button>
                 </form>
               )}
 
-              <div className="mt-5 pt-4 border-t border-slate-100 text-center text-xs text-slate-500">
+              <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
                 {t('noAccount')}{' '}
-                <Link to="/register" className="font-semibold text-blue-700 hover:text-blue-900 hover:underline">
+                <Link to="/register" className="font-semibold text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 hover:underline">
                   {t('registerBtn')}
                 </Link>
               </div>
@@ -312,4 +312,3 @@ export const LoginPage: React.FC = () => {
     </div>
   )
 }
-

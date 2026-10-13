@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { LanguageProvider } from '@/contexts/LanguageContext'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { AppLayout } from '@/layouts/AppLayout'
 
@@ -30,9 +31,10 @@ const queryClient = new QueryClient({
 export const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <LanguageProvider>
-        <AuthProvider>
-          <BrowserRouter>
+      <ThemeProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <BrowserRouter>
             <Routes>
               <Route element={<AppLayout />}>
                 <Route path="/" element={<LandingPage />} />
@@ -51,8 +53,9 @@ export const App: React.FC = () => {
           </BrowserRouter>
         </AuthProvider>
       </LanguageProvider>
-    </QueryClientProvider>
-  )
+    </ThemeProvider>
+  </QueryClientProvider>
+)
 }
 
 export default App
