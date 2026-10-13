@@ -24,7 +24,7 @@ import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
 import { formatRelativeTime } from '@/lib/utils'
 import { DisclaimerBanner } from '@/components/common/DisclaimerBanner'
-import { getMapStyle } from '@/lib/mapStyle'
+import { attachMapTileFallback, getMapStyle } from '@/lib/mapStyle'
 
 export const ReportDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -79,6 +79,8 @@ export const ReportDetailsPage: React.FC = () => {
         zoom: 14,
         interactive: true,
       })
+
+      attachMapTileFallback(map, () => document.documentElement.classList.contains('dark'))
 
       const markerEl = document.createElement('div')
       const markerRing = isDark ? 'border-slate-900 shadow-lg' : 'border-white shadow-md'

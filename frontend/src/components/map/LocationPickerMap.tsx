@@ -4,7 +4,7 @@ import { MapPin, Navigation } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslation } from '@/contexts/LanguageContext'
 import { useTheme } from '@/contexts/ThemeContext'
-import { getMapStyle } from '@/lib/mapStyle'
+import { attachMapTileFallback, getMapStyle } from '@/lib/mapStyle'
 
 interface LocationPickerMapProps {
   latitude: number
@@ -36,6 +36,8 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
       center: [longitude || 104.9282, latitude || 11.5564],
       zoom: 13,
     })
+
+    attachMapTileFallback(map, () => mapThemeRef.current === 'dark')
 
     map.addControl(new maplibregl.NavigationControl(), 'top-right')
 

@@ -30,6 +30,8 @@ The example environment uses demo data. To use registration email and optional a
 
 To use MapTiler for the feed map, report location picker, and report detail map, set `VITE_MAPTILER_API_KEY` in your local `frontend/.env`. This is a browser key, so visitors can see it in network requests. Restrict its allowed HTTP origins in MapTiler Cloud (add `localhost` for local testing and your production domain before deployment). Without the key, the maps use the existing CARTO basemap. A `MAP_API_KEY` in `backend/.env` does not configure these browser maps.
 
+MapTiler maps use raster tiles so roads and labels remain visible in browsers that fail to render the vector style. If tile loading fails, the app switches to the CARTO basemap. Check your MapTiler plan's request quota before wider deployment.
+
 ### 4. Build for Production
 ```bash
 npm run build

@@ -7,7 +7,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
 import { ThumbsUp, MapPin, ExternalLink } from 'lucide-react'
-import { getMapStyle } from '@/lib/mapStyle'
+import { attachMapTileFallback, getMapStyle } from '@/lib/mapStyle'
 
 interface CambodiaMapProps {
   reports: Report[]
@@ -61,6 +61,8 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
         center,
         zoom,
       })
+
+      attachMapTileFallback(map, () => mapThemeRef.current === 'dark')
 
       // Add zoom and navigation controls
       map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right')
