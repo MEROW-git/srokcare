@@ -28,9 +28,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 The example environment uses demo data. To use registration email and optional authenticator app MFA, set `VITE_USE_MOCK_API=false` and `VITE_API_BASE_URL=http://localhost:8080/api/v1` in `frontend/.env`, then restart the development server. After signing in, open Settings to scan an authenticator QR code and save the one-time recovery codes.
 
-To use MapTiler for the feed map, report location picker, and report detail map, set `VITE_MAPTILER_API_KEY` in your local `frontend/.env`. This is a browser key, so visitors can see it in network requests. Restrict its allowed HTTP origins in MapTiler Cloud (add `localhost` for local testing and your production domain before deployment). Without the key, the maps use the existing CARTO basemap. A `MAP_API_KEY` in `backend/.env` does not configure these browser maps.
-
-MapTiler maps use raster tiles so roads and labels remain visible in browsers that fail to render the vector style. If tile loading fails, the app switches to the CARTO basemap. Check your MapTiler plan's request quota before wider deployment.
+The feed map, report location picker, and report detail map use [OpenFreeMap](https://openfreemap.org/quick_start/) through MapLibre. No map API key or account is required. The maps use the Liberty style in light mode and the Dark style in dark mode. Map attribution appears automatically in MapLibre.
 
 ### 4. Build for Production
 ```bash
@@ -44,7 +42,7 @@ npm run build
 - **Framework**: React 19 + Vite 8 + TypeScript
 - **Styling**: Tailwind CSS v4 + Custom design tokens
 - **Routing**: React Router v7 (`react-router-dom`)
-- **Map Engine**: MapLibre GL JS + MapTiler Streets when configured, with a CARTO Voyager fallback
+- **Map Engine**: MapLibre GL JS + OpenFreeMap
 - **State & Data Fetching**: TanStack Query (`@tanstack/react-query`) + Axios
 - **Form Management & Validation**: React Hook Form + Zod
 - **Icons**: Lucide React
