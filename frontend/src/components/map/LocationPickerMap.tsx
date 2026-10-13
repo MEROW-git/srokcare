@@ -57,8 +57,8 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
     // Initial marker
     const markerEl = document.createElement('div')
     markerEl.innerHTML = `
-      <div class="w-9 h-9 rounded-full bg-blue-600 border-3 border-white text-white flex items-center justify-center shadow-xl animate-bounce">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <div class="w-8 h-8 rounded-sm bg-blue-900 border-2 border-white text-white flex items-center justify-center shadow-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
           <circle cx="12" cy="10" r="3"/>
         </svg>
@@ -127,18 +127,18 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-blue-600" />
-          <span className="text-xs font-semibold text-slate-700">{t('locationHelp')}</span>
+          <MapPin className="w-4 h-4 text-blue-900" />
+          <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">{t('locationHelp')}</span>
         </div>
 
         <button
           type="button"
           onClick={handleGetCurrentLocation}
           disabled={isLocating}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-200/60"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-800 bg-white hover:bg-slate-100 rounded-sm transition-colors border border-slate-300"
         >
           <Navigation className={`w-3.5 h-3.5 ${isLocating ? 'animate-spin' : ''}`} />
           <span>{isLocating ? 'Locating...' : t('useMyLocation')}</span>
@@ -146,17 +146,18 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
       </div>
 
       {/* Map container */}
-      <div className="relative w-full h-72 rounded-2xl overflow-hidden border border-slate-200 shadow-2xs">
+      <div className="relative w-full h-72 rounded-sm overflow-hidden border border-slate-300 shadow-2xs">
         <div ref={mapContainerRef} className="w-full h-full" />
 
         {/* Selected Coords Overlay */}
-        <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200/90 shadow-md text-xs font-mono text-slate-700 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>Lat: {latitude.toFixed(5)}</span>
+        <div className="absolute bottom-2.5 left-2.5 bg-white/95 backdrop-blur-xs px-3 py-1.5 rounded-xs border border-slate-300 shadow-2xs text-xs font-mono text-slate-800 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-xs bg-emerald-600 animate-pulse" />
+          <span>LAT: {latitude.toFixed(5)}</span>
           <span className="text-slate-300">|</span>
-          <span>Lng: {longitude.toFixed(5)}</span>
+          <span>LNG: {longitude.toFixed(5)}</span>
         </div>
       </div>
     </div>
   )
 }
+

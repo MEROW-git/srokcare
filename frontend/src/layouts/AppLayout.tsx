@@ -7,7 +7,7 @@ import { MobileBottomNav } from '@/components/layout/MobileBottomNav'
 
 export const AppLayout: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-blue-600 selection:text-white pb-16 md:pb-0">
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 selection:bg-blue-900 selection:text-white pb-16 md:pb-0">
       <Navbar />
       <div className="flex-1">
         <Outlet />
@@ -18,3 +18,4 @@ export const AppLayout: React.FC = () => {
     </div>
   )
 }
+

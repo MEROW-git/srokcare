@@ -49,23 +49,23 @@ export const ReportFilterBar: React.FC<ReportFilterBarProps> = ({
   const { t } = useTranslation()
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs space-y-3.5">
-      {/* Search Input & Quick Controls */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+    <div className="bg-white rounded-md border border-slate-300 p-4 shadow-2xs space-y-3">
+      {/* Search Input & Select Controls */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
         {/* Search input */}
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={t('searchPlaceholder')}
-            className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 hover:bg-slate-100/60 focus:bg-white rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-hidden text-slate-900 placeholder:text-slate-400"
+            className="w-full pl-9 pr-14 py-2 text-xs sm:text-sm bg-slate-50 hover:bg-slate-100/60 focus:bg-white rounded-sm border border-slate-300 focus:border-blue-800 focus:ring-1 focus:ring-blue-800 transition-colors outline-hidden text-slate-900 placeholder:text-slate-400"
           />
           {searchQuery && (
             <button
               onClick={() => onSearchChange('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs px-1.5 py-0.5 rounded-md hover:bg-slate-200"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 text-[11px] font-mono uppercase px-1.5 py-0.5 rounded-xs hover:bg-slate-200 border border-slate-300"
             >
               Clear
             </button>
@@ -78,7 +78,7 @@ export const ReportFilterBar: React.FC<ReportFilterBarProps> = ({
             <select
               value={selectedStatus}
               onChange={(e) => onStatusChange(e.target.value as ReportStatus | 'ALL')}
-              className="appearance-none pl-3 pr-8 py-2.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100/60 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 cursor-pointer outline-hidden transition-all"
+              className="appearance-none pl-3 pr-8 py-2 text-xs font-bold uppercase tracking-wider text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-sm border border-slate-300 focus:border-blue-800 cursor-pointer outline-hidden transition-colors"
             >
               {STATUSES.map((st) => (
                 <option key={st} value={st}>
@@ -86,7 +86,7 @@ export const ReportFilterBar: React.FC<ReportFilterBarProps> = ({
                 </option>
               ))}
             </select>
-            <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
 
           {/* Sort Dropdown */}
@@ -94,19 +94,19 @@ export const ReportFilterBar: React.FC<ReportFilterBarProps> = ({
             <select
               value={sortBy}
               onChange={(e) => onSortChange(e.target.value as SortOption)}
-              className="appearance-none pl-3 pr-8 py-2.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100/60 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 cursor-pointer outline-hidden transition-all"
+              className="appearance-none pl-3 pr-8 py-2 text-xs font-bold uppercase tracking-wider text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-sm border border-slate-300 focus:border-blue-800 cursor-pointer outline-hidden transition-colors"
             >
               <option value="latest">{t('sortLatest')}</option>
               <option value="popular">{t('sortPopular')}</option>
               <option value="most_supported">{t('sortMostSupported')}</option>
             </select>
-            <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ArrowUpDown className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
         </div>
       </div>
 
-      {/* Category Filter Chips */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar pt-1 border-t border-slate-100">
+      {/* Category Filter Chips / Tabs */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar pt-2 border-t border-slate-200">
         {CATEGORIES.map((cat) => {
           const isSelected = selectedCategory === cat
           const key = `cat_${cat}` as any
@@ -114,10 +114,10 @@ export const ReportFilterBar: React.FC<ReportFilterBarProps> = ({
             <button
               key={cat}
               onClick={() => onCategoryChange(cat)}
-              className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-xs transition-colors border ${
                 isSelected
-                  ? 'bg-blue-600 text-white shadow-xs shadow-blue-500/20'
-                  : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200/70 hover:text-slate-900'
+                  ? 'bg-blue-800 text-white border-blue-950 font-bold uppercase tracking-wider shadow-2xs'
+                  : 'bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 border-slate-300 font-medium'
               }`}
             >
               {cat !== 'ALL' && (
@@ -134,3 +134,4 @@ export const ReportFilterBar: React.FC<ReportFilterBarProps> = ({
     </div>
   )
 }
+

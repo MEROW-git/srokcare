@@ -6,14 +6,14 @@ interface AvatarProps {
   className?: string
 }
 
-// Generate consistent background gradient based on nickname string hash
-const GRADIENTS = [
-  'from-blue-500 to-indigo-600',
-  'from-emerald-500 to-teal-600',
-  'from-amber-500 to-orange-600',
-  'from-rose-500 to-pink-600',
-  'from-violet-500 to-purple-600',
-  'from-cyan-500 to-blue-600',
+// Consistent civic palette pairings: solid background + crisp text + subtle border
+const CIVIC_COLOR_PAIRS = [
+  { bg: 'bg-slate-800 text-slate-100 border-slate-700' },
+  { bg: 'bg-blue-900 text-blue-100 border-blue-800' },
+  { bg: 'bg-stone-800 text-stone-100 border-stone-700' },
+  { bg: 'bg-sky-900 text-sky-100 border-sky-800' },
+  { bg: 'bg-amber-900 text-amber-100 border-amber-800' },
+  { bg: 'bg-teal-900 text-teal-100 border-teal-800' },
 ]
 
 function getHash(str: string): number {
@@ -33,22 +33,22 @@ export const Avatar: React.FC<AvatarProps> = ({ nickname, size = 'md', className
     .map((w) => w[0]?.toUpperCase())
     .join('') || cleanNick.slice(0, 2).toUpperCase()
 
-  const gradientIdx = getHash(cleanNick) % GRADIENTS.length
-  const gradient = GRADIENTS[gradientIdx]
+  const colorPair = CIVIC_COLOR_PAIRS[getHash(cleanNick) % CIVIC_COLOR_PAIRS.length]
 
   const sizeClasses = {
-    sm: 'w-7 h-7 text-xs',
-    md: 'w-9 h-9 text-sm',
-    lg: 'w-11 h-11 text-base',
-    xl: 'w-16 h-16 text-xl font-bold',
+    sm: 'w-7 h-7 text-[11px] rounded-xs',
+    md: 'w-9 h-9 text-xs rounded-sm',
+    lg: 'w-11 h-11 text-sm rounded-sm',
+    xl: 'w-16 h-16 text-lg font-bold rounded-md',
   }[size]
 
   return (
     <div
-      className={`inline-flex items-center justify-center rounded-full bg-gradient-to-tr ${gradient} text-white font-semibold shadow-xs select-none shrink-0 ${sizeClasses} ${className}`}
+      className={`inline-flex items-center justify-center font-bold tracking-tight select-none shrink-0 border ${colorPair.bg} ${sizeClasses} ${className}`}
       title={cleanNick}
     >
       <span>{initials}</span>
     </div>
   )
 }
+
