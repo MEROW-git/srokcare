@@ -61,18 +61,23 @@ html {
   background: #475569;
 }
 
-/* Keep the pointer visible over the light map, including in dark site mode. */
+/* High contrast hand cursor over the light map in either site theme. */
 .maplibregl-map .maplibregl-canvas-container.maplibregl-interactive {
-  cursor: url('./assets/map-cursor.svg') 3 2, grab;
+  cursor: url('./assets/map-cursor.svg') 12 4, grab;
 }
 
 .maplibregl-map .maplibregl-canvas-container.maplibregl-interactive:active {
-  cursor: url('./assets/map-cursor.svg') 3 2, grabbing;
+  cursor: url('./assets/map-cursor-grabbing.svg') 16 17, grabbing;
 }
 
 .maplibregl-map .maplibregl-marker,
 .maplibregl-map .maplibregl-marker * {
-  cursor: url('./assets/map-cursor.svg') 3 2, pointer;
+  cursor: url('./assets/map-cursor.svg') 12 4, pointer;
+}
+
+.maplibregl-map .maplibregl-marker:active,
+.maplibregl-map .maplibregl-marker:active * {
+  cursor: url('./assets/map-cursor-grabbing.svg') 16 17, grabbing;
 }
 
 /* MapLibre popup and marker styling */
