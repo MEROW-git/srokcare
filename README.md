@@ -30,6 +30,8 @@ Community reporting for roads, drainage, waste, lighting, and other local issues
 
 The interface supports English and Khmer. The frontend also has a browser-based demo mode with sample reports, so you can explore the UI before connecting a database.
 
+Accounts using the real backend can optionally protect sign-in with an authenticator app. Setup is in Settings and includes one-time recovery codes.
+
 ## Quick start
 
 **Requirements:** Java 21, Node.js 20+, npm 10+, and PostgreSQL 16 (or Docker for a local database). Use the included Gradle wrapper; a separate Gradle installation is unnecessary.

@@ -35,17 +35,21 @@ public class OpenApiConfig {
                 boolean publicGet = method == io.swagger.v3.oas.models.PathItem.HttpMethod.GET
                         && (path.equals("/api/v1/reports") || path.matches("/api/v1/reports/\\{id\\}(/comments|/images|/images/\\{imageId\\}/content)?"));
                 boolean publicAuth = path.equals("/api/v1/auth/register") || path.equals("/api/v1/auth/verify-registration")
-                        || path.equals("/api/v1/auth/login");
+                        || path.equals("/api/v1/auth/login") || path.equals("/api/v1/auth/mfa/verify-login");
                 if (!path.endsWith("/health") && !publicGet && !publicAuth) {
                     addError(operation, path, "401", "Authentication required or invalid token");
                     addError(operation, path, "403", "Insufficient permission");
                 }
+                if (path.equals("/api/v1/auth/login") || path.equals("/api/v1/auth/mfa/verify-login"))
+                    addError(operation, path, "401", "Invalid credentials or authenticator code");
                 if (path.contains("{id}") || path.contains("{imageId}")) addError(operation, path, "404", "Resource not found");
                 if (path.equals("/api/v1/auth/register") || (path.endsWith("/support") && method == io.swagger.v3.oas.models.PathItem.HttpMethod.POST))
                     addError(operation, path, "409", "Duplicate email or support");
-                if (path.equals("/api/v1/auth/register") || path.equals("/api/v1/auth/verify-registration"))
+                if (path.equals("/api/v1/auth/register") || path.equals("/api/v1/auth/verify-registration")
+                        || path.contains("/mfa/"))
                     addError(operation, path, "429", "Too many code requests or incorrect attempts");
                 if (path.equals("/api/v1/auth/register")) addError(operation, path, "503", "Email delivery unavailable");
+                if (path.contains("/mfa/")) addError(operation, path, "503", "Authenticator configuration unavailable");
                 if (path.endsWith("/images") && method == io.swagger.v3.oas.models.PathItem.HttpMethod.POST)
                     addError(operation, path, "413", "Upload too large");
                 addError(operation, path, "500", "Internal server error");

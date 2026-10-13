@@ -31,14 +31,14 @@ class ServiceRulesTest {
         when(users.existsByEmailIgnoreCase("sok@example.com")).thenReturn(true);
         RegistrationEmailSender emails = mock(RegistrationEmailSender.class);
         AuthService service = new AuthService(users, mock(PendingRegistrationRepository.class), new BCryptPasswordEncoder(),
-                mock(JwtEncoder.class), mock(ApiMapper.class), mock(CurrentUser.class), emails);
+                mock(JwtEncoder.class), mock(ApiMapper.class), mock(CurrentUser.class), emails, mock(MfaService.class));
         ApiException error = assertThrows(ApiException.class, () -> service.register(new RegisterRequest("SOK@example.com")));
         assertEquals(HttpStatus.CONFLICT, error.getStatus()); verifyNoInteractions(emails);
     }
     @Test void registrationCodesAreHashedAndRateLimited() {
         UserRepository users = mock(UserRepository.class); PendingRegistrationRepository pending = mock(PendingRegistrationRepository.class);
         RegistrationEmailSender emails = mock(RegistrationEmailSender.class); BCryptPasswordEncoder passwords = new BCryptPasswordEncoder();
-        AuthService service = new AuthService(users, pending, passwords, mock(JwtEncoder.class), mock(ApiMapper.class), mock(CurrentUser.class), emails);
+        AuthService service = new AuthService(users, pending, passwords, mock(JwtEncoder.class), mock(ApiMapper.class), mock(CurrentUser.class), emails, mock(MfaService.class));
         PendingRegistration record = new PendingRegistration();
         when(pending.findLockedByEmail("sok@example.com")).thenReturn(Optional.of(record));
         service.register(new RegisterRequest("SOK@example.com"));
@@ -56,10 +56,10 @@ class ServiceRulesTest {
         SecretKeySpec key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
         UserRepository users = mock(UserRepository.class); ApiMapper mapper = mock(ApiMapper.class);
         User user = citizen(); user.setEmail("sok@example.com"); user.setPasswordHash(new BCryptPasswordEncoder().encode("StrongPassword123!"));
-        when(users.findByEmailIgnoreCase("sok@example.com")).thenReturn(Optional.of(user));
+        when(users.findLockedByEmail("sok@example.com")).thenReturn(Optional.of(user));
         when(mapper.user(user)).thenReturn(new UserResponse(id, user.getNickname(), user.getEmail(), Role.CITIZEN, null));
         AuthService service = new AuthService(users, mock(PendingRegistrationRepository.class), new BCryptPasswordEncoder(),
-                new NimbusJwtEncoder(new ImmutableSecret<>(key)), mapper, mock(CurrentUser.class), mock(RegistrationEmailSender.class));
+                new NimbusJwtEncoder(new ImmutableSecret<>(key)), mapper, mock(CurrentUser.class), mock(RegistrationEmailSender.class), mock(MfaService.class));
         AuthResponse response = service.login(new LoginRequest("sok@example.com", "StrongPassword123!"));
         Jwt jwt = NimbusJwtDecoder.withSecretKey(key).build().decode(response.token());
         assertEquals(id.toString(), jwt.getSubject()); assertEquals("CITIZEN", jwt.getClaimAsString("role"));
@@ -82,7 +82,7 @@ class ServiceRulesTest {
             return new UserResponse(user.getId(), user.getNickname(), user.getEmail(), user.getRole(), user.getCreatedAt());
         });
         AuthService service = new AuthService(users, pending, passwords, new NimbusJwtEncoder(new ImmutableSecret<>(key)),
-                mapper, mock(CurrentUser.class), mock(RegistrationEmailSender.class));
+                mapper, mock(CurrentUser.class), mock(RegistrationEmailSender.class), mock(MfaService.class));
         assertEquals(HttpStatus.BAD_REQUEST, assertThrows(ApiException.class,
                 () -> service.verifyRegistration(new VerifyRegistrationRequest("SOK Citizen", "sok@example.com", "StrongPassword123!", "000000"))).getStatus());
         assertEquals(1, record.getAttempts()); verify(users, never()).saveAndFlush(any());

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import type { User, LoginInput, RegisterInput } from '@/types/auth'
+import type { User, LoginInput, RegisterInput, AuthResponse } from '@/types/auth'
 import { authService } from '@/services/authService'
 import { isMockMode } from '@/services/apiClient'
 
@@ -7,7 +7,9 @@ interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isAdmin: boolean
-  login: (input: LoginInput) => Promise<void>
+  login: (input: LoginInput) => Promise<string | null>
+  verifyMfaLogin: (challengeToken: string, code: string) => Promise<void>
+  replaceAuth: (response: AuthResponse) => void
   register: (input: RegisterInput) => Promise<boolean>
   verifyRegistration: (input: RegisterInput & { code: string }) => Promise<void>
   loginAsDemoUser: () => void
@@ -46,8 +48,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (input: LoginInput) => {
     const res = await authService.login(input)
+    if ('challengeToken' in res) {
+      setUser(null)
+      return res.challengeToken
+    }
     localStorage.setItem(TOKEN_STORAGE_KEY, res.token)
     setUser(res.user)
+    return null
+  }
+
+  const verifyMfaLogin = async (challengeToken: string, code: string) => {
+    const res = await authService.verifyMfaLogin(challengeToken, code)
+    localStorage.setItem(TOKEN_STORAGE_KEY, res.token)
+    setUser(res.user)
+  }
+
+  const replaceAuth = (response: AuthResponse) => {
+    localStorage.setItem(TOKEN_STORAGE_KEY, response.token)
+    setUser(response.user)
   }
 
   const register = async (input: RegisterInput) => {
@@ -100,6 +118,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated,
         isAdmin,
         login,
+        verifyMfaLogin,
+        replaceAuth,
         register,
         verifyRegistration,
         loginAsDemoUser,

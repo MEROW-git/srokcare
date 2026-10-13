@@ -13,7 +13,7 @@ export const apiClient = axios.create({
 // Attach Bearer token if present
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('fixkh_auth_token')
-  const publicAuthRoute = ['/auth/register', '/auth/verify-registration', '/auth/login'].includes(config.url || '')
+  const publicAuthRoute = ['/auth/register', '/auth/verify-registration', '/auth/login', '/auth/mfa/verify-login'].includes(config.url || '')
   if (token && !publicAuthRoute) {
     config.headers.Authorization = `Bearer ${token}`
   }

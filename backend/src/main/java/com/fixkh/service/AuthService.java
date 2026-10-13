@@ -30,11 +30,12 @@ public class AuthService {
     private final ApiMapper mapper;
     private final CurrentUser current;
     private final RegistrationEmailSender emails;
+    private final MfaService mfa;
     private final SecureRandom random = new SecureRandom();
     public AuthService(UserRepository users, PendingRegistrationRepository pendingRegistrations, PasswordEncoder passwords,
-            JwtEncoder encoder, ApiMapper mapper, CurrentUser current, RegistrationEmailSender emails) {
+            JwtEncoder encoder, ApiMapper mapper, CurrentUser current, RegistrationEmailSender emails, MfaService mfa) {
         this.users = users; this.pendingRegistrations = pendingRegistrations; this.passwords = passwords;
-        this.encoder = encoder; this.mapper = mapper; this.current = current; this.emails = emails;
+        this.encoder = encoder; this.mapper = mapper; this.current = current; this.emails = emails; this.mfa = mfa;
     }
     @Transactional
     public RegistrationPendingResponse register(RegisterRequest request) {
@@ -87,18 +88,20 @@ public class AuthService {
         pendingRegistrations.delete(pending);
         return response(user);
     }
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthResponse login(LoginRequest request) {
-        User user = users.findByEmailIgnoreCase(request.email().trim()).orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
+        User user = users.findLockedByEmail(request.email().trim()).orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
         if (!passwords.matches(request.password(), user.getPasswordHash())) throw new ApiException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+        if (user.isMfaEnabled()) return AuthResponse.challenge(mfa.startChallenge(user).challengeToken());
         return response(user);
     }
     @Transactional(readOnly = true)
     public UserResponse me() { return mapper.user(current.user()); }
-    private AuthResponse response(User user) {
+    public AuthResponse response(User user) {
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder().issuer("fixkh").subject(user.getId().toString())
-                .issuedAt(now).expiresAt(now.plus(12, ChronoUnit.HOURS)).claim("role", user.getRole().name()).build();
+                .issuedAt(now).expiresAt(now.plus(12, ChronoUnit.HOURS)).claim("role", user.getRole().name())
+                .claim("authVersion", user.getAuthVersion()).claim("mfa", user.isMfaEnabled()).build();
         String token = encoder.encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims)).getTokenValue();
         return new AuthResponse(token, mapper.user(user));
     }

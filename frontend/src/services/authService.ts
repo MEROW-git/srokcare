@@ -1,5 +1,5 @@
 import { apiClient, isMockMode } from './apiClient'
-import type { User, LoginInput, RegisterInput, AuthResponse } from '@/types/auth'
+import type { User, LoginInput, RegisterInput, AuthResponse, MfaChallengeResponse, MfaSetupResponse, MfaConfirmResponse } from '@/types/auth'
 
 const DEFAULT_DEMO_USER: User = {
   id: 'usr-demo-01',
@@ -18,7 +18,7 @@ const DEFAULT_ADMIN_USER: User = {
 }
 
 export const authService = {
-  async login(input: LoginInput): Promise<AuthResponse> {
+  async login(input: LoginInput): Promise<AuthResponse | MfaChallengeResponse> {
     if (isMockMode()) {
       await new Promise((res) => setTimeout(res, 200))
       // Check if trying admin demo
@@ -27,7 +27,32 @@ export const authService = {
       const mockToken = `mock-jwt-${isAdmin ? 'admin' : 'user'}-${Date.now()}`
       return { token: mockToken, user }
     }
-    const response = await apiClient.post<AuthResponse>('/auth/login', input)
+    const response = await apiClient.post<AuthResponse | MfaChallengeResponse>('/auth/login', input)
+    return response.data
+  },
+
+  async verifyMfaLogin(challengeToken: string, code: string): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>('/auth/mfa/verify-login', { challengeToken, code })
+    return response.data
+  },
+
+  async getMfaStatus(): Promise<boolean> {
+    const response = await apiClient.get<{ enabled: boolean }>('/auth/mfa/status')
+    return response.data.enabled
+  },
+
+  async beginMfaSetup(password: string): Promise<MfaSetupResponse> {
+    const response = await apiClient.post<MfaSetupResponse>('/auth/mfa/setup', { password })
+    return response.data
+  },
+
+  async confirmMfaSetup(code: string): Promise<MfaConfirmResponse> {
+    const response = await apiClient.post<MfaConfirmResponse>('/auth/mfa/confirm', { code })
+    return response.data
+  },
+
+  async disableMfa(password: string, code: string): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>('/auth/mfa/disable', { password, code })
     return response.data
   },
 

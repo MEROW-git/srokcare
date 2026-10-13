@@ -25,6 +25,14 @@ Check `http://localhost:8080/api/v1/health`. Swagger UI is at `http://localhost:
 
 Registration sends a six-digit code by email. Configure a verified `otp_email` sender plus `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, and `SMTP_PASSWORD` in your private `.env`. For [Brevo SMTP](https://help.brevo.com/hc/en-us/articles/7924908994450-Send-transactional-emails-using-Brevo-SMTP), use `smtp-relay.brevo.com`, port `587`, the SMTP login shown in Brevo, and an SMTP key (not an API key). The sender address must be verified with your provider. Never put SMTP credentials in the frontend environment or commit them to Git. Without valid mail settings, registration returns `503`; other backend endpoints still start normally.
 
+### Optional authenticator app MFA
+
+Set `TWO_FACTOR_ENCRYPTION_KEY` in the private `.env` to the Base64 encoding of **32 random bytes**. Keep this key stable and backed up securely: changing or losing it makes existing authenticator setups unreadable. The app starts without this key, but MFA setup and login for MFA-enabled users fail closed with `503`.
+
+Users can opt in from frontend Settings after signing in. Setup requires their current password, displays a QR code or manual setup key, and becomes active only after they enter a valid six-digit app code. Eight one-time recovery codes are then displayed once; users must store them safely. Each login first checks the password, then requires a current authenticator code or unused recovery code before issuing a JWT. Five incorrect MFA attempts lock the account's MFA step for 15 minutes. Enabling or disabling MFA invalidates existing JWTs.
+
+The endpoints are `GET /api/v1/auth/mfa/status`, `POST /api/v1/auth/mfa/setup` with `{"password":"..."}`, `POST /api/v1/auth/mfa/confirm` with `{"code":"123456"}`, public `POST /api/v1/auth/mfa/verify-login` with `{"challengeToken":"...","code":"123456"}`, and `POST /api/v1/auth/mfa/disable` with `{"password":"...","code":"123456"}`. Setup, confirm, status, and disable require an access token. A password login for an MFA-enabled account returns `mfaRequired: true` and a short-lived challenge token instead of an access token.
+
 To create a **development-only** administrator, set `SPRING_PROFILES_ACTIVE=dev`, `FIXKH_DEV_ADMIN_EMAIL`, `FIXKH_DEV_ADMIN_PASSWORD` (at least 12 characters), and optionally `FIXKH_DEV_ADMIN_NICKNAME` before startup. Bootstrap creates the account only if the email is unused. Never enable the dev profile or bootstrap credentials in production. Public registration always creates `CITIZEN`.
 
 ## Try the API

@@ -13,6 +13,22 @@ export interface AuthResponse {
   user: User
 }
 
+export interface MfaChallengeResponse {
+  mfaRequired: true
+  challengeToken: string
+}
+
+export interface MfaSetupResponse {
+  secret: string
+  otpauthUri: string
+  expiresAt: string
+}
+
+export interface MfaConfirmResponse {
+  auth: AuthResponse
+  recoveryCodes: string[]
+}
+
 export interface RegisterInput {
   nickname: string
   email: string

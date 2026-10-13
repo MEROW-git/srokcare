@@ -28,6 +28,14 @@ Response `201` (using the actual emailed code):
 
 Login is `POST /auth/login` with `{"email":"sok@example.com","password":"StrongPassword123!"}` and returns the same shape (`200`). `GET /auth/me` returns the private `user` object when authenticated.
 
+### Optional authenticator app
+
+After signing in, call `POST /auth/mfa/setup` with `{"password":"StrongPassword123!"}` and the Bearer token. Its response contains a `secret`, `otpauthUri`, and `expiresAt`. Scan the URI as a QR code in an authenticator app or enter the secret manually. Within 10 minutes, call `POST /auth/mfa/confirm` with `{"code":"123456"}` and the Bearer token, using the actual current app code. The response contains a new `auth` object with a replacement JWT and eight `recoveryCodes`. Save the recovery codes now; the server never returns them again.
+
+Later, `POST /auth/login` with the correct password returns `{"mfaRequired":true,"challengeToken":"<temporary token>"}` for this account. Send `{"challengeToken":"<temporary token>","code":"123456"}` to public `POST /auth/mfa/verify-login`, using a current app code or unused recovery code. Only this second response contains the access JWT. The challenge expires after five minutes and works once. Five incorrect MFA codes cause a 15-minute lock.
+
+`GET /auth/mfa/status` returns `{"enabled":true}` or `{"enabled":false}`. To turn MFA off, call `POST /auth/mfa/disable` with `{"password":"StrongPassword123!","code":"123456"}` and the Bearer token. Confirming or disabling MFA invalidates earlier JWTs; use the new token in the response.
+
 ## Create and browse reports
 
 ```http

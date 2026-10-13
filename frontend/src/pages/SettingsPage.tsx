@@ -9,6 +9,8 @@ import { toast } from 'sonner'
 import { useTranslation } from '@/contexts/LanguageContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { Avatar } from '@/components/common/Avatar'
+import { MfaSettings } from '@/components/auth/MfaSettings'
+import { isMockMode } from '@/services/apiClient'
 
 export const SettingsPage: React.FC = () => {
   const { t, language, setLanguage } = useTranslation()
@@ -142,6 +144,7 @@ export const SettingsPage: React.FC = () => {
           </div>
         </form>
       </div>
+      {!isMockMode() && <MfaSettings />}
     </div>
   )
 }

@@ -23,7 +23,22 @@ public final class ApiDtos {
             @NotBlank @Schema(example = "StrongPassword123!") String password) {}
     public record UserResponse(@Schema(example = "bb5fc6f1-64c2-4f0f-bec8-a4f3d85d81f4") UUID id,
             @Schema(example = "SOK Citizen") String nickname, String email, Role role, Instant createdAt) {}
-    public record AuthResponse(@Schema(example = "eyJhbGciOiJIUzI1NiJ9...") String token, UserResponse user) {}
+    @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+    public record AuthResponse(@Schema(example = "eyJhbGciOiJIUzI1NiJ9...") String token, UserResponse user,
+            Boolean mfaRequired, String challengeToken) {
+        public AuthResponse(String token, UserResponse user) { this(token, user, null, null); }
+        public static AuthResponse challenge(String challengeToken) {
+            return new AuthResponse(null, null, true, challengeToken);
+        }
+    }
+    public record MfaChallengeResponse(boolean mfaRequired, String challengeToken) {}
+    public record MfaStatusResponse(boolean enabled) {}
+    public record MfaSetupRequest(@NotBlank String password) {}
+    public record MfaSetupResponse(String secret, String otpauthUri, Instant expiresAt) {}
+    public record MfaCodeRequest(@NotBlank @Size(max = 32) String code) {}
+    public record MfaVerifyRequest(@NotBlank String challengeToken, @NotBlank @Size(max = 32) String code) {}
+    public record MfaDisableRequest(@NotBlank String password, @NotBlank @Size(max = 32) String code) {}
+    public record MfaConfirmResponse(AuthResponse auth, List<String> recoveryCodes) {}
 
     public record ReportRequest(
             @NotBlank @Size(min = 5, max = 120) @Schema(example = "Large pothole on the road") String title,

@@ -1,6 +1,7 @@
 package com.fixkh.config;
 
 import com.fixkh.dto.ApiDtos.ErrorResponse;
+import com.fixkh.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,6 +15,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @Configuration
 public class SecurityConfig {
@@ -33,8 +39,23 @@ public class SecurityConfig {
     @Bean JwtEncoder jwtEncoder(@Value("${fixkh.jwt-secret}") String secret) {
         return new NimbusJwtEncoder(new ImmutableSecret<>(key(secret)));
     }
-    @Bean JwtDecoder jwtDecoder(@Value("${fixkh.jwt-secret}") String secret) {
-        return NimbusJwtDecoder.withSecretKey(key(secret)).build();
+    @Bean JwtDecoder jwtDecoder(@Value("${fixkh.jwt-secret}") String secret, UserRepository users) {
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(key(secret)).build();
+        OAuth2TokenValidator<Jwt> accountValidator = jwt -> {
+            try {
+                var user = users.findById(UUID.fromString(jwt.getSubject()));
+                Object version = jwt.getClaims().get("authVersion");
+                if (user.isPresent() && version instanceof Number number
+                        && number.intValue() == user.get().getAuthVersion()
+                        && (!user.get().isMfaEnabled() || Boolean.TRUE.equals(jwt.getClaim("mfa"))))
+                    return OAuth2TokenValidatorResult.success();
+            } catch (RuntimeException ignored) {
+                // Invalid account identity or missing account.
+            }
+            return OAuth2TokenValidatorResult.failure(new OAuth2Error("invalid_token", "Account session expired", null));
+        };
+        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(JwtValidators.createDefault(), accountValidator));
+        return decoder;
     }
     private SecretKeySpec key(String secret) {
         byte[] bytes = secret.getBytes(StandardCharsets.UTF_8);
@@ -65,7 +86,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(a -> a
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/health", "/api/v1/reports", "/api/v1/reports/*", "/api/v1/reports/*/comments", "/api/v1/reports/*/images", "/api/v1/reports/*/images/*/content").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/verify-registration", "/api/v1/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/verify-registration",
+                                "/api/v1/auth/login", "/api/v1/auth/mfa/verify-login").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(o -> o

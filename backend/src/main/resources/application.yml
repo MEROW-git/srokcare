@@ -40,6 +40,7 @@ springdoc:
     path: /swagger-ui.html
 fixkh:
   otp-sender-email: ${otp_email:}
+  two-factor-encryption-key: ${TWO_FACTOR_ENCRYPTION_KEY:}
   jwt-secret: ${JWT_SECRET}
   cors-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
   upload-dir: ${UPLOAD_DIR:./uploads}

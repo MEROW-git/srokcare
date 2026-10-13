@@ -6,6 +6,7 @@ import com.fixkh.dto.ApiDtos.*;
 import com.fixkh.entity.*;
 import com.fixkh.exception.ApiException;
 import com.fixkh.service.*;
+import com.fixkh.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -32,6 +33,8 @@ class ApiWebTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
     @MockitoBean AuthService auth;
+    @MockitoBean MfaService mfa;
+    @MockitoBean UserRepository users;
     @MockitoBean ReportService reports;
     @MockitoBean ImageService images;
     @MockitoBean SupportService supports;
@@ -77,6 +80,24 @@ class ApiWebTest {
         mvc.perform(post("/api/v1/auth/login").contentType("application/json")
                 .content("{\"email\":\"sok@example.com\",\"password\":\"StrongPassword123!\"}"))
                 .andExpect(status().isOk());
+    }
+    @Test void mfaChallengeDoesNotGrantAccessAndVerificationIsPublic() throws Exception {
+        when(auth.login(any())).thenReturn(AuthResponse.challenge("opaque-challenge"));
+        mvc.perform(post("/api/v1/auth/login").contentType("application/json")
+                .content("{\"email\":\"sok@example.com\",\"password\":\"StrongPassword123!\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.mfaRequired").value(true))
+                .andExpect(header().string("Cache-Control", "no-store"))
+                .andExpect(jsonPath("$.token").doesNotExist());
+        mvc.perform(post("/api/v1/auth/mfa/setup").contentType("application/json")
+                .content("{\"password\":\"StrongPassword123!\"}"))
+                .andExpect(status().isUnauthorized());
+        when(mfa.verifyLogin(any())).thenReturn(new User());
+        when(auth.response(any())).thenReturn(new AuthResponse("signed-jwt",
+                new UserResponse(ID, "SOK Citizen", "sok@example.com", Role.CITIZEN, Instant.now())));
+        mvc.perform(post("/api/v1/auth/mfa/verify-login").contentType("application/json")
+                .content("{\"challengeToken\":\"opaque-challenge\",\"code\":\"123456\"}"))
+                .andExpect(status().isOk()).andExpect(header().string("Cache-Control", "no-store"))
+                .andExpect(jsonPath("$.token").value("signed-jwt"));
     }
     @Test void reportCreationAndPaginationFilter() throws Exception {
         when(reports.create(any())).thenReturn(report());

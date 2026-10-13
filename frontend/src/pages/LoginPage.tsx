@@ -18,10 +18,12 @@ type LoginFormData = z.infer<typeof loginSchema>
 
 export const LoginPage: React.FC = () => {
   const { t } = useTranslation()
-  const { login, loginAsDemoUser, loginAsAdmin } = useAuth()
+  const { login, verifyMfaLogin, loginAsDemoUser, loginAsAdmin } = useAuth()
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [mfaChallenge, setMfaChallenge] = useState<string | null>(null)
+  const [mfaCode, setMfaCode] = useState('')
 
   const {
     register,
@@ -38,11 +40,31 @@ export const LoginPage: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true)
     try {
-      await login(data)
+      const challenge = await login(data)
+      if (challenge) {
+        setMfaChallenge(challenge)
+        setMfaCode('')
+        return
+      }
       toast.success('Signed in successfully!')
       navigate('/feed')
     } catch {
       toast.error('Invalid credentials. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const onMfaSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!mfaChallenge || !mfaCode.trim()) return
+    setIsSubmitting(true)
+    try {
+      await verifyMfaLogin(mfaChallenge, mfaCode.trim())
+      toast.success('Signed in successfully!')
+      navigate('/feed')
+    } catch {
+      toast.error('Invalid or expired authenticator code. Try again or use a recovery code.')
     } finally {
       setIsSubmitting(false)
     }
@@ -105,7 +127,29 @@ export const LoginPage: React.FC = () => {
 
         {/* Login Form */}
         <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {mfaChallenge && (
+            <form onSubmit={onMfaSubmit} className="space-y-4">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">Authenticator code</h2>
+                <p className="text-sm text-slate-600 mt-1">
+                  Enter the six-digit code from your authenticator app, or one of your recovery codes.
+                </p>
+              </div>
+              <label htmlFor="mfa-login-code" className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                Code
+              </label>
+              <input id="mfa-login-code" value={mfaCode} onChange={(event) => setMfaCode(event.target.value)}
+                autoComplete="one-time-code" maxLength={32} required autoFocus
+                className="w-full px-4 py-2.5 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:border-blue-500 outline-hidden font-mono tracking-wider" />
+              <button type="submit" disabled={isSubmitting}
+                className="w-full py-3 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl disabled:opacity-50">
+                {isSubmitting ? 'Verifying...' : 'Verify and sign in'}
+              </button>
+              <button type="button" onClick={() => { setMfaChallenge(null); setMfaCode('') }}
+                className="w-full text-sm text-slate-600 hover:text-slate-900">Back to password</button>
+            </form>
+          )}
+          {!mfaChallenge && <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
                 {t('emailField')}
@@ -159,7 +203,7 @@ export const LoginPage: React.FC = () => {
             >
               {isSubmitting ? 'Signing in...' : t('loginBtn')}
             </button>
-          </form>
+          </form>}
 
           <div className="mt-6 pt-5 border-t border-slate-100 text-center text-xs text-slate-500">
             {t('noAccount')}{' '}

@@ -26,6 +26,8 @@ npm run dev
 ```
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
+The example environment uses demo data. To use registration email and optional authenticator app MFA, set `VITE_USE_MOCK_API=false` and `VITE_API_BASE_URL=http://localhost:8080/api/v1` in `frontend/.env`, then restart the development server. After signing in, open Settings to scan an authenticator QR code and save the one-time recovery codes.
+
 ### 4. Build for Production
 ```bash
 npm run build
