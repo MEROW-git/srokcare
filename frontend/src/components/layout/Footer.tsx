@@ -24,7 +24,7 @@ export const Footer: React.FC = () => {
               </span>
             </div>
             <p className="text-slate-400 text-xs sm:text-sm max-w-md leading-relaxed">
-              {t('appTagline')} — វេទិការាយការណ៍បញ្ហាសង្គមរបស់ពលរដ្ឋកម្ពុជា។ An independent civic platform where residents can document and discuss neighborhood infrastructure issues.
+              {t('appTagline')} — {t('footerDescription')}
             </p>
             <div className="flex items-center gap-2.5 text-xs text-slate-300 bg-slate-950 p-2.5 rounded-xs border border-slate-800 max-w-md">
               <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0" />

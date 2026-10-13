@@ -50,7 +50,7 @@ export const Navbar: React.FC = () => {
               </span>
             </div>
             <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 hidden sm:block tracking-normal">
-              ថែរក្សាសហគមន៍ • {t('appTagline')}
+              {t('appTagline')}
             </p>
           </div>
         </Link>

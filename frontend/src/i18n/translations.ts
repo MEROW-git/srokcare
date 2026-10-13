@@ -5,6 +5,8 @@ export const translations = {
     // App Brand
     appName: 'FixKH',
     appTagline: 'Report. Support. Improve.',
+    footerDescription: 'An independent civic platform where residents can document and discuss neighborhood infrastructure issues.',
+    landingEyebrow: 'Community Issue Reporting',
     disclaimer: 'FixKH is an independent community initiative for Cambodian citizens. It is not an official government service and submitting a report does not guarantee official intervention.',
 
     // Navigation
@@ -231,6 +233,8 @@ export const translations = {
     // App Brand
     appName: 'FixKH',
     appTagline: 'រាយការណ៍. គាំទ្រ. កែលម្អ.',
+    footerDescription: 'វេទិកាសហគមន៍ឯករាជ្យដែលប្រជាពលរដ្ឋអាចកត់ត្រា និងពិភាក្សាអំពីបញ្ហាហេដ្ឋារចនាសម្ព័ន្ធក្នុងសហគមន៍។',
+    landingEyebrow: 'ការរាយការណ៍បញ្ហាសហគមន៍',
     disclaimer: 'FixKH គឺជាវេទិកាសហគមន៍ឯករាជ្យសម្រាប់ប្រជាពលរដ្ឋកម្ពុជា។ វាមិនមែនជាសេវាផ្លូវការរបស់រដ្ឋាភិបាលឡើយ ហើយការរាយការណ៍មិនធានាដល់ការអន្តរាគមន៍ជាផ្លូវការនោះទេ។',
 
     // Navigation

@@ -64,7 +64,7 @@ export const LandingPage: React.FC = () => {
             <div className="lg:col-span-7 space-y-5 text-left">
               <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xs text-[11px] font-semibold tracking-wider text-slate-800 dark:text-slate-200 uppercase">
                 <span className="w-1.5 h-1.5 rounded-xs bg-blue-700 dark:bg-blue-500"></span>
-                National Civic Ledger • កំណត់ត្រាសហគមន៍កម្ពុជា
+                {t('landingEyebrow')}
               </div>
 
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-slate-100 tracking-tight leading-[1.14]">
