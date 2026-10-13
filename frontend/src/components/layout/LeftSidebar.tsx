@@ -6,14 +6,11 @@ import {
   PlusCircle,
   FolderOpen,
   Shield,
-  Settings,
-  Globe,
   Home,
 } from 'lucide-react'
 import type { ReportCategory } from '@/types/report'
 import { useTranslation } from '@/contexts/LanguageContext'
 import { useAuth } from '@/contexts/AuthContext'
-import { Avatar } from '@/components/common/Avatar'
 import { CategoryIcon } from '@/components/common/CategoryIcon'
 
 interface LeftSidebarProps {
@@ -36,8 +33,8 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   selectedCategory = 'ALL',
   onSelectCategory,
 }) => {
-  const { t, language, toggleLanguage } = useTranslation()
-  const { user, isAuthenticated, isAdmin } = useAuth()
+  const { t } = useTranslation()
+  const { isAdmin } = useAuth()
   const location = useLocation()
 
   const isActive = (path: string) => location.pathname === path
@@ -152,34 +149,6 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
         </div>
       </div>
 
-      {/* User Status / Quick Profile Card */}
-      {isAuthenticated && user ? (
-        <div className="bg-white dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-800 p-3 shadow-2xs space-y-2.5 transition-colors duration-150">
-          <div className="flex items-center gap-2.5">
-            <Avatar nickname={user.nickname} size="md" />
-            <div className="overflow-hidden">
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Signed in as</p>
-              <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">{user.nickname}</p>
-            </div>
-          </div>
-          <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800 text-xs font-bold uppercase tracking-wider">
-            <Link
-              to="/settings"
-              className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 hover:text-blue-900 dark:hover:text-blue-400"
-            >
-              <Settings className="w-3.5 h-3.5" />
-              <span>{t('navSettings')}</span>
-            </Link>
-            <button
-              onClick={toggleLanguage}
-              className="flex items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-blue-900 dark:hover:text-blue-400"
-            >
-              <Globe className="w-3.5 h-3.5" />
-              <span>{language === 'en' ? 'ខ្មែរ' : 'EN'}</span>
-            </button>
-          </div>
-        </div>
-      ) : null}
     </aside>
   )
 }
