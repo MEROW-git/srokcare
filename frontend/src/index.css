@@ -61,6 +61,20 @@ html {
   background: #475569;
 }
 
+/* Keep the pointer visible over the light map, including in dark site mode. */
+.maplibregl-map .maplibregl-canvas-container.maplibregl-interactive {
+  cursor: url('./assets/map-cursor.svg') 3 2, grab;
+}
+
+.maplibregl-map .maplibregl-canvas-container.maplibregl-interactive:active {
+  cursor: url('./assets/map-cursor.svg') 3 2, grabbing;
+}
+
+.maplibregl-map .maplibregl-marker,
+.maplibregl-map .maplibregl-marker * {
+  cursor: url('./assets/map-cursor.svg') 3 2, pointer;
+}
+
 /* MapLibre popup and marker styling */
 .maplibregl-popup-content {
   border-radius: 4px;
@@ -111,4 +125,3 @@ html {
   border-top-color: #0F172A !important;
   border-bottom-color: #0F172A !important;
 }
-
