@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import type { Report, ReportCategory, ReportStatus, SortOption } from '@/types/report'
 import { reportService } from '@/services/reportService'
 import { useTranslation } from '@/contexts/LanguageContext'
@@ -14,11 +14,30 @@ import { useRealtimeEvents } from '@/hooks/useRealtimeEvents'
 
 export const FeedPage: React.FC = () => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const [reports, setReports] = useState<Report[]>([])
   const [loading, setLoading] = useState(true)
+  const [feedError, setFeedError] = useState(false)
   const [visibleCount, setVisibleCount] = useState(6)
+  const [communityStats, setCommunityStats] = useState<{ total: number; resolved: number } | null>(null)
+  const [highlightReports, setHighlightReports] = useState<Report[]>([])
+
+  const fetchCommunityOverview = async () => {
+    try {
+      const [total, resolved, highlights] = await Promise.all([
+        reportService.getReportCount(),
+        reportService.getReportCount({ status: 'RESOLVED' }),
+        reportService.getReports({ sortBy: 'most_supported' }),
+      ])
+      setCommunityStats({ total, resolved })
+      setHighlightReports(highlights.slice(0, 4))
+    } catch {
+      setCommunityStats(null)
+      setHighlightReports([])
+    }
+  }
 
   // Filter state synced with searchParams
   const categoryParam = (searchParams.get('category') as ReportCategory) || 'ALL'
@@ -43,6 +62,10 @@ export const FeedPage: React.FC = () => {
       const seen = new Set<string>()
       const unique = data.filter((r) => !seen.has(r.id) && seen.add(r.id))
       setReports(unique)
+      setFeedError(false)
+    } catch {
+      setReports([])
+      setFeedError(true)
     } finally {
       setLoading(false)
     }
@@ -66,8 +89,15 @@ export const FeedPage: React.FC = () => {
 
   useRealtimeEvents({
     topic: '/topic/reports',
-    onRefresh: fetchReportsSilently,
+    onRefresh: () => {
+      void fetchReportsSilently()
+      void fetchCommunityOverview()
+    },
   })
+
+  useEffect(() => {
+    void fetchCommunityOverview()
+  }, [])
 
   useEffect(() => {
     fetchReports()
@@ -156,10 +186,14 @@ export const FeedPage: React.FC = () => {
             </div>
           ) : reports.length === 0 ? (
             <EmptyState
-              title={t('noReportsFound')}
-              description={t('noReportsDesc')}
-              actionLabel={t('resetFilters')}
+              title={feedError ? t('reportsUnavailable') : selectedCategory === 'ALL' && selectedStatus === 'ALL' && !searchQuery ? t('noCommunityReports') : t('noReportsFound')}
+              description={feedError ? t('reportsUnavailableDesc') : selectedCategory === 'ALL' && selectedStatus === 'ALL' && !searchQuery ? t('noCommunityReportsDesc') : t('noReportsDesc')}
+              actionLabel={feedError ? undefined : selectedCategory === 'ALL' && selectedStatus === 'ALL' && !searchQuery ? t('ctaReport') : t('resetFilters')}
               onAction={() => {
+                if (selectedCategory === 'ALL' && selectedStatus === 'ALL' && !searchQuery) {
+                  navigate('/reports/new')
+                  return
+                }
                 setSelectedCategory('ALL')
                 setSelectedStatus('ALL')
                 setSearchQuery('')
@@ -195,12 +229,8 @@ export const FeedPage: React.FC = () => {
         {/* Right Sidebar (Desktop) */}
         <div className="hidden xl:block">
           <RightSidebar
-            trendingReports={reports.slice(0, 5)}
-            stats={{
-              total: reports.length,
-              resolved: reports.filter((r) => r.status === 'RESOLVED').length,
-              activeContributors: 142,
-            }}
+            trendingReports={highlightReports}
+            stats={communityStats}
           />
         </div>
       </div>

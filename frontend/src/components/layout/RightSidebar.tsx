@@ -7,16 +7,15 @@ import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
 
 interface RightSidebarProps {
   trendingReports: Report[]
-  stats?: {
+  stats: {
     total: number
     resolved: number
-    activeContributors: number
-  }
+  } | null
 }
 
 export const RightSidebar: React.FC<RightSidebarProps> = ({
   trendingReports,
-  stats = { total: 48, resolved: 29, activeContributors: 142 },
+  stats,
 }) => {
   const { t } = useTranslation()
 
@@ -30,23 +29,17 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
           </div>
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">{t('statsTitle')}</h3>
         </div>
-        <div className="grid grid-cols-3 gap-2 text-center">
+        <div className="grid grid-cols-2 gap-2 text-center">
           <div className="p-2 rounded-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-            <div className="text-base font-black font-mono text-slate-900 dark:text-slate-100">{stats.total}</div>
+            <div className="text-base font-black font-mono text-slate-900 dark:text-slate-100">{stats?.total ?? '—'}</div>
             <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase leading-tight mt-0.5">
               Reports
             </div>
           </div>
           <div className="p-2 rounded-xs bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/70">
-            <div className="text-base font-black font-mono text-emerald-800 dark:text-emerald-300">{stats.resolved}</div>
+            <div className="text-base font-black font-mono text-emerald-800 dark:text-emerald-300">{stats?.resolved ?? '—'}</div>
             <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase leading-tight mt-0.5">
-              Fixed
-            </div>
-          </div>
-          <div className="p-2 rounded-xs bg-blue-50/60 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/70">
-            <div className="text-base font-black font-mono text-blue-900 dark:text-blue-300">{stats.activeContributors}</div>
-            <div className="text-[10px] font-bold text-blue-800 dark:text-blue-400 uppercase leading-tight mt-0.5">
-              Citizens
+              {t('resolvedReportsCount')}
             </div>
           </div>
         </div>
@@ -58,10 +51,11 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
           <div className="p-1 rounded-xs bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">
             <TrendingUp className="w-3.5 h-3.5 text-blue-900 dark:text-blue-400" />
           </div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">{t('trendingTitle')}</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">{t('mostSupportedTitle')}</h3>
         </div>
 
         <div className="divide-y divide-slate-200 dark:divide-slate-800">
+          {trendingReports.length === 0 && <p className="py-3 text-xs text-slate-500 dark:text-slate-400">{t('noHighlightsYet')}</p>}
           {trendingReports.slice(0, 4).map((report) => (
             <Link
               key={report.id}

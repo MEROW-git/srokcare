@@ -14,6 +14,14 @@ export const reportService = {
     return response.data
   },
 
+  async getReportCount(filter?: Pick<ReportFilter, 'status'>): Promise<number> {
+    if (isMockMode()) return mockStorage.getReports(filter).length
+    const response = await apiClient.get<Report[]>('/reports', { params: { ...filter, page: 0, size: 1 } })
+    const total = Number(response.headers['x-total-count'])
+    if (!Number.isFinite(total)) throw new Error('Report count is unavailable')
+    return total
+  },
+
   async getReportById(id: string): Promise<Report> {
     if (isMockMode()) {
       await new Promise((res) => setTimeout(res, 80))
