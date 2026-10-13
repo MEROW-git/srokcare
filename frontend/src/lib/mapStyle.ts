@@ -4,8 +4,8 @@ import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 // Vite needs an explicit MapLibre worker URL for vector map styles.
 setWorkerUrl(workerUrl)
 
-const OPENFREEMAP_BASE_URL = 'https://tiles.openfreemap.org/styles'
+const OPENFREEMAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty'
 
-export function getMapStyle(isDark = false): string {
-  return `${OPENFREEMAP_BASE_URL}/${isDark ? 'dark' : 'liberty'}`
+export function getMapStyle(): string {
+  return OPENFREEMAP_STYLE_URL
 }

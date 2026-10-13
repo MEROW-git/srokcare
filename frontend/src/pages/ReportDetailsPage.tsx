@@ -41,7 +41,6 @@ export const ReportDetailsPage: React.FC = () => {
   const [activePhotoIdx, setActivePhotoIdx] = useState(0)
 
   const mapContainerRef = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<maplibregl.Map | null>(null)
 
   // Fetch report and its comments
   const loadReportData = async () => {
@@ -74,7 +73,7 @@ export const ReportDetailsPage: React.FC = () => {
       const isDark = resolvedTheme === 'dark'
       const map = new maplibregl.Map({
         container: mapContainerRef.current,
-        style: getMapStyle(isDark),
+        style: getMapStyle(),
         center: [report.longitude, report.latitude],
         zoom: 14,
         interactive: true,
@@ -94,8 +93,6 @@ export const ReportDetailsPage: React.FC = () => {
         .setLngLat([report.longitude, report.latitude])
         .addTo(map)
 
-      mapRef.current = map
-
       return () => {
         map.remove()
       }
@@ -103,12 +100,6 @@ export const ReportDetailsPage: React.FC = () => {
       console.warn('Map initialization failed:', err)
     }
   }, [report])
-
-  // React to theme changes on mini-map
-  useEffect(() => {
-    if (!mapRef.current) return
-    mapRef.current.setStyle(getMapStyle(resolvedTheme === 'dark'))
-  }, [resolvedTheme])
 
   const handleSupportToggle = async () => {
     if (!report) return
