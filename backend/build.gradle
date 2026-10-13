@@ -51,3 +51,12 @@ tasks.register('seedMvp', JavaExec) {
     mainClass = 'com.fixkh.MvpSeedApplication'
     workingDir = projectDir
 }
+
+tasks.register('refreshMvp', JavaExec) {
+    group = 'application'
+    description = 'Refresh the text of seed-owned MVP example reports in the configured database.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.fixkh.MvpSeedApplication'
+    workingDir = projectDir
+    args '--fixkh.mvp-seed.refresh=true'
+}

@@ -13,6 +13,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -32,20 +33,20 @@ public class MvpSeedConfig {
     private static final Example[] EXAMPLES = {
             new Example(UUID.fromString("7a5eb89f-afdb-413e-aa2a-58fbfb652101"),
                     UUID.fromString("7a5eb89f-afdb-413e-aa2a-58fbfb652201"),
-                    "MVP example: Damaged road surface",
-                    "Illustrative sample report for testing FixKH. The image is generated, and this map pin is an approximate district center. This is not a verified real-world incident. A resident could use a report like this to document a road defect and its impact on travel.",
+                    "ផ្លូវខូច មានរណ្តៅធំ",
+                    "There's a deep pothole on this stretch of road, and motorbikes have to swerve around it. ពេលភ្លៀង រណ្តៅនេះពេញទឹក មើលមិនឃើញទេ។ សូមជួយពិនិត្យផង។\n\nDemo example: generated photo and approximate map pin. This incident has not been verified.",
                     ReportCategory.ROAD_DAMAGE, 11.54954, 104.91844,
                     "Phnom Penh", "Chamkarmon", "road-damage.png"),
             new Example(UUID.fromString("7a5eb89f-afdb-413e-aa2a-58fbfb652102"),
                     UUID.fromString("7a5eb89f-afdb-413e-aa2a-58fbfb652202"),
-                    "MVP example: Blocked roadside drain",
-                    "Illustrative sample report for testing FixKH. The image is generated, and this map pin is an approximate district center. This is not a verified real-world incident. A resident could use a report like this to describe drainage blocked by leaves and litter after rain.",
+                    "Drain blocked after the rain",
+                    "ទឹកដក់នៅតាមចិញ្ចើមផ្លូវក្រោយភ្លៀង ព្រោះស្លឹកឈើ និងសំរាមស្ទះមាត់លូ។ People walking past have to step into the road to get around it. សូមជួយសម្អាតលូផង។\n\nDemo example: generated photo and approximate map pin. This incident has not been verified.",
                     ReportCategory.DRAINAGE, 13.38505, 103.85227,
                     "Siem Reap", "Siem Reap City", "drainage.png"),
             new Example(UUID.fromString("7a5eb89f-afdb-413e-aa2a-58fbfb652103"),
                     UUID.fromString("7a5eb89f-afdb-413e-aa2a-58fbfb652203"),
-                    "MVP example: Waste beside a public bin",
-                    "Illustrative sample report for testing FixKH. The image is generated, and this map pin is an approximate district center. This is not a verified real-world incident. A resident could use a report like this to request attention for uncollected waste.",
+                    "សំរាមកកកុញក្បែរធុងសាធារណៈ",
+                    "The bin looks full, and rubbish bags have been left beside it. មានក្លិនមិនល្អ ហើយសំរាមរាយប៉ាយលើចិញ្ចើមផ្លូវ។ Could the collection team please check this spot?\n\nDemo example: generated photo and approximate map pin. This incident has not been verified.",
                     ReportCategory.GARBAGE, 13.10203, 103.19976,
                     "Battambang", "Battambang Municipality", "garbage.png")
     };
@@ -53,7 +54,8 @@ public class MvpSeedConfig {
     @Bean
     ApplicationRunner seedMvpReports(UserRepository users, ReportRepository reports,
                                      ReportImageRepository images, ImageStorage storage,
-                                     PasswordEncoder passwordEncoder) {
+                                     PasswordEncoder passwordEncoder,
+                                     @Value("${fixkh.mvp-seed.refresh:false}") boolean refresh) {
         return args -> {
             User author = users.findById(AUTHOR_ID).orElseGet(() -> {
                 User user = new User();
@@ -81,6 +83,11 @@ public class MvpSeedConfig {
                     item.setAddress("MVP demo pin — approximate district center");
                     return reports.saveAndFlush(item);
                 });
+                if (refresh && report.getAuthor().getId().equals(AUTHOR_ID)) {
+                    report.setTitle(example.title());
+                    report.setDescription(example.description());
+                    reports.saveAndFlush(report);
+                }
 
                 String key = example.imageId() + ".png";
                 try {
@@ -100,7 +107,9 @@ public class MvpSeedConfig {
                     images.saveAndFlush(image);
                 }
             }
-            System.out.println("MVP seed ready: 3 labeled example reports with local images (existing records preserved).");
+            System.out.println(refresh
+                    ? "MVP examples refreshed: titles and descriptions updated on seed-owned reports."
+                    : "MVP seed ready: 3 labeled example reports with local images (existing records preserved).");
         };
     }
 }
