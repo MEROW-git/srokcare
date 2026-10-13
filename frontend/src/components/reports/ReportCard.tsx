@@ -23,16 +23,34 @@ interface ReportCardProps {
 }
 
 export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated }) => {
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
   const [isSupporting, setIsSupporting] = useState(false)
   const [supportedByMe, setSupportedByMe] = useState(report.supportedByMe)
   const [supportCount, setSupportCount] = useState(report.supportCount)
   const [activePhotoIdx, setActivePhotoIdx] = useState(0)
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
+  const [isDescriptionTruncated, setIsDescriptionTruncated] = useState(false)
+  const descriptionRef = React.useRef<HTMLParagraphElement>(null)
 
   React.useEffect(() => {
     setSupportedByMe(report.supportedByMe)
     setSupportCount(report.supportCount)
   }, [report.supportedByMe, report.supportCount])
+
+  React.useLayoutEffect(() => {
+    const description = descriptionRef.current
+    if (!description || isDescriptionExpanded) return
+
+    const updateTruncation = () => {
+      setIsDescriptionTruncated(description.scrollHeight > description.clientHeight + 1)
+    }
+    updateTruncation()
+
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(updateTruncation)
+    observer.observe(description)
+    return () => observer.disconnect()
+  }, [report.description, isDescriptionExpanded])
 
   const handleSupportClick = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -134,9 +152,26 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
               {report.title}
             </h3>
           </Link>
-          <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed">
+          <p
+            ref={descriptionRef}
+            id={`report-description-${report.id}`}
+            className={`text-sm text-slate-600 dark:text-slate-400 whitespace-pre-line leading-relaxed ${isDescriptionExpanded ? '' : 'line-clamp-3'}`}
+          >
             {report.description}
           </p>
+          {(isDescriptionTruncated || isDescriptionExpanded) && (
+            <button
+              type="button"
+              aria-controls={`report-description-${report.id}`}
+              aria-expanded={isDescriptionExpanded}
+              onClick={() => setIsDescriptionExpanded((expanded) => !expanded)}
+              className="text-xs font-bold text-blue-800 dark:text-blue-400 hover:text-blue-950 dark:hover:text-blue-300 hover:underline"
+            >
+              {isDescriptionExpanded
+                ? (language === 'km' ? 'បង្ហាញតិច' : 'Read less')
+                : (language === 'km' ? 'អានបន្ថែម' : 'Read more')}
+            </button>
+          )}
         </div>
       </div>
 
