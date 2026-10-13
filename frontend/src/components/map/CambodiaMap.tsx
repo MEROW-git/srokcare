@@ -6,11 +6,7 @@ import { useTranslation } from '@/contexts/LanguageContext'
 import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
 import { ThumbsUp, MapPin, ExternalLink } from 'lucide-react'
-import { toast } from 'sonner'
-import { MapStyleToggle } from '@/components/map/MapStyleToggle'
-import { SatelliteAttribution } from '@/components/map/SatelliteAttribution'
-import { attachSatelliteFallback, getMapStyle, satelliteMapAvailable } from '@/lib/mapStyle'
-import type { MapMode } from '@/lib/mapStyle'
+import { getMapStyle } from '@/lib/mapStyle'
 
 interface CambodiaMapProps {
   reports: Report[]
@@ -48,7 +44,6 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
   const markersRef = useRef<maplibregl.Marker[]>([])
   const [activePreviewReport, setActivePreviewReport] = useState<Report | null>(selectedReport || null)
   const [mapError, setMapError] = useState(false)
-  const [mapMode, setMapMode] = useState<MapMode>('road')
 
   // Initialize MapLibre
   useEffect(() => {
@@ -64,11 +59,6 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
 
       // Add zoom and navigation controls
       map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right')
-      attachSatelliteFallback(map, () => {
-        setMapMode('road')
-        toast.error('Satellite imagery is unavailable. Showing the road map.')
-      })
-
       map.on('error', (e: maplibregl.ErrorEvent) => {
         console.warn('MapLibre notice:', e)
       })
@@ -83,12 +73,6 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
       setMapError(true)
     }
   }, [])
-
-  const handleMapModeChange = (mode: MapMode) => {
-    if (mode === mapMode) return
-    mapRef.current?.setStyle(getMapStyle(mode))
-    setMapMode(mode)
-  }
 
   // Sync selectedReport prop
   useEffect(() => {
@@ -152,9 +136,6 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
       {/* Map Container */}
       <div ref={mapContainerRef} className="w-full h-full min-h-[500px]" />
 
-      <MapStyleToggle mode={mapMode} onChange={handleMapModeChange} />
-      <SatelliteAttribution mode={mapMode} className="bottom-2.5 left-2.5" />
-
       {/* Fallback error notice if tiles fail */}
       {mapError && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-900 p-6 text-center z-20">
@@ -168,7 +149,7 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
 
       {/* Floating Report Preview Card */}
       {activePreviewReport && (
-        <div className={`absolute ${mapMode === 'satellite' ? 'bottom-12' : 'bottom-4'} left-4 right-4 sm:left-6 sm:right-auto sm:max-w-sm z-30 bg-white dark:bg-slate-900 rounded-md p-4 shadow-md border border-slate-300 dark:border-slate-800 animate-in slide-in-from-bottom-2 duration-150`}>
+        <div className="absolute bottom-4 left-4 right-4 sm:left-6 sm:right-auto sm:max-w-sm z-30 bg-white dark:bg-slate-900 rounded-md p-4 shadow-md border border-slate-300 dark:border-slate-800 animate-in slide-in-from-bottom-2 duration-150">
           <div className="flex items-start justify-between gap-2 mb-2">
             <ReportCategoryBadge category={activePreviewReport.category} size="sm" />
             <div className="flex items-center gap-1.5">
@@ -222,7 +203,7 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
       )}
 
       {/* Map Legend Overlay */}
-      <div className={`hidden lg:flex absolute ${satelliteMapAvailable ? 'top-14' : 'top-3'} left-3 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs px-3 py-2 rounded-sm border border-slate-300 dark:border-slate-800 shadow-2xs flex-col gap-1 text-[11px] text-slate-800 dark:text-slate-200`}>
+      <div className="hidden lg:flex absolute top-3 left-3 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs px-3 py-2 rounded-sm border border-slate-300 dark:border-slate-800 shadow-2xs flex-col gap-1 text-[11px] text-slate-800 dark:text-slate-200">
         <span className="font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 mb-0.5 text-[10px]">Civic Category Legend</span>
         <div className="grid grid-cols-2 gap-x-3 gap-y-1">
           <span className="flex items-center gap-1.5">

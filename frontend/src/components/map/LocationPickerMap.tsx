@@ -3,10 +3,7 @@ import * as maplibregl from 'maplibre-gl'
 import { MapPin, Navigation } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslation } from '@/contexts/LanguageContext'
-import { MapStyleToggle } from '@/components/map/MapStyleToggle'
-import { SatelliteAttribution } from '@/components/map/SatelliteAttribution'
-import { attachSatelliteFallback, getMapStyle } from '@/lib/mapStyle'
-import type { MapMode } from '@/lib/mapStyle'
+import { getMapStyle } from '@/lib/mapStyle'
 
 interface LocationPickerMapProps {
   latitude: number
@@ -26,7 +23,6 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
   const mapRef = useRef<maplibregl.Map | null>(null)
   const markerRef = useRef<maplibregl.Marker | null>(null)
   const [isLocating, setIsLocating] = useState(false)
-  const [mapMode, setMapMode] = useState<MapMode>('road')
 
   useEffect(() => {
     if (!mapContainerRef.current) return
@@ -39,10 +35,6 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
     })
 
     map.addControl(new maplibregl.NavigationControl(), 'top-right')
-    attachSatelliteFallback(map, () => {
-      setMapMode('road')
-      toast.error('Satellite imagery is unavailable. Showing the road map.')
-    })
 
     // Initial marker
     const markerEl = document.createElement('div')
@@ -78,12 +70,6 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
       map.remove()
     }
   }, [])
-
-  const handleMapModeChange = (mode: MapMode) => {
-    if (mode === mapMode) return
-    mapRef.current?.setStyle(getMapStyle(mode))
-    setMapMode(mode)
-  }
 
   // Sync external coordinates
   useEffect(() => {
@@ -155,9 +141,6 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
       {/* Map container */}
       <div className="relative w-full h-72 rounded-sm overflow-hidden border border-slate-300 dark:border-slate-800 shadow-2xs">
         <div ref={mapContainerRef} className="w-full h-full" />
-
-        <MapStyleToggle mode={mapMode} onChange={handleMapModeChange} />
-        <SatelliteAttribution mode={mapMode} className="bottom-12 left-2.5" />
 
         {/* Selected Coords Overlay */}
         <div className="absolute bottom-2.5 left-2.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs px-3 py-1.5 rounded-xs border border-slate-300 dark:border-slate-800 shadow-2xs text-xs font-mono text-slate-800 dark:text-slate-200 flex items-center gap-2">

@@ -28,7 +28,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 The example environment uses demo data. To use registration email and optional authenticator app MFA, set `VITE_USE_MOCK_API=false` and `VITE_API_BASE_URL=http://localhost:8080/api/v1` in `frontend/.env`, then restart the development server. After signing in, open Settings to scan an authenticator QR code and save the one-time recovery codes.
 
-The feed map, report location picker, and report detail map use [OpenFreeMap](https://openfreemap.org/quick_start/) for the default Road view. It needs no API key and stays light even when the site is in dark mode. To enable the optional Satellite toggle, set `VITE_MAPTILER_API_KEY` in your local `frontend/.env` and restart the development server. Satellite imagery comes from MapTiler, with its required logo and map attribution. The MapTiler key is visible in browser requests, so restrict its allowed origins in MapTiler Cloud. [MapTiler's Free plan](https://www.maptiler.com/cloud/pricing/) is for non-commercial use and pauses at its usage limit.
+The feed map, report location picker, and report detail map use [OpenFreeMap](https://openfreemap.org/quick_start/) for a light road map, even when the site is in dark mode. No map API key is needed. The report form uses approximate district centers to move the map when a place is selected; these centers are credited to MapTiler in the form.
 
 ### 4. Build for Production
 ```bash

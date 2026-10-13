@@ -23,10 +23,7 @@ import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
 import { formatRelativeTime } from '@/lib/utils'
 import { DisclaimerBanner } from '@/components/common/DisclaimerBanner'
-import { MapStyleToggle } from '@/components/map/MapStyleToggle'
-import { SatelliteAttribution } from '@/components/map/SatelliteAttribution'
-import { attachSatelliteFallback, getMapStyle } from '@/lib/mapStyle'
-import type { MapMode } from '@/lib/mapStyle'
+import { getMapStyle } from '@/lib/mapStyle'
 
 export const ReportDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -40,11 +37,7 @@ export const ReportDetailsPage: React.FC = () => {
   const [newComment, setNewComment] = useState('')
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const [activePhotoIdx, setActivePhotoIdx] = useState(0)
-  const [mapMode, setMapMode] = useState<MapMode>('road')
-
   const mapContainerRef = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<maplibregl.Map | null>(null)
-  const mapModeRef = useRef<MapMode>('road')
 
   // Fetch report and its comments
   const loadReportData = async () => {
@@ -76,16 +69,10 @@ export const ReportDetailsPage: React.FC = () => {
     try {
       const map = new maplibregl.Map({
         container: mapContainerRef.current,
-        style: getMapStyle(mapModeRef.current),
+        style: getMapStyle(),
         center: [report.longitude, report.latitude],
         zoom: 14,
         interactive: true,
-      })
-
-      attachSatelliteFallback(map, () => {
-        mapModeRef.current = 'road'
-        setMapMode('road')
-        toast.error('Satellite imagery is unavailable. Showing the road map.')
       })
 
       const markerEl = document.createElement('div')
@@ -102,23 +89,13 @@ export const ReportDetailsPage: React.FC = () => {
         .setLngLat([report.longitude, report.latitude])
         .addTo(map)
 
-      mapRef.current = map
-
       return () => {
         map.remove()
-        if (mapRef.current === map) mapRef.current = null
       }
     } catch (err) {
       console.warn('Map initialization failed:', err)
     }
   }, [report])
-
-  const handleMapModeChange = (mode: MapMode) => {
-    if (mode === mapMode) return
-    mapModeRef.current = mode
-    mapRef.current?.setStyle(getMapStyle(mode))
-    setMapMode(mode)
-  }
 
   const handleSupportToggle = async () => {
     if (!report) return
@@ -293,8 +270,6 @@ export const ReportDetailsPage: React.FC = () => {
             </div>
             <div className="relative h-60 rounded-xs overflow-hidden border border-slate-300 dark:border-slate-800">
               <div ref={mapContainerRef} className="w-full h-full" />
-              <MapStyleToggle mode={mapMode} onChange={handleMapModeChange} />
-              <SatelliteAttribution mode={mapMode} />
             </div>
           </div>
 
