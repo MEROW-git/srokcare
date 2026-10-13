@@ -18,20 +18,21 @@ import { reportService } from '@/services/reportService'
 import { commentService } from '@/services/commentService'
 import { useTranslation } from '@/contexts/LanguageContext'
 import { useAuth } from '@/contexts/AuthContext'
-import { useTheme } from '@/contexts/ThemeContext'
 import { Avatar } from '@/components/common/Avatar'
 import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
 import { formatRelativeTime } from '@/lib/utils'
 import { DisclaimerBanner } from '@/components/common/DisclaimerBanner'
-import { getMapStyle } from '@/lib/mapStyle'
+import { MapStyleToggle } from '@/components/map/MapStyleToggle'
+import { SatelliteAttribution } from '@/components/map/SatelliteAttribution'
+import { attachSatelliteFallback, getMapStyle } from '@/lib/mapStyle'
+import type { MapMode } from '@/lib/mapStyle'
 
 export const ReportDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { user } = useAuth()
-  const { resolvedTheme } = useTheme()
 
   const [report, setReport] = useState<Report | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
@@ -39,8 +40,11 @@ export const ReportDetailsPage: React.FC = () => {
   const [newComment, setNewComment] = useState('')
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const [activePhotoIdx, setActivePhotoIdx] = useState(0)
+  const [mapMode, setMapMode] = useState<MapMode>('road')
 
   const mapContainerRef = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<maplibregl.Map | null>(null)
+  const mapModeRef = useRef<MapMode>('road')
 
   // Fetch report and its comments
   const loadReportData = async () => {
@@ -70,17 +74,22 @@ export const ReportDetailsPage: React.FC = () => {
     if (!report || !mapContainerRef.current) return
 
     try {
-      const isDark = resolvedTheme === 'dark'
       const map = new maplibregl.Map({
         container: mapContainerRef.current,
-        style: getMapStyle(),
+        style: getMapStyle(mapModeRef.current),
         center: [report.longitude, report.latitude],
         zoom: 14,
         interactive: true,
       })
 
+      attachSatelliteFallback(map, () => {
+        mapModeRef.current = 'road'
+        setMapMode('road')
+        toast.error('Satellite imagery is unavailable. Showing the road map.')
+      })
+
       const markerEl = document.createElement('div')
-      const markerRing = isDark ? 'border-slate-900 shadow-lg' : 'border-white shadow-md'
+      const markerRing = 'border-white shadow-md'
       markerEl.className = `w-7 h-7 rounded-xs bg-blue-900 dark:bg-blue-600 border-2 ${markerRing} text-amber-400 flex items-center justify-center`
       markerEl.innerHTML = `
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -93,13 +102,23 @@ export const ReportDetailsPage: React.FC = () => {
         .setLngLat([report.longitude, report.latitude])
         .addTo(map)
 
+      mapRef.current = map
+
       return () => {
         map.remove()
+        if (mapRef.current === map) mapRef.current = null
       }
     } catch (err) {
       console.warn('Map initialization failed:', err)
     }
   }, [report])
+
+  const handleMapModeChange = (mode: MapMode) => {
+    if (mode === mapMode) return
+    mapModeRef.current = mode
+    mapRef.current?.setStyle(getMapStyle(mode))
+    setMapMode(mode)
+  }
 
   const handleSupportToggle = async () => {
     if (!report) return
@@ -274,6 +293,8 @@ export const ReportDetailsPage: React.FC = () => {
             </div>
             <div className="relative h-60 rounded-xs overflow-hidden border border-slate-300 dark:border-slate-800">
               <div ref={mapContainerRef} className="w-full h-full" />
+              <MapStyleToggle mode={mapMode} onChange={handleMapModeChange} />
+              <SatelliteAttribution mode={mapMode} />
             </div>
           </div>
 

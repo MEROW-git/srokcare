@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import * as maplibregl from 'maplibre-gl'
 import type { Report, ReportCategory } from '@/types/report'
 import { useTranslation } from '@/contexts/LanguageContext'
-import { useTheme } from '@/contexts/ThemeContext'
 import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
 import { ThumbsUp, MapPin, ExternalLink } from 'lucide-react'
-import { getMapStyle } from '@/lib/mapStyle'
+import { toast } from 'sonner'
+import { MapStyleToggle } from '@/components/map/MapStyleToggle'
+import { SatelliteAttribution } from '@/components/map/SatelliteAttribution'
+import { attachSatelliteFallback, getMapStyle, satelliteMapAvailable } from '@/lib/mapStyle'
+import type { MapMode } from '@/lib/mapStyle'
 
 interface CambodiaMapProps {
   reports: Report[]
@@ -39,13 +42,13 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
   className = 'w-full h-full min-h-[500px]',
 }) => {
   const { t } = useTranslation()
-  const { resolvedTheme } = useTheme()
   const navigate = useNavigate()
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const markersRef = useRef<maplibregl.Marker[]>([])
   const [activePreviewReport, setActivePreviewReport] = useState<Report | null>(selectedReport || null)
   const [mapError, setMapError] = useState(false)
+  const [mapMode, setMapMode] = useState<MapMode>('road')
 
   // Initialize MapLibre
   useEffect(() => {
@@ -61,6 +64,10 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
 
       // Add zoom and navigation controls
       map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right')
+      attachSatelliteFallback(map, () => {
+        setMapMode('road')
+        toast.error('Satellite imagery is unavailable. Showing the road map.')
+      })
 
       map.on('error', (e: maplibregl.ErrorEvent) => {
         console.warn('MapLibre notice:', e)
@@ -77,6 +84,12 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
     }
   }, [])
 
+  const handleMapModeChange = (mode: MapMode) => {
+    if (mode === mapMode) return
+    mapRef.current?.setStyle(getMapStyle(mode))
+    setMapMode(mode)
+  }
+
   // Sync selectedReport prop
   useEffect(() => {
     if (selectedReport) {
@@ -91,7 +104,7 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
     }
   }, [selectedReport])
 
-  // Update markers when reports or theme change
+  // Update markers when reports change
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
@@ -105,7 +118,7 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
       const el = document.createElement('div')
       el.className = 'group relative cursor-pointer'
       const color = CATEGORY_COLORS[report.category] || '#2563EB'
-      const ringBorder = resolvedTheme === 'dark' ? 'border-slate-900 shadow-lg' : 'border-white shadow-md'
+      const ringBorder = 'border-white shadow-md'
 
       el.innerHTML = `
         <div style="background-color: ${color};" class="w-7 h-7 rounded-xs flex items-center justify-center text-white ${ringBorder} border-2 transition-transform group-hover:scale-115 duration-150">
@@ -132,12 +145,15 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
 
       markersRef.current.push(marker)
     })
-  }, [reports, resolvedTheme])
+  }, [reports])
 
   return (
     <div className={`relative rounded-md overflow-hidden border border-slate-300 dark:border-slate-800 shadow-2xs transition-colors duration-150 ${className}`}>
       {/* Map Container */}
       <div ref={mapContainerRef} className="w-full h-full min-h-[500px]" />
+
+      <MapStyleToggle mode={mapMode} onChange={handleMapModeChange} />
+      <SatelliteAttribution mode={mapMode} className="bottom-2.5 left-2.5" />
 
       {/* Fallback error notice if tiles fail */}
       {mapError && (
@@ -152,7 +168,7 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
 
       {/* Floating Report Preview Card */}
       {activePreviewReport && (
-        <div className="absolute bottom-4 left-4 right-4 sm:left-6 sm:right-auto sm:max-w-sm z-30 bg-white dark:bg-slate-900 rounded-md p-4 shadow-md border border-slate-300 dark:border-slate-800 animate-in slide-in-from-bottom-2 duration-150">
+        <div className={`absolute ${mapMode === 'satellite' ? 'bottom-12' : 'bottom-4'} left-4 right-4 sm:left-6 sm:right-auto sm:max-w-sm z-30 bg-white dark:bg-slate-900 rounded-md p-4 shadow-md border border-slate-300 dark:border-slate-800 animate-in slide-in-from-bottom-2 duration-150`}>
           <div className="flex items-start justify-between gap-2 mb-2">
             <ReportCategoryBadge category={activePreviewReport.category} size="sm" />
             <div className="flex items-center gap-1.5">
@@ -206,7 +222,7 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
       )}
 
       {/* Map Legend Overlay */}
-      <div className="hidden lg:flex absolute top-3 left-3 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs px-3 py-2 rounded-sm border border-slate-300 dark:border-slate-800 shadow-2xs flex-col gap-1 text-[11px] text-slate-800 dark:text-slate-200">
+      <div className={`hidden lg:flex absolute ${satelliteMapAvailable ? 'top-14' : 'top-3'} left-3 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs px-3 py-2 rounded-sm border border-slate-300 dark:border-slate-800 shadow-2xs flex-col gap-1 text-[11px] text-slate-800 dark:text-slate-200`}>
         <span className="font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 mb-0.5 text-[10px]">Civic Category Legend</span>
         <div className="grid grid-cols-2 gap-x-3 gap-y-1">
           <span className="flex items-center gap-1.5">
