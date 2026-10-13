@@ -12,12 +12,14 @@ interface LocationPickerMapProps {
   latitude: number
   longitude: number
   onLocationChange: (lat: number, lng: number) => void
+  focusTarget?: { latitude: number; longitude: number; zoom: number } | null
 }
 
 export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
   latitude,
   longitude,
   onLocationChange,
+  focusTarget,
 }) => {
   const { t } = useTranslation()
   const mapContainerRef = useRef<HTMLDivElement>(null)
@@ -89,6 +91,16 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
       markerRef.current.setLngLat([longitude, latitude])
     }
   }, [latitude, longitude])
+
+  // Only dropdown selections move the camera; a manually placed pin stays in view.
+  useEffect(() => {
+    if (!focusTarget) return
+    mapRef.current?.flyTo({
+      center: [focusTarget.longitude, focusTarget.latitude],
+      zoom: focusTarget.zoom,
+      essential: true,
+    })
+  }, [focusTarget])
 
   const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) {

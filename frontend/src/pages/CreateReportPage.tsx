@@ -15,6 +15,7 @@ import type { ReportCategory } from '@/types/report'
 import type { User } from '@/types/auth'
 import { reportService } from '@/services/reportService'
 import { CAMBODIA_PROVINCES } from '@/data/provinces'
+import { getDistrictCenter } from '@/data/districtCenters'
 import { useTranslation } from '@/contexts/LanguageContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { LocationPickerMap } from '@/components/map/LocationPickerMap'
@@ -68,6 +69,7 @@ export const CreateReportPage: React.FC = () => {
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([])
   const [photoError, setPhotoError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [mapFocus, setMapFocus] = useState<{ latitude: number; longitude: number; zoom: number } | null>(null)
 
   const {
     register,
@@ -84,8 +86,8 @@ export const CreateReportPage: React.FC = () => {
       province: 'Phnom Penh',
       district: 'Chamkarmon',
       address: '',
-      latitude: 11.5564,
-      longitude: 104.9282,
+      latitude: 11.54954,
+      longitude: 104.91844,
     },
   })
 
@@ -96,6 +98,27 @@ export const CreateReportPage: React.FC = () => {
   // Find districts for chosen province
   const currentProvinceData = CAMBODIA_PROVINCES.find((p) => p.en === selectedProvince)
   const availableDistricts = currentProvinceData?.districts || []
+  const provinceField = register('province')
+  const districtField = register('district')
+
+  const focusMap = (latitude: number, longitude: number, zoom: number) => {
+    setValue('latitude', latitude, { shouldValidate: true })
+    setValue('longitude', longitude, { shouldValidate: true })
+    setMapFocus({ latitude, longitude, zoom })
+  }
+
+  const handleProvinceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    provinceField.onChange(event)
+    setValue('district', '', { shouldValidate: true })
+    const province = CAMBODIA_PROVINCES.find((item) => item.en === event.target.value)
+    if (province) focusMap(province.defaultLat, province.defaultLng, 10)
+  }
+
+  const handleDistrictChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    districtField.onChange(event)
+    const center = getDistrictCenter(selectedProvince, event.target.value)
+    if (center) focusMap(center[0], center[1], 13)
+  }
 
   // Handle Photo selection (converts to data URL for preview and local storage persistence)
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -278,7 +301,8 @@ export const CreateReportPage: React.FC = () => {
                 {t('fieldProvince')} <span className="text-rose-600">*</span>
               </label>
               <select
-                {...register('province')}
+                {...provinceField}
+                onChange={handleProvinceChange}
                 className="w-full px-2.5 py-2 text-xs font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 rounded-sm border border-slate-300 dark:border-slate-700 outline-hidden focus:border-slate-800 dark:focus:border-blue-500"
               >
                 {CAMBODIA_PROVINCES.map((p) => (
@@ -294,9 +318,11 @@ export const CreateReportPage: React.FC = () => {
                 {t('fieldDistrict')} <span className="text-rose-600">*</span>
               </label>
               <select
-                {...register('district')}
+                {...districtField}
+                onChange={handleDistrictChange}
                 className="w-full px-2.5 py-2 text-xs font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 rounded-sm border border-slate-300 dark:border-slate-700 outline-hidden focus:border-slate-800 dark:focus:border-blue-500"
               >
+                <option value="">{language === 'km' ? 'ជ្រើសរើសខណ្ឌ / ស្រុក' : 'Select a district'}</option>
                 {availableDistricts.map((d) => (
                   <option key={d.en} value={d.en} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
                     {language === 'km' ? d.km : d.en}
@@ -323,11 +349,18 @@ export const CreateReportPage: React.FC = () => {
             <LocationPickerMap
               latitude={currentLatitude}
               longitude={currentLongitude}
+              focusTarget={mapFocus}
               onLocationChange={(lat, lng) => {
                 setValue('latitude', lat)
                 setValue('longitude', lng)
               }}
             />
+            <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">
+              {language === 'km'
+                ? 'ការជ្រើសរើសខេត្ត ឬស្រុកនឹងផ្លាស់ទីផែនទីទៅកណ្តាលប្រហាក់ប្រហែល។ ចុចលើផែនទី ឬអូសសញ្ញាសម្គាល់ដើម្បីកំណត់ទីតាំងពិត។'
+                : 'Choosing a province or district moves the pin to an approximate center. Click the map or drag the pin to mark the exact location.'}
+              {' '}<a href="https://www.maptiler.com/" target="_blank" rel="noreferrer" className="underline hover:text-blue-700 dark:hover:text-blue-400">© MapTiler</a>
+            </p>
           </div>
 
           {/* Photos Upload Dropzone */}
