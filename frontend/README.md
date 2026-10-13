@@ -26,7 +26,7 @@ npm run dev
 ```
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-The example environment uses demo data. To use registration email and optional authenticator app MFA, set `VITE_USE_MOCK_API=false` and `VITE_API_BASE_URL=http://localhost:8080/api/v1` in `frontend/.env`, then restart the development server. After signing in, open Settings to scan an authenticator QR code and save the one-time recovery codes.
+The example environment connects to the Spring Boot API. Keep `VITE_USE_MOCK_API=false` and set `VITE_API_BASE_URL` in `frontend/.env` if your backend uses a different address. After signing in, open Settings to scan an authenticator QR code and save the one-time recovery codes. Demo data is available only when `VITE_USE_MOCK_API=true` is set explicitly.
 
 The feed map, report location picker, and report detail map use [OpenFreeMap](https://openfreemap.org/quick_start/) for a light road map, even when the site is in dark mode. No key is needed to display maps. The report form uses approximate district centers to move the map when a place is selected; these centers are credited to MapTiler in the form. To suggest a nearby street when a district or report pin is selected, add `VITE_MAPTILER_API_KEY` to `frontend/.env` and restart the development server. This uses [MapTiler reverse geocoding](https://docs.maptiler.com/cloud/api/geocoding/) and leaves the street field editable; no satellite tiles are loaded. Restrict the browser key to your site's allowed origins in MapTiler Cloud.
 
@@ -61,7 +61,7 @@ npm run build
 | `/reports/new` | **Create Report** | Submission form with photo upload (up to 5 images with previews), interactive location picker with drag-to-pin and GPS geolocation, validated via Zod. |
 | `/reports/:id` | **Report Details** | Full issue view, image viewer, mini-map of exact coordinates, live support upvote toggle, and community discussion comments. |
 | `/register` | **Registration** | Pseudonymous account creation using public nicknames (e.g. `SOK Citizen` or `សុខ ពលរដ្ឋ`). Never requests real names; email remains private. |
-| `/login` | **Login** | Authentication with password toggle and instant one-click demo shortcuts (`SOK Citizen` and `Admin Moderator`). |
+| `/login` | **Login** | Authentication with password toggle and optional demo shortcuts when mock mode is enabled. |
 | `/my-reports` | **My Reports** | Manage submitted reports, filter by status, quick inline editing modal, and safe deletion with confirmation dialog. |
 | `/settings` | **User Settings** | Update public nickname, inspect public identity preview, toggle language (Khmer/English), view privacy disclosures. |
 | `/admin` | **Admin Dashboard** | Dedicated moderation console with metric cards, moderation queue table, and status transition selector (`REPORTED` → `UNDER_REVIEW` → `IN_PROGRESS` → `RESOLVED` / `REJECTED`). |
@@ -72,13 +72,13 @@ npm run build
 
 The frontend is architected with a decoupled service layer (`src/services/`):
 
-- In **Mock Mode** (`VITE_USE_MOCK_API=true`), all CRUD operations, upvotes, comments, and status transitions persist automatically to browser `localStorage` using 16+ realistic Cambodian community sample reports.
-- In **Real Backend Mode** (`VITE_USE_MOCK_API=false`), requests are dispatched via Axios to the Java Spring Boot backend at `http://localhost:8080/api/v1`.
+- In **Real Backend Mode** (the default), requests are dispatched via Axios to the Java Spring Boot backend at `http://localhost:8080/api/v1`. No sample reports appear when the database is empty.
+- In optional **Mock Mode** (`VITE_USE_MOCK_API=true`), operations persist to browser `localStorage` with sample reports for isolated development.
 
 ### Environment Configuration (`.env`)
 ```env
 VITE_API_BASE_URL=http://localhost:8080/api/v1
-VITE_USE_MOCK_API=true
+VITE_USE_MOCK_API=false
 ```
 
 For full details on expected Spring Boot REST endpoints, schemas, authentication, and multipart upload formats, please review:

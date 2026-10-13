@@ -67,7 +67,7 @@ npm install
 npm run dev
 ```
 
-Open **[http://localhost:5173](http://localhost:5173)**. The example frontend configuration starts in demo mode with sample data. To send requests to Spring Boot, set `VITE_USE_MOCK_API=false` and `VITE_API_BASE_URL=http://localhost:8080/api/v1` in `frontend/.env`, then restart Vite.
+Open **[http://localhost:5173](http://localhost:5173)**. The example frontend configuration uses the real Spring Boot API. Keep `VITE_USE_MOCK_API=false` and set `VITE_API_BASE_URL=http://localhost:8080/api/v1` in `frontend/.env`. Demo data appears only when `VITE_USE_MOCK_API=true` is set explicitly.
 
 > **Live API status:** Registration and login use the backend in real API mode. Some report interactions still need frontend contract updates, including support removal and separate multipart image upload. See the [backend integration notes](backend/README.md#react-integration) before testing the full live flow.
 

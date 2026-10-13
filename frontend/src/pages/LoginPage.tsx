@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff, ShieldCheck, UserCheck, AlertCircle, Building2, MapPin, CheckCircle2, Lock } from 'lucide-react'
+import { Eye, EyeOff, ShieldCheck, UserCheck, AlertCircle, Building2, CheckCircle2, Lock } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslation } from '@/contexts/LanguageContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -96,10 +96,10 @@ export const LoginPage: React.FC = () => {
                 FixKH Civic Portal • ច្រកចូលសហគមន៍
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
-                Direct Citizen-to-Municipality Reporting System
+                Community Issue Reporting
               </h1>
               <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Connect directly with provincial administrations, public works departments, and local authorities across Cambodia to report and track infrastructure issues transparently.
+                Share local infrastructure issues with your community and track the status of submitted reports.
               </p>
             </div>
 
@@ -118,40 +118,18 @@ export const LoginPage: React.FC = () => {
                 <li className="flex items-start gap-2.5">
                   <Building2 className="w-4 h-4 text-blue-700 dark:text-blue-400 shrink-0 mt-0.5" />
                   <span>
-                    <strong className="text-slate-900 dark:text-slate-100 font-semibold">25 Provinces Covered:</strong> Direct dispatch routing for potholes, drainage failures, trash build-ups, streetlights, and traffic hazards.
+                    <strong className="text-slate-900 dark:text-slate-100 font-semibold">Location-based Reports:</strong> Pin potholes, drainage failures, trash build-ups, streetlights, and traffic hazards on the map.
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Lock className="w-4 h-4 text-slate-700 dark:text-slate-400 shrink-0 mt-0.5" />
                   <span>
-                    <strong className="text-slate-900 dark:text-slate-100 font-semibold">Two-Factor Security:</strong> Optional TOTP authenticator MFA and verified audit logs for community accountability.
+                    <strong className="text-slate-900 dark:text-slate-100 font-semibold">Two-Factor Security:</strong> Optional authenticator app MFA helps protect your account.
                   </span>
                 </li>
               </ul>
             </div>
 
-            {/* Active Coverage Regions */}
-            <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-md p-4 space-y-2">
-              <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                <span className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-                  Major Active Operational Municipalities
-                </span>
-                <span className="text-emerald-700 dark:text-emerald-300 font-mono text-[10px] bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-1.5 py-0.5 rounded-xs">
-                  ONLINE
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {['Phnom Penh', 'Siem Reap', 'Battambang', 'Sihanoukville', 'Kampot', 'Poipet', 'Kandal'].map((city) => (
-                  <span
-                    key={city}
-                    className="text-[11px] font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded-xs"
-                  >
-                    {city}
-                  </span>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Right Form Panel */}

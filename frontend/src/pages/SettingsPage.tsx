@@ -71,7 +71,7 @@ export const SettingsPage: React.FC = () => {
                 {nicknameInput.trim() || 'Anonymous'}
               </h3>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Visible to municipal dispatchers and community members on your reports and comments
+                Visible to community members on your reports and comments
               </p>
             </div>
           </div>
@@ -147,15 +147,15 @@ export const SettingsPage: React.FC = () => {
             <div className="p-3.5 rounded-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 space-y-1.5 max-w-md font-mono">
               <div className="flex justify-between">
                 <span className="text-slate-400 dark:text-slate-500 uppercase text-[11px]">Account ID:</span>
-                <span className="text-slate-900 dark:text-slate-100">{user?.id || 'usr-demo-01'}</span>
+                <span className="text-slate-900 dark:text-slate-100">{user?.id || '—'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400 dark:text-slate-500 uppercase text-[11px]">Registered Email:</span>
-                <span className="text-slate-900 dark:text-slate-100">{user?.email || 'private@email.local'}</span>
+                <span className="text-slate-900 dark:text-slate-100">{user?.email || '—'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400 dark:text-slate-500 uppercase text-[11px]">Civic Role:</span>
-                <span className="font-semibold text-blue-800 dark:text-blue-400">{user?.role || 'CITIZEN'}</span>
+                <span className="font-semibold text-blue-800 dark:text-blue-400">{user?.role || '—'}</span>
               </div>
             </div>
             <p className="text-[11px] text-slate-400 dark:text-slate-500">

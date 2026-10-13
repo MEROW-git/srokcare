@@ -27,7 +27,7 @@ export const DisclaimerBanner: React.FC<DisclaimerBannerProps> = ({ className = 
       </div>
       <div>
         <span className="font-bold text-slate-900 dark:text-slate-100 mr-1.5 uppercase tracking-wider text-[11px] block sm:inline">
-          Official Civic Notice:
+          Independent Civic Notice:
         </span>
         <span className="text-slate-700 dark:text-slate-300">{t('disclaimer')}</span>
       </div>

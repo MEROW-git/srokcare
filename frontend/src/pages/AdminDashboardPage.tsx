@@ -18,6 +18,7 @@ import { useTranslation } from '@/contexts/LanguageContext'
 import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents'
+import { isMockMode } from '@/services/apiClient'
 
 const ALL_STATUSES: ReportStatus[] = [
   'REPORTED',
@@ -105,7 +106,7 @@ export const AdminDashboardPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 transition-colors duration-150">
       {/* Demo Moderation Banner */}
-      <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-xs p-3 flex items-center justify-between gap-3 text-amber-900 dark:text-amber-200 text-xs">
+      {isMockMode() && <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-xs p-3 flex items-center justify-between gap-3 text-amber-900 dark:text-amber-200 text-xs">
         <div className="flex items-center gap-2">
           <Shield className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
           <span className="font-medium">{t('adminDemoBanner')}</span>
@@ -113,13 +114,13 @@ export const AdminDashboardPage: React.FC = () => {
         <span className="px-2 py-0.5 rounded-xs bg-amber-200 dark:bg-amber-900/60 text-amber-950 dark:text-amber-200 font-mono text-[10px] font-bold shrink-0">
           DEMO ACTIVE
         </span>
-      </div>
+      </div>}
 
       {/* Header */}
       <div>
         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-[11px] font-semibold tracking-wider uppercase mb-1.5">
           <Shield className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400" />
-          <span>Municipal Dispatch & Moderation Console • ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល</span>
+          <span>Community Report Moderation • ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល</span>
         </div>
         <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
           {t('adminTitle')}

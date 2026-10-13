@@ -24,7 +24,7 @@ export const Footer: React.FC = () => {
               </span>
             </div>
             <p className="text-slate-400 text-xs sm:text-sm max-w-md leading-relaxed">
-              {t('appTagline')} — វេទិការាយការណ៍បញ្ហាសង្គមរបស់ពលរដ្ឋកម្ពុជា។ An independent civic platform enabling residents across Cambodia to document, verify, and resolve neighborhood infrastructure issues together.
+              {t('appTagline')} — វេទិការាយការណ៍បញ្ហាសង្គមរបស់ពលរដ្ឋកម្ពុជា។ An independent civic platform where residents can document and discuss neighborhood infrastructure issues.
             </p>
             <div className="flex items-center gap-2.5 text-xs text-slate-300 bg-slate-950 p-2.5 rounded-xs border border-slate-800 max-w-md">
               <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0" />
@@ -82,7 +82,7 @@ export const Footer: React.FC = () => {
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
           <p>© 2026 FixKH Civic Initiative Cambodia. Documenting public infrastructure with precision.</p>
           <div className="flex items-center gap-3 text-[11px] text-slate-400">
-            <span>25 Provinces Covered</span>
+            <span>Community Reports</span>
             <span>•</span>
             <span>Pseudonymous Participation</span>
           </div>
@@ -91,4 +91,3 @@ export const Footer: React.FC = () => {
     </footer>
   )
 }
-
