@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -14,6 +14,7 @@ import { toast } from 'sonner'
 import type { ReportCategory } from '@/types/report'
 import type { User } from '@/types/auth'
 import { reportService } from '@/services/reportService'
+import { findStreetAtPin, streetLookupAvailable } from '@/services/streetLookup'
 import { CAMBODIA_PROVINCES } from '@/data/provinces'
 import { getDistrictCenter } from '@/data/districtCenters'
 import { useTranslation } from '@/contexts/LanguageContext'
@@ -70,6 +71,10 @@ export const CreateReportPage: React.FC = () => {
   const [photoError, setPhotoError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [mapFocus, setMapFocus] = useState<{ latitude: number; longitude: number; zoom: number } | null>(null)
+  const [streetLookupStatus, setStreetLookupStatus] = useState<'idle' | 'loading' | 'not-found' | 'error'>('idle')
+  const streetLookupRef = useRef<AbortController | null>(null)
+  const streetLookupIdRef = useRef(0)
+  const addressManuallyEditedRef = useRef(false)
 
   const {
     register,
@@ -100,10 +105,57 @@ export const CreateReportPage: React.FC = () => {
   const availableDistricts = currentProvinceData?.districts || []
   const provinceField = register('province')
   const districtField = register('district')
+  const addressField = register('address')
 
-  const focusMap = (latitude: number, longitude: number, zoom: number) => {
+  useEffect(() => () => streetLookupRef.current?.abort(), [])
+
+  const cancelStreetLookup = () => {
+    streetLookupRef.current?.abort()
+    streetLookupRef.current = null
+    streetLookupIdRef.current += 1
+  }
+
+  const suggestStreet = (latitude: number, longitude: number) => {
+    cancelStreetLookup()
+    if (addressManuallyEditedRef.current) return
+
+    setValue('address', '')
+    if (!streetLookupAvailable) return
+
+    const controller = new AbortController()
+    streetLookupRef.current = controller
+    const lookupId = streetLookupIdRef.current
+    setStreetLookupStatus('loading')
+
+    findStreetAtPin(latitude, longitude, language, controller.signal)
+      .then((street) => {
+        if (lookupId !== streetLookupIdRef.current || addressManuallyEditedRef.current) return
+        if (street) setValue('address', street, { shouldDirty: true })
+        setStreetLookupStatus(street ? 'idle' : 'not-found')
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted || lookupId !== streetLookupIdRef.current) return
+        console.warn('Street lookup failed:', error)
+        setStreetLookupStatus('error')
+      })
+  }
+
+  const updatePin = (latitude: number, longitude: number) => {
     setValue('latitude', latitude, { shouldValidate: true })
     setValue('longitude', longitude, { shouldValidate: true })
+    suggestStreet(latitude, longitude)
+  }
+
+  const focusMap = (latitude: number, longitude: number, zoom: number, lookUpStreet = true) => {
+    setValue('latitude', latitude, { shouldValidate: true })
+    setValue('longitude', longitude, { shouldValidate: true })
+    if (lookUpStreet) {
+      suggestStreet(latitude, longitude)
+    } else {
+      cancelStreetLookup()
+      if (!addressManuallyEditedRef.current) setValue('address', '')
+      setStreetLookupStatus('idle')
+    }
     setMapFocus({ latitude, longitude, zoom })
   }
 
@@ -111,7 +163,7 @@ export const CreateReportPage: React.FC = () => {
     provinceField.onChange(event)
     setValue('district', '', { shouldValidate: true })
     const province = CAMBODIA_PROVINCES.find((item) => item.en === event.target.value)
-    if (province) focusMap(province.defaultLat, province.defaultLng, 10)
+    if (province) focusMap(province.defaultLat, province.defaultLng, 10, false)
   }
 
   const handleDistrictChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -337,10 +389,31 @@ export const CreateReportPage: React.FC = () => {
               </label>
               <input
                 type="text"
-                {...register('address')}
+                {...addressField}
+                onChange={(event) => {
+                  addressField.onChange(event)
+                  addressManuallyEditedRef.current = event.target.value.trim().length > 0
+                  cancelStreetLookup()
+                  setStreetLookupStatus('idle')
+                }}
                 placeholder={t('fieldAddressPlaceholder')}
                 className="w-full px-2.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 rounded-sm border border-slate-300 dark:border-slate-700 outline-hidden focus:border-slate-800 dark:focus:border-blue-500 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
               />
+              {streetLookupStatus === 'loading' && (
+                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                  {language === 'km' ? 'កំពុងស្វែងរកឈ្មោះផ្លូវជិតខាង…' : 'Finding nearby street…'}
+                </p>
+              )}
+              {(streetLookupStatus === 'not-found' || streetLookupStatus === 'error') && (
+                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                  {language === 'km' ? 'រកមិនឃើញឈ្មោះផ្លូវ។ អ្នកអាចបញ្ចូលដោយខ្លួនឯង។' : 'Street unavailable here. You can enter it manually.'}
+                </p>
+              )}
+              {!streetLookupAvailable && (
+                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                  {language === 'km' ? 'បញ្ចូលឈ្មោះផ្លូវដោយខ្លួនឯង។' : 'Enter the street manually.'}
+                </p>
+              )}
             </div>
           </div>
 
@@ -350,10 +423,7 @@ export const CreateReportPage: React.FC = () => {
               latitude={currentLatitude}
               longitude={currentLongitude}
               focusTarget={mapFocus}
-              onLocationChange={(lat, lng) => {
-                setValue('latitude', lat)
-                setValue('longitude', lng)
-              }}
+              onLocationChange={updatePin}
             />
             <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">
               {language === 'km'

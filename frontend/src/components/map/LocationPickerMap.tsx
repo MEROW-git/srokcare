@@ -22,7 +22,12 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const markerRef = useRef<maplibregl.Marker | null>(null)
+  const onLocationChangeRef = useRef(onLocationChange)
   const [isLocating, setIsLocating] = useState(false)
+
+  useEffect(() => {
+    onLocationChangeRef.current = onLocationChange
+  }, [onLocationChange])
 
   useEffect(() => {
     if (!mapContainerRef.current) return
@@ -54,13 +59,13 @@ export const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
 
     marker.on('dragend', () => {
       const lngLat = marker.getLngLat()
-      onLocationChange(Number(lngLat.lat.toFixed(6)), Number(lngLat.lng.toFixed(6)))
+      onLocationChangeRef.current(Number(lngLat.lat.toFixed(6)), Number(lngLat.lng.toFixed(6)))
     })
 
     // Click anywhere on map to reposition pin
     map.on('click', (e: maplibregl.MapMouseEvent) => {
       marker.setLngLat(e.lngLat)
-      onLocationChange(Number(e.lngLat.lat.toFixed(6)), Number(e.lngLat.lng.toFixed(6)))
+      onLocationChangeRef.current(Number(e.lngLat.lat.toFixed(6)), Number(e.lngLat.lng.toFixed(6)))
     })
 
     mapRef.current = map
