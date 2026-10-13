@@ -10,6 +10,7 @@ import { ReportFilterBar } from '@/components/reports/ReportFilterBar'
 import { SkeletonCard } from '@/components/common/SkeletonCard'
 import { EmptyState } from '@/components/common/EmptyState'
 import { DisclaimerBanner } from '@/components/common/DisclaimerBanner'
+import { useRealtimeEvents } from '@/hooks/useRealtimeEvents'
 
 export const FeedPage: React.FC = () => {
   const { t } = useTranslation()
@@ -39,11 +40,34 @@ export const FeedPage: React.FC = () => {
         sortBy,
         search: searchQuery,
       })
-      setReports(data)
+      const seen = new Set<string>()
+      const unique = data.filter((r) => !seen.has(r.id) && seen.add(r.id))
+      setReports(unique)
     } finally {
       setLoading(false)
     }
   }
+
+  const fetchReportsSilently = async () => {
+    try {
+      const data = await reportService.getReports({
+        category: selectedCategory,
+        status: selectedStatus,
+        sortBy,
+        search: searchQuery,
+      })
+      const seen = new Set<string>()
+      const unique = data.filter((r) => !seen.has(r.id) && seen.add(r.id))
+      setReports(unique)
+    } catch (err) {
+      console.warn('Realtime feed refresh notice:', err)
+    }
+  }
+
+  useRealtimeEvents({
+    topic: '/topic/reports',
+    onRefresh: fetchReportsSilently,
+  })
 
   useEffect(() => {
     fetchReports()

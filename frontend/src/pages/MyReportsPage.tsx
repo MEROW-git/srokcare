@@ -19,6 +19,7 @@ import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { EmptyState } from '@/components/common/EmptyState'
+import { useRealtimeEvents } from '@/hooks/useRealtimeEvents'
 
 export const MyReportsPage: React.FC = () => {
   const { t } = useTranslation()
@@ -44,11 +45,30 @@ export const MyReportsPage: React.FC = () => {
     setLoading(true)
     try {
       const data = await reportService.getMyReports(user.id, user.nickname)
-      setMyReports(data)
+      const seen = new Set<string>()
+      const unique = data.filter((r) => !seen.has(r.id) && seen.add(r.id))
+      setMyReports(unique)
     } finally {
       setLoading(false)
     }
   }
+
+  const reloadMyReportsSilently = async () => {
+    if (!user) return
+    try {
+      const data = await reportService.getMyReports(user.id, user.nickname)
+      const seen = new Set<string>()
+      const unique = data.filter((r) => !seen.has(r.id) && seen.add(r.id))
+      setMyReports(unique)
+    } catch (err) {
+      console.warn('Realtime my reports reload notice:', err)
+    }
+  }
+
+  useRealtimeEvents({
+    topic: '/topic/reports',
+    onRefresh: reloadMyReportsSilently,
+  })
 
   useEffect(() => {
     loadMyReports()

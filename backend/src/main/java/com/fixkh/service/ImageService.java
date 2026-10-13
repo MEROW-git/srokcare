@@ -22,6 +22,10 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 
+import com.fixkh.event.ReportDomainEvent;
+import org.springframework.context.ApplicationEventPublisher;
+import java.time.Instant;
+
 @Service
 public class ImageService {
     private final ReportImageRepository images;
@@ -29,8 +33,9 @@ public class ImageService {
     private final CurrentUser current;
     private final ImageStorage storage;
     private final ApiMapper mapper;
-    public ImageService(ReportImageRepository images, ReportRepository reports, CurrentUser current, ImageStorage storage, ApiMapper mapper) {
-        this.images = images; this.reports = reports; this.current = current; this.storage = storage; this.mapper = mapper;
+    private final ApplicationEventPublisher events;
+    public ImageService(ReportImageRepository images, ReportRepository reports, CurrentUser current, ImageStorage storage, ApiMapper mapper, ApplicationEventPublisher events) {
+        this.images = images; this.reports = reports; this.current = current; this.storage = storage; this.mapper = mapper; this.events = events;
     }
     private Report report(UUID id) { return reports.findById(id).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Report not found")); }
     private void allowEdit(Report report) {
@@ -59,6 +64,7 @@ public class ImageService {
             ReportImage image = new ReportImage(); image.setReport(report); image.setStorageKey(key); image.setContentType(processed.contentType());
             result.add(mapper.image(images.saveAndFlush(image)));
         }
+        events.publishEvent(new ReportDomainEvent("REPORT_UPDATED", reportId, Instant.now()));
         return result;
     }
     @Transactional(readOnly = true)
@@ -72,6 +78,7 @@ public class ImageService {
         Report report = report(reportId); allowEdit(report);
         ReportImage image = image(reportId, imageId); images.delete(image);
         afterCommitDelete(image.getStorageKey());
+        events.publishEvent(new ReportDomainEvent("REPORT_UPDATED", reportId, Instant.now()));
     }
     public void removeFilesAfterCommit(UUID reportId) {
         images.findByReportIdOrderByCreatedAt(reportId).forEach(i -> afterCommitDelete(i.getStorageKey()));

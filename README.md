@@ -89,6 +89,50 @@ With the backend running on its default port:
 
 For request bodies and response examples, see the [backend API examples](backend/docs/API_EXAMPLES.md). The [frontend API contract](frontend/docs/API_CONTRACT.md) describes the client-side expectations.
 
+## Real-Time Updates & WebSocket
+
+FixKH uses Spring WebSocket with STOMP for live, instant updates across clients without page reloads.
+
+- **WebSocket Endpoint:** `ws://localhost:8080/ws` (SockJS fallback: `http://localhost:8080/ws`)
+- **Public Topics:**
+  - `/topic/reports`: Broadcasts report creation, updates, deletions, moderator status transitions, comments, and support count updates across Cambodia.
+  - `/topic/reports/{reportId}`: Broadcasts updates, comments, and support changes specific to an individual report.
+- **Payload Privacy:** Broadcast payloads contain only minimal metadata (`eventType`, `reportId`, `timestamp`). No tokens, emails, OTPs, MFA secrets, or private user fields are ever broadcast.
+- **Transactional Safety:** Events are broadcast exclusively after the database transaction successfully commits via Spring `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`. Rolled back writes broadcast nothing.
+- **Write Policy:** Clients may only subscribe to topics; writes are forbidden via WebSocket and must use the existing authenticated REST endpoints.
+- **Offline & Reconnect:** Automatically reconnects upon network recovery and refetches affected REST data to catch up on updates missed while disconnected. Rapid event bursts are debounced to prevent duplicate refetches.
+
+### Two-Browser Manual Test Procedure
+
+To verify real-time updates between two users without refreshing:
+
+1. **Setup Two Browser Windows:**
+   - Open **Browser Window A** at `http://localhost:5173/feed` (e.g., standard Chrome window).
+   - Open **Browser Window B** at `http://localhost:5173/feed` (e.g., incognito/private window or a second browser such as Firefox/Edge).
+
+2. **Test 1: Report Creation & Feed / Map Sync:**
+   - In **Browser Window A**, click **Report Issue** (`/create`) and submit a new civic issue report.
+   - Watch **Browser Window B** (staying on `/feed`): the new report appears at the top of the feed immediately without refreshing.
+   - In **Browser Window B**, switch to the **Map** tab (`/map`): verify the new pin appears on the map without refreshing.
+
+3. **Test 2: Support Counter Sync:**
+   - In **Browser Window A**, find any report on the feed and click the **Support** button.
+   - Observe **Browser Window B**: the support counter for that card increments instantly.
+
+4. **Test 3: Discussion Comments Sync:**
+   - In both **Browser Window A** and **Browser Window B**, open the same report details page (`/reports/{id}`).
+   - In **Browser Window A**, write a comment in the discussion box and submit.
+   - Observe **Browser Window B**: the new comment appears in the discussion thread and the total comment counter updates in real time without refreshing.
+
+5. **Test 4: Moderator Status Transition:**
+   - In **Browser Window A**, navigate to the **Moderation Console** (`/admin`) and change the status of a report (e.g., from `Reported` to `In Progress` or `Resolved`).
+   - Observe **Browser Window B** (viewing the report details or feed): the status badge and admin notes immediately update to reflect the new state.
+
+6. **Test 5: Reconnect & Offline Reconciliation:**
+   - In **Browser Window B**, temporarily disable network access in DevTools (Offline mode).
+   - In **Browser Window A**, make a change (e.g., add a comment or update a report).
+   - In **Browser Window B**, restore network access (Online): the client reconnects automatically and fetches the latest data without manual refresh.
+
 ## Development
 
 | Directory | What it contains |

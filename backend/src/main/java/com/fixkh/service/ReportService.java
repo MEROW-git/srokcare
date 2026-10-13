@@ -12,6 +12,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.fixkh.event.ReportDomainEvent;
+import org.springframework.context.ApplicationEventPublisher;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -21,8 +24,9 @@ public class ReportService {
     private final CurrentUser current;
     private final ApiMapper mapper;
     private final ImageService images;
-    public ReportService(ReportRepository reports, CurrentUser current, ApiMapper mapper, ImageService images) {
-        this.reports = reports; this.current = current; this.mapper = mapper; this.images = images;
+    private final ApplicationEventPublisher events;
+    public ReportService(ReportRepository reports, CurrentUser current, ApiMapper mapper, ImageService images, ApplicationEventPublisher events) {
+        this.reports = reports; this.current = current; this.mapper = mapper; this.images = images; this.events = events;
     }
     @Transactional(readOnly = true)
     public Report find(UUID id) { return reports.findById(id).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Report not found")); }
@@ -64,7 +68,9 @@ public class ReportService {
         r.setAuthor(current.user()); r.setTitle(request.title().trim()); r.setDescription(request.description().trim());
         r.setCategory(request.category()); r.setLatitude(request.latitude()); r.setLongitude(request.longitude());
         r.setProvince(request.province().trim()); r.setDistrict(request.district()); r.setAddress(request.address());
-        return mapper.report(reports.saveAndFlush(r));
+        Report saved = reports.saveAndFlush(r);
+        events.publishEvent(new ReportDomainEvent("REPORT_CREATED", saved.getId(), Instant.now()));
+        return mapper.report(saved);
     }
     @Transactional
     public ReportResponse update(UUID id, ReportUpdateRequest request) {
@@ -86,10 +92,18 @@ public class ReportService {
         }
         if (request.district() != null) r.setDistrict(request.district());
         if (request.address() != null) r.setAddress(request.address());
-        reports.flush(); return mapper.report(r);
+        reports.flush();
+        events.publishEvent(new ReportDomainEvent("REPORT_UPDATED", id, Instant.now()));
+        return mapper.report(r);
     }
     @Transactional
-    public void delete(UUID id) { Report r = find(id); assertCanModify(r); images.removeFilesAfterCommit(id); reports.delete(r); }
+    public void delete(UUID id) {
+        Report r = find(id);
+        assertCanModify(r);
+        images.removeFilesAfterCommit(id);
+        reports.delete(r);
+        events.publishEvent(new ReportDomainEvent("REPORT_DELETED", id, Instant.now()));
+    }
     public void assertCanModify(Report r) {
         User user = current.user();
         if (user.getRole() == Role.ADMIN) return;

@@ -23,6 +23,7 @@ import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
 import { formatRelativeTime } from '@/lib/utils'
 import { DisclaimerBanner } from '@/components/common/DisclaimerBanner'
+import { useRealtimeEvents } from '@/hooks/useRealtimeEvents'
 import { getMapStyle } from '@/lib/mapStyle'
 
 export const ReportDetailsPage: React.FC = () => {
@@ -48,8 +49,10 @@ export const ReportDetailsPage: React.FC = () => {
         reportService.getReportById(id),
         commentService.getComments(id),
       ])
+      const seen = new Set<string>()
+      const uniqueComments = cmtData.filter((c) => !seen.has(c.id) && seen.add(c.id))
       setReport(repData)
-      setComments(cmtData)
+      setComments(uniqueComments)
     } catch (err) {
       console.error(err)
       toast.error('Report not found')
@@ -57,6 +60,33 @@ export const ReportDetailsPage: React.FC = () => {
       setLoading(false)
     }
   }
+
+  const reloadDataSilently = async () => {
+    if (!id) return
+    try {
+      const [repData, cmtData] = await Promise.all([
+        reportService.getReportById(id),
+        commentService.getComments(id),
+      ])
+      const seen = new Set<string>()
+      const uniqueComments = cmtData.filter((c) => !seen.has(c.id) && seen.add(c.id))
+      setReport((prev) => {
+        if (!prev) return repData
+        return {
+          ...repData,
+          supportedByMe: prev.supportedByMe !== undefined ? prev.supportedByMe : repData.supportedByMe,
+        }
+      })
+      setComments(uniqueComments)
+    } catch (err) {
+      console.warn('Realtime report details reload notice:', err)
+    }
+  }
+
+  useRealtimeEvents({
+    topic: id ? `/topic/reports/${id}` : '/topic/reports',
+    onRefresh: reloadDataSilently,
+  })
 
   useEffect(() => {
     loadReportData()

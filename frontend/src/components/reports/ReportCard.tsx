@@ -29,6 +29,11 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
   const [supportCount, setSupportCount] = useState(report.supportCount)
   const [activePhotoIdx, setActivePhotoIdx] = useState(0)
 
+  React.useEffect(() => {
+    setSupportedByMe(report.supportedByMe)
+    setSupportCount(report.supportCount)
+  }, [report.supportedByMe, report.supportCount])
+
   const handleSupportClick = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()

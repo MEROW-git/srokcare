@@ -95,7 +95,7 @@ class ServiceRulesTest {
         ReportRepository reports = mock(ReportRepository.class); CurrentUser current = mock(CurrentUser.class); ApiMapper mapper = mock(ApiMapper.class);
         User user = citizen(); when(current.user()).thenReturn(user);
         when(reports.saveAndFlush(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        ReportService service = new ReportService(reports, current, mapper, mock(ImageService.class));
+        ReportService service = new ReportService(reports, current, mapper, mock(ImageService.class), mock(org.springframework.context.ApplicationEventPublisher.class));
         service.create(new ReportRequest("Large pothole", "Dangerous for motorcycles", ReportCategory.ROAD_DAMAGE,
                 11.55, 104.92, "Phnom Penh", null, null));
         org.mockito.ArgumentCaptor<Report> captured = org.mockito.ArgumentCaptor.forClass(Report.class);
@@ -105,7 +105,7 @@ class ServiceRulesTest {
     }
     @Test void ownerCannotModifyModeratedReport() {
         CurrentUser current = mock(CurrentUser.class); when(current.user()).thenReturn(citizen());
-        ReportService service = new ReportService(mock(ReportRepository.class), current, mock(ApiMapper.class), mock(ImageService.class));
+        ReportService service = new ReportService(mock(ReportRepository.class), current, mock(ApiMapper.class), mock(ImageService.class), mock(org.springframework.context.ApplicationEventPublisher.class));
         Report report = new Report(); report.setAuthor(citizen()); report.setStatus(ReportStatus.IN_PROGRESS);
         assertEquals(HttpStatus.FORBIDDEN, assertThrows(ApiException.class, () -> service.assertCanModify(report)).getStatus());
         report.setStatus(ReportStatus.REPORTED); User other = citizen(); other.setId(UUID.randomUUID()); report.setAuthor(other);
@@ -116,7 +116,7 @@ class ServiceRulesTest {
         ReportRepository reports = mock(ReportRepository.class); CurrentUser current = mock(CurrentUser.class);
         when(reports.findById(id)).thenReturn(java.util.Optional.of(new Report()));
         when(current.id()).thenReturn(id); when(supports.existsByReportIdAndUserId(id, id)).thenReturn(true);
-        SupportService service = new SupportService(supports, reports, current);
+        SupportService service = new SupportService(supports, reports, current, mock(org.springframework.context.ApplicationEventPublisher.class));
         assertEquals(HttpStatus.CONFLICT, assertThrows(ApiException.class, () -> service.add(id)).getStatus());
         verify(supports, never()).save(any());
     }
@@ -124,7 +124,7 @@ class ServiceRulesTest {
         ReportRepository reports = mock(ReportRepository.class); CurrentUser current = mock(CurrentUser.class);
         Report report = new Report(); report.setAuthor(citizen());
         when(reports.findLockedById(id)).thenReturn(java.util.Optional.of(report)); when(current.user()).thenReturn(citizen());
-        ImageService service = new ImageService(mock(ReportImageRepository.class), reports, current, mock(ImageStorage.class), mock(ApiMapper.class));
+        ImageService service = new ImageService(mock(ReportImageRepository.class), reports, current, mock(ImageStorage.class), mock(ApiMapper.class), mock(org.springframework.context.ApplicationEventPublisher.class));
         MockMultipartFile fake = new MockMultipartFile("files", "fake.jpg", "image/jpeg", "not really a JPEG".getBytes(StandardCharsets.UTF_8));
         assertEquals(HttpStatus.BAD_REQUEST, assertThrows(ApiException.class, () -> service.upload(id, new MockMultipartFile[] { fake })).getStatus());
         MockMultipartFile huge = new MockMultipartFile("files", "huge.jpg", "image/jpeg", new byte[5 * 1024 * 1024 + 1]);

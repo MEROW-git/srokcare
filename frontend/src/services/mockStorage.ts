@@ -3,6 +3,7 @@ import type { Report, CreateReportInput, UpdateReportInput, ReportFilter, Report
 import type { Comment } from '@/types/comment'
 import type { AdminStats } from '@/types/admin'
 import type { User } from '@/types/auth'
+import { websocketService } from './websocketService'
 
 const STORAGE_KEYS = {
   REPORTS: 'fixkh_mock_reports_v1',
@@ -109,6 +110,11 @@ class MockStorage {
 
     const updated = [newReport, ...reports]
     localStorage.setItem(STORAGE_KEYS.REPORTS, JSON.stringify(updated))
+    websocketService.broadcastLocalEvent({
+      eventType: 'REPORT_CREATED',
+      reportId: newReport.id,
+      timestamp: new Date().toISOString(),
+    })
     return newReport
   }
 
@@ -128,6 +134,11 @@ class MockStorage {
 
     reports[index] = updatedReport
     localStorage.setItem(STORAGE_KEYS.REPORTS, JSON.stringify(reports))
+    websocketService.broadcastLocalEvent({
+      eventType: 'REPORT_UPDATED',
+      reportId: id,
+      timestamp: new Date().toISOString(),
+    })
     return updatedReport
   }
 
@@ -136,6 +147,11 @@ class MockStorage {
     const reports = this.getReports()
     const filtered = reports.filter((r) => r.id !== id)
     localStorage.setItem(STORAGE_KEYS.REPORTS, JSON.stringify(filtered))
+    websocketService.broadcastLocalEvent({
+      eventType: 'REPORT_DELETED',
+      reportId: id,
+      timestamp: new Date().toISOString(),
+    })
     return true
   }
 
@@ -156,6 +172,11 @@ class MockStorage {
 
     reports[index] = report
     localStorage.setItem(STORAGE_KEYS.REPORTS, JSON.stringify(reports))
+    websocketService.broadcastLocalEvent({
+      eventType: 'SUPPORT_CHANGED',
+      reportId,
+      timestamp: new Date().toISOString(),
+    })
 
     return {
       supportCount: report.supportCount,
@@ -197,6 +218,12 @@ class MockStorage {
       localStorage.setItem(STORAGE_KEYS.REPORTS, JSON.stringify(reports))
     }
 
+    websocketService.broadcastLocalEvent({
+      eventType: 'COMMENT_ADDED',
+      reportId,
+      timestamp: new Date().toISOString(),
+    })
+
     return newComment
   }
 
@@ -216,6 +243,12 @@ class MockStorage {
         reports[repIndex].commentCount = Math.max(0, (reports[repIndex].commentCount || 1) - 1)
         localStorage.setItem(STORAGE_KEYS.REPORTS, JSON.stringify(reports))
       }
+
+      websocketService.broadcastLocalEvent({
+        eventType: 'COMMENT_DELETED',
+        reportId: comment.reportId,
+        timestamp: new Date().toISOString(),
+      })
     }
     return true
   }
@@ -231,6 +264,13 @@ class MockStorage {
     reports[index].status = status
     reports[index].updatedAt = new Date().toISOString()
     localStorage.setItem(STORAGE_KEYS.REPORTS, JSON.stringify(reports))
+
+    websocketService.broadcastLocalEvent({
+      eventType: 'REPORT_STATUS_CHANGED',
+      reportId,
+      timestamp: new Date().toISOString(),
+    })
+
     return reports[index]
   }
 

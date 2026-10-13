@@ -7,9 +7,12 @@ import com.fixkh.mapper.ApiMapper;
 import com.fixkh.repository.CommentRepository;
 import com.fixkh.repository.ReportRepository;
 import com.fixkh.repository.ReportSupportRepository;
+import com.fixkh.event.ReportDomainEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -18,15 +21,18 @@ public class AdminService {
     private final ReportSupportRepository supports;
     private final CommentRepository comments;
     private final ApiMapper mapper;
-    public AdminService(ReportRepository reports, ReportSupportRepository supports, CommentRepository comments, ApiMapper mapper) {
-        this.reports = reports; this.supports = supports; this.comments = comments; this.mapper = mapper;
+    private final ApplicationEventPublisher events;
+    public AdminService(ReportRepository reports, ReportSupportRepository supports, CommentRepository comments, ApiMapper mapper, ApplicationEventPublisher events) {
+        this.reports = reports; this.supports = supports; this.comments = comments; this.mapper = mapper; this.events = events;
     }
     @Transactional
     public ReportResponse status(UUID id, StatusRequest request) {
         var report = reports.findById(id).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Report not found"));
         report.setStatus(request.status());
         if (request.adminNote() != null) report.setAdminNote(request.adminNote().trim());
-        reports.flush(); return mapper.report(report);
+        reports.flush();
+        events.publishEvent(new ReportDomainEvent("REPORT_STATUS_CHANGED", id, Instant.now()));
+        return mapper.report(report);
     }
     @Transactional(readOnly = true)
     public AdminStats stats() {

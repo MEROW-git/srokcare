@@ -6,6 +6,7 @@ import { CAMBODIA_PROVINCES } from '@/data/provinces'
 import { useTranslation } from '@/contexts/LanguageContext'
 import { CambodiaMap } from '@/components/map/CambodiaMap'
 import { CategoryIcon } from '@/components/common/CategoryIcon'
+import { useRealtimeEvents } from '@/hooks/useRealtimeEvents'
 
 const CATEGORIES: (ReportCategory | 'ALL')[] = [
   'ALL',
@@ -38,6 +39,29 @@ export const MapPage: React.FC = () => {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const fetchReportsSilently = async () => {
+    try {
+      const data = await reportService.getReports({
+        category: selectedCategory,
+        status: selectedStatus,
+        province: selectedProvince === 'ALL' ? undefined : selectedProvince,
+        search: searchQuery,
+      })
+      const seen = new Set<string>()
+      const unique = data.filter((r) => !seen.has(r.id) && seen.add(r.id))
+      setReports(unique)
+      // If a selected report exists, sync its latest status/attributes
+      setSelectedReport((prev) => (prev ? unique.find((r) => r.id === prev.id) || null : null))
+    } catch (err) {
+      console.warn('Realtime map refresh notice:', err)
+    }
+  }
+
+  useRealtimeEvents({
+    topic: '/topic/reports',
+    onRefresh: fetchReportsSilently,
+  })
+
   useEffect(() => {
     setLoading(true)
     reportService
@@ -47,7 +71,11 @@ export const MapPage: React.FC = () => {
         province: selectedProvince === 'ALL' ? undefined : selectedProvince,
         search: searchQuery,
       })
-      .then((data) => setReports(data))
+      .then((data) => {
+        const seen = new Set<string>()
+        const unique = data.filter((r) => !seen.has(r.id) && seen.add(r.id))
+        setReports(unique)
+      })
       .finally(() => setLoading(false))
   }, [selectedCategory, selectedStatus, selectedProvince, searchQuery])
 

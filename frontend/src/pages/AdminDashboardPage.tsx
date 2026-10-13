@@ -17,6 +17,7 @@ import { adminService } from '@/services/adminService'
 import { useTranslation } from '@/contexts/LanguageContext'
 import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
+import { useRealtimeEvents } from '@/hooks/useRealtimeEvents'
 
 const ALL_STATUSES: ReportStatus[] = [
   'REPORTED',
@@ -48,12 +49,38 @@ export const AdminDashboardPage: React.FC = () => {
         }),
         adminService.getAdminStats(),
       ])
-      setReports(reps)
+      const seen = new Set<string>()
+      const unique = reps.filter((r) => !seen.has(r.id) && seen.add(r.id))
+      setReports(unique)
       setStats(st)
     } finally {
       setLoading(false)
     }
   }
+
+  const reloadAdminSilently = async () => {
+    try {
+      const [reps, st] = await Promise.all([
+        adminService.getAdminReports({
+          status: filterStatus === 'ALL' ? undefined : filterStatus,
+          category: filterCategory === 'ALL' ? undefined : filterCategory,
+          search: searchQuery,
+        }),
+        adminService.getAdminStats(),
+      ])
+      const seen = new Set<string>()
+      const unique = reps.filter((r) => !seen.has(r.id) && seen.add(r.id))
+      setReports(unique)
+      setStats(st)
+    } catch (err) {
+      console.warn('Realtime admin refresh notice:', err)
+    }
+  }
+
+  useRealtimeEvents({
+    topic: '/topic/reports',
+    onRefresh: reloadAdminSilently,
+  })
 
   useEffect(() => {
     loadAdminData()
