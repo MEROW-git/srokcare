@@ -23,6 +23,16 @@ With a hosted PostgreSQL database, set `DB_URL=postgresql://username:password@ho
 
 Check `http://localhost:8080/api/v1/health`. Swagger UI is at `http://localhost:8080/swagger-ui/index.html`; OpenAPI JSON is at `http://localhost:8080/v3/api-docs`. Real-time STOMP WebSocket is at `ws://localhost:8080/ws` (SockJS at `http://localhost:8080/ws`) with public topics `/topic/reports` and `/topic/reports/{reportId}`. Flyway migrates the schema on startup and Hibernate validates it.
 
+### Optional MVP example reports
+
+To populate the real PostgreSQL database for an MVP walkthrough, run this once from `backend` with the same `.env` and `UPLOAD_DIR` as the running API:
+
+```powershell
+.\gradlew.bat seedMvp
+```
+
+The task inserts three **clearly labeled examples** with generated illustrative images: road damage, blocked drainage, and uncollected waste. They appear through the normal API in the feed, map, and the `FixKH MVP Demo` public profile. Their pins are approximate district centers, not verified incident locations. The seed account cannot be used to sign in. The task is opt-in and uses fixed IDs, so repeating it does not create duplicate reports or change other users' data. Image files are placed in `UPLOAD_DIR`; keep that directory available to the API. Replace these examples with consented, verified submissions before presenting the site as a live civic feed.
+
 Registration sends a six-digit code by email. Configure a verified `otp_email` sender plus `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, and `SMTP_PASSWORD` in your private `.env`. For [Brevo SMTP](https://help.brevo.com/hc/en-us/articles/7924908994450-Send-transactional-emails-using-Brevo-SMTP), use `smtp-relay.brevo.com`, port `587`, the SMTP login shown in Brevo, and an SMTP key (not an API key). The sender address must be verified with your provider. Never put SMTP credentials in the frontend environment or commit them to Git. Without valid mail settings, registration returns `503`; other backend endpoints still start normally.
 
 ### Optional authenticator app MFA

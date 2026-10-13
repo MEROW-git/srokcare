@@ -39,3 +39,15 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+springBoot {
+    mainClass = 'com.fixkh.FixKhApplication'
+}
+
+tasks.register('seedMvp', JavaExec) {
+    group = 'application'
+    description = 'Insert labeled MVP example reports and images into the configured database once.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.fixkh.MvpSeedApplication'
+    workingDir = projectDir
+}
