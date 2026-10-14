@@ -50,6 +50,8 @@ These screens show the local MVP with example reports. The example photos are ge
 
 The interface supports English and Khmer. The frontend also has a browser-based demo mode with sample reports, so you can explore the UI before connecting a database.
 
+To add five labeled MVP example posts **with images** to a real database, use the [backend seed instructions](backend/README.md#optional-mvp-example-reports). The images and seed task are already in the repository; teammates can clone or pull instead of sharing a ZIP.
+
 Accounts using the real backend can optionally protect sign-in with an authenticator app. Setup is in Settings and includes one-time recovery codes. Until MFA is enabled, the app shows an optional setup reminder after a randomly chosen 3–6 successful sign-ins. Choosing **Maybe later** starts another 3–6 sign-in interval; failed sign-ins and accounts with MFA enabled do not trigger the reminder.
 
 ### What a report status means

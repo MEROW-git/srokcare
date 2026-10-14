@@ -33,6 +33,17 @@ To populate the real PostgreSQL database for an MVP walkthrough, run this once f
 
 The task inserts five **clearly labeled examples** with generated illustrative images: road damage, blocked drainage, uncollected waste, a broken streetlight, and roadside flooding. They appear through the normal API in the feed, map, and the `FixKH MVP Demo` public profile. Their pins are approximate district centers, not verified incident locations. The seed account cannot be used to sign in. The task is opt-in and uses fixed IDs, so repeating it does not create duplicate reports or change other users' data. Image files are placed in `UPLOAD_DIR`; keep that directory available to the API. Replace these examples with consented, verified submissions before presenting the site as a live civic feed.
 
+#### Seed the examples on another machine
+
+Your teammate does not need a ZIP of the project or a copy of `backend/uploads`. The five source images and the seed task are committed to Git. After cloning the repository (or running `git pull` in an existing checkout), they can configure their own private `backend/.env` for their PostgreSQL database and run:
+
+```powershell
+cd backend
+.\gradlew.bat seedMvp
+```
+
+On macOS/Linux, run `./gradlew seedMvp` instead. The task creates the five example posts and copies their images from `src/main/resources/mvp-seed/` into the configured `UPLOAD_DIR`. Run it on the machine that serves the backend, or use an upload directory shared with that machine. If a teammate seeds a shared database from a different computer but keeps images in their own local `UPLOAD_DIR`, the backend serving the site will not be able to display those images. Running the task again with the backend's `UPLOAD_DIR` restores any missing seed image files without duplicating the posts.
+
 Two example posts are entirely in Khmer, two are entirely in English, and one mixes both languages. Each has a short demo notice. To update their titles and descriptions after changing the seed copy, run `.\gradlew.bat refreshMvp`. This updates only the seed-owned reports; it does not change their images, locations, moderation statuses, or other users' reports.
 
 Registration sends a six-digit code by email. Configure a verified `otp_email` sender plus `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, and `SMTP_PASSWORD` in your private `.env`. For [Brevo SMTP](https://help.brevo.com/hc/en-us/articles/7924908994450-Send-transactional-emails-using-Brevo-SMTP), use `smtp-relay.brevo.com`, port `587`, the SMTP login shown in Brevo, and an SMTP key (not an API key). The sender address must be verified with your provider. Never put SMTP credentials in the frontend environment or commit them to Git. Without valid mail settings, registration returns `503`; other backend endpoints still start normally.
