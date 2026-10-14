@@ -67,6 +67,37 @@ class ServiceRulesTest {
         assertEquals(HttpStatus.UNAUTHORIZED, assertThrows(ApiException.class,
                 () -> service.login(new LoginRequest("sok@example.com", "wrong"))).getStatus());
     }
+    @Test void mfaReminderAppearsAfterThreeToSixSuccessfulLoginsAndSkipsProtectedAccounts() {
+        String secret = "unit-test-secret-with-more-than-thirty-two-characters";
+        SecretKeySpec key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        UserRepository users = mock(UserRepository.class);
+        ApiMapper mapper = mock(ApiMapper.class);
+        org.springframework.security.crypto.password.PasswordEncoder passwords = mock(org.springframework.security.crypto.password.PasswordEncoder.class);
+        MfaService mfa = mock(MfaService.class);
+        User user = citizen(); user.setEmail("sok@example.com"); user.setPasswordHash("stored-hash");
+        when(users.findLockedByEmail("sok@example.com")).thenReturn(Optional.of(user));
+        when(passwords.matches(any(), eq("stored-hash"))).thenAnswer(invocation -> "correct".equals(invocation.getArgument(0)));
+        when(mapper.user(user)).thenReturn(new UserResponse(id, user.getNickname(), user.getEmail(), Role.CITIZEN, null));
+        AuthService service = new AuthService(users, mock(PendingRegistrationRepository.class), passwords,
+                new NimbusJwtEncoder(new ImmutableSecret<>(key)), mapper, mock(CurrentUser.class), mock(RegistrationEmailSender.class), mfa);
+
+        for (int cycle = 0; cycle < 2; cycle++) {
+            int successfulLogins = 0;
+            AuthResponse result;
+            do {
+                assertThrows(ApiException.class, () -> service.login(new LoginRequest("sok@example.com", "wrong")));
+                result = service.login(new LoginRequest("sok@example.com", "correct"));
+                successfulLogins++;
+            } while (!Boolean.TRUE.equals(result.mfaSetupReminder()) && successfulLogins < 7);
+            assertTrue(successfulLogins >= 3 && successfulLogins <= 6);
+        }
+
+        user.setMfaEnabled(true);
+        int loginsBefore = user.getMfaReminderLogins();
+        when(mfa.startChallenge(user)).thenReturn(new MfaChallengeResponse(true, "challenge"));
+        assertTrue(service.login(new LoginRequest("sok@example.com", "correct")).mfaRequired());
+        assertEquals(loginsBefore, user.getMfaReminderLogins());
+    }
     @Test void correctCodeCreatesAccountAndWrongCodesConsumeAttempts() {
         String secret = "unit-test-secret-with-more-than-thirty-two-characters";
         SecretKeySpec key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");

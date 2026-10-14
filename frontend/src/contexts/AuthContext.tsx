@@ -7,6 +7,8 @@ interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isAdmin: boolean
+  showMfaReminder: boolean
+  dismissMfaReminder: () => void
   login: (input: LoginInput) => Promise<string | null>
   verifyMfaLogin: (challengeToken: string, code: string) => Promise<void>
   replaceAuth: (response: AuthResponse) => void
@@ -26,6 +28,7 @@ const USER_STORAGE_KEY = 'fixkh_auth_user'
 const TOKEN_STORAGE_KEY = 'fixkh_auth_token'
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [showMfaReminder, setShowMfaReminder] = useState(false)
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem(USER_STORAGE_KEY)
     const token = localStorage.getItem(TOKEN_STORAGE_KEY)
@@ -49,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user])
 
   useEffect(() => {
-    const expireSession = () => setUser(null)
+    const expireSession = () => { setUser(null); setShowMfaReminder(false) }
     window.addEventListener(SESSION_EXPIRED_EVENT, expireSession)
     return () => window.removeEventListener(SESSION_EXPIRED_EVENT, expireSession)
   }, [])
@@ -58,10 +61,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const res = await authService.login(input)
     if ('challengeToken' in res) {
       setUser(null)
+      setShowMfaReminder(false)
       return res.challengeToken
     }
     localStorage.setItem(TOKEN_STORAGE_KEY, res.token)
     setUser(res.user)
+    setShowMfaReminder(res.mfaSetupReminder === true)
     return null
   }
 
@@ -74,6 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const replaceAuth = (response: AuthResponse) => {
     localStorage.setItem(TOKEN_STORAGE_KEY, response.token)
     setUser(response.user)
+    setShowMfaReminder(false)
   }
 
   const register = async (input: RegisterInput) => {
@@ -106,6 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setUser(null)
+    setShowMfaReminder(false)
     localStorage.removeItem(USER_STORAGE_KEY)
     localStorage.removeItem(TOKEN_STORAGE_KEY)
   }
@@ -136,6 +143,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         isAuthenticated,
         isAdmin,
+        showMfaReminder,
+        dismissMfaReminder: () => setShowMfaReminder(false),
         login,
         verifyMfaLogin,
         replaceAuth,

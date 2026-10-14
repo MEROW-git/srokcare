@@ -26,6 +26,7 @@ export interface PublicProfile {
 export interface AuthResponse {
   token: string
   user: User
+  mfaSetupReminder?: boolean
 }
 
 export interface MfaChallengeResponse {

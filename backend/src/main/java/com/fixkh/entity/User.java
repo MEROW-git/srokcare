@@ -21,6 +21,8 @@ public class User {
     @Column(name = "cover_key", length = 100) private String coverKey;
     @Column(name = "cover_content_type", length = 20) private String coverContentType;
     @Column(name = "mfa_enabled", nullable = false) private boolean mfaEnabled;
+    @Column(name = "mfa_reminder_logins", nullable = false) private int mfaReminderLogins;
+    @Column(name = "mfa_reminder_target", nullable = false) private int mfaReminderTarget;
     @Column(name = "mfa_secret_ciphertext", length = 512) private String mfaSecretCiphertext;
     @Column(name = "mfa_pending_ciphertext", length = 512) private String mfaPendingCiphertext;
     @Column(name = "mfa_pending_expires_at") private Instant mfaPendingExpiresAt;

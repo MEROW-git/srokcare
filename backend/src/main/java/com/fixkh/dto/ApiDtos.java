@@ -54,10 +54,13 @@ public final class ApiDtos {
             long activeReports) {}
     @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
     public record AuthResponse(@Schema(example = "eyJhbGciOiJIUzI1NiJ9...") String token, UserResponse user,
-            Boolean mfaRequired, String challengeToken) {
-        public AuthResponse(String token, UserResponse user) { this(token, user, null, null); }
+            Boolean mfaRequired, String challengeToken, Boolean mfaSetupReminder) {
+        public AuthResponse(String token, UserResponse user) { this(token, user, null, null, null); }
+        public AuthResponse(String token, UserResponse user, boolean mfaSetupReminder) {
+            this(token, user, null, null, mfaSetupReminder);
+        }
         public static AuthResponse challenge(String challengeToken) {
-            return new AuthResponse(null, null, true, challengeToken);
+            return new AuthResponse(null, null, true, challengeToken, null);
         }
     }
     public record MfaChallengeResponse(boolean mfaRequired, String challengeToken) {}

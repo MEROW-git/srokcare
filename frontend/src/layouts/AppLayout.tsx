@@ -1,14 +1,18 @@
 import React, { useEffect } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav'
 import { useTheme } from '@/contexts/ThemeContext'
 import { websocketService } from '@/services/websocketService'
+import { useAuth } from '@/contexts/AuthContext'
+import { MfaReminderModal } from '@/components/auth/MfaReminderModal'
 
 export const AppLayout: React.FC = () => {
   const { resolvedTheme } = useTheme()
+  const { showMfaReminder, dismissMfaReminder } = useAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
     websocketService.init()
@@ -22,6 +26,10 @@ export const AppLayout: React.FC = () => {
       </div>
       <Footer />
       <MobileBottomNav />
+      <MfaReminderModal open={showMfaReminder} onClose={dismissMfaReminder} onSetup={() => {
+        dismissMfaReminder()
+        navigate('/settings#authenticator')
+      }} />
       <Toaster position="top-right" richColors closeButton theme={resolvedTheme} />
     </div>
   )

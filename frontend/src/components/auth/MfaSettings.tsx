@@ -17,6 +17,9 @@ export function MfaSettings() {
 
   useEffect(() => {
     authService.getMfaStatus().then(setEnabled).catch(() => toast.error('Could not load authenticator status.'))
+    if (window.location.hash === '#authenticator') {
+      requestAnimationFrame(() => document.getElementById('authenticator')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+    }
   }, [])
 
   const begin = async (event: React.FormEvent) => {
@@ -70,7 +73,7 @@ export function MfaSettings() {
   }
 
   return (
-    <section className="bg-white dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-800 shadow-2xs p-6 sm:p-8 space-y-5 transition-colors duration-150">
+    <section id="authenticator" className="bg-white dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-800 shadow-2xs p-6 sm:p-8 space-y-5 transition-colors duration-150">
       <div className="flex items-start gap-3">
         <div className="p-2 rounded-sm bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-900 shrink-0">
           <ShieldCheck className="w-5 h-5" />

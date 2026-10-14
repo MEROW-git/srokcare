@@ -94,7 +94,17 @@ public class AuthService {
         User user = users.findLockedByEmail(request.email().trim()).orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
         if (!passwords.matches(request.password(), user.getPasswordHash())) throw new ApiException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         if (user.isMfaEnabled()) return AuthResponse.challenge(mfa.startChallenge(user).challengeToken());
-        return response(user);
+        boolean reminder = shouldRemindAboutMfa(user);
+        AuthResponse signedIn = response(user);
+        return new AuthResponse(signedIn.token(), signedIn.user(), reminder);
+    }
+    private boolean shouldRemindAboutMfa(User user) {
+        if (user.getMfaReminderTarget() == 0) user.setMfaReminderTarget(3 + random.nextInt(4));
+        user.setMfaReminderLogins(user.getMfaReminderLogins() + 1);
+        if (user.getMfaReminderLogins() < user.getMfaReminderTarget()) return false;
+        user.setMfaReminderLogins(0);
+        user.setMfaReminderTarget(3 + random.nextInt(4));
+        return true;
     }
     @Transactional(readOnly = true)
     public UserResponse me() { return mapper.user(current.user()); }
