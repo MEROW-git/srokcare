@@ -26,6 +26,7 @@ import { Avatar } from '@/components/common/Avatar'
 import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
 import { EmptyState } from '@/components/common/EmptyState'
+import { ImageCropModal } from '@/components/profile/ImageCropModal'
 import type { Report } from '@/types/report'
 import type { PublicProfile } from '@/types/auth'
 
@@ -53,11 +54,15 @@ export const ProfilePage: React.FC = () => {
   const [isSavingProfile, setIsSavingProfile] = useState(false)
   const [editError, setEditError] = useState<string | null>(null)
 
-  // File uploads
+  // File uploads & Crop editor
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
   const [isUploadingCover, setIsUploadingCover] = useState(false)
   const avatarInputRef = useRef<HTMLInputElement>(null)
   const coverInputRef = useRef<HTMLInputElement>(null)
+  const avatarButtonRef = useRef<HTMLButtonElement>(null)
+  const coverButtonRef = useRef<HTMLButtonElement>(null)
+  const [cropFile, setCropFile] = useState<File | null>(null)
+  const [cropType, setCropType] = useState<'avatar' | 'cover' | null>(null)
 
   // Determine if viewing own profile
   const isOwnProfile =
@@ -144,23 +149,17 @@ export const ProfilePage: React.FC = () => {
     return true
   }
 
-  // Upload Avatar
-  const handleAvatarSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Select Avatar - opens crop modal
+  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file || !validateFile(file)) return
-
-    setIsUploadingAvatar(true)
-    try {
-      const updatedUser = await userService.uploadAvatar(file)
-      updateUser(updatedUser)
-      setProfile((prev) => (prev ? { ...prev, avatarUrl: updatedUser.avatarUrl } : null))
-      toast.success('Avatar updated successfully')
-    } catch {
-      toast.error('Failed to update avatar photo')
-    } finally {
-      setIsUploadingAvatar(false)
+    if (!file) return
+    if (!validateFile(file)) {
       if (avatarInputRef.current) avatarInputRef.current.value = ''
+      return
     }
+    setCropFile(file)
+    setCropType('avatar')
+    if (avatarInputRef.current) avatarInputRef.current.value = ''
   }
 
   // Remove Avatar
@@ -178,22 +177,61 @@ export const ProfilePage: React.FC = () => {
     }
   }
 
-  // Upload Cover
-  const handleCoverSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Select Cover - opens crop modal
+  const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file || !validateFile(file)) return
-
-    setIsUploadingCover(true)
-    try {
-      const updatedUser = await userService.uploadCover(file)
-      updateUser(updatedUser)
-      setProfile((prev) => (prev ? { ...prev, coverUrl: updatedUser.coverUrl } : null))
-      toast.success('Cover photo updated successfully')
-    } catch {
-      toast.error('Failed to update cover photo')
-    } finally {
-      setIsUploadingCover(false)
+    if (!file) return
+    if (!validateFile(file)) {
       if (coverInputRef.current) coverInputRef.current.value = ''
+      return
+    }
+    setCropFile(file)
+    setCropType('cover')
+    if (coverInputRef.current) coverInputRef.current.value = ''
+  }
+
+  // Cancel Crop Editor
+  const handleCropCancel = () => {
+    setCropFile(null)
+    setCropType(null)
+  }
+
+  // Save Cropped Image and upload
+  const handleCropSave = async (croppedFile: File) => {
+    if (!cropType) return
+    const isAvatar = cropType === 'avatar'
+
+    if (isAvatar) {
+      setIsUploadingAvatar(true)
+    } else {
+      setIsUploadingCover(true)
+    }
+
+    try {
+      if (isAvatar) {
+        const updatedUser = await userService.uploadAvatar(croppedFile)
+        updateUser(updatedUser)
+        setProfile((prev) => (prev ? { ...prev, avatarUrl: updatedUser.avatarUrl } : null))
+        toast.success('Avatar updated successfully')
+      } else {
+        const updatedUser = await userService.uploadCover(croppedFile)
+        updateUser(updatedUser)
+        setProfile((prev) => (prev ? { ...prev, coverUrl: updatedUser.coverUrl } : null))
+        toast.success('Cover photo updated successfully')
+      }
+      setCropFile(null)
+      setCropType(null)
+    } catch (err: unknown) {
+      console.error('Failed to upload image:', err)
+      const errorMsg = isAvatar ? 'Failed to update avatar photo' : 'Failed to update cover photo'
+      toast.error(errorMsg)
+      throw err
+    } finally {
+      if (isAvatar) {
+        setIsUploadingAvatar(false)
+      } else {
+        setIsUploadingCover(false)
+      }
     }
   }
 
@@ -364,6 +402,7 @@ export const ProfilePage: React.FC = () => {
               <div className="absolute top-3 right-3 sm:bottom-4 sm:top-auto flex items-center gap-2">
                 <button
                   type="button"
+                  ref={coverButtonRef}
                   disabled={isUploadingCover}
                   onClick={() => coverInputRef.current?.click()}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900/80 hover:bg-slate-900 text-white text-xs font-bold uppercase tracking-wider rounded-xs backdrop-blur-xs border border-white/20 hover:border-white/40 shadow-xs transition-colors"
@@ -405,6 +444,7 @@ export const ProfilePage: React.FC = () => {
                     <div className="absolute bottom-2 right-2 flex items-center gap-1">
                       <button
                         type="button"
+                        ref={avatarButtonRef}
                         disabled={isUploadingAvatar}
                         onClick={() => avatarInputRef.current?.click()}
                         title={t('profileAvatarChange')}
@@ -761,6 +801,16 @@ export const ProfilePage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Image Crop & Zoom Editor Modal */}
+      <ImageCropModal
+        isOpen={!!cropFile && !!cropType}
+        file={cropFile}
+        cropType={cropType || 'avatar'}
+        onSave={handleCropSave}
+        onCancel={handleCropCancel}
+        triggerRef={cropType === 'cover' ? coverButtonRef : avatarButtonRef}
+      />
     </div>
   )
 }

@@ -36,6 +36,9 @@ export const reportService = {
   },
 
   async createReport(input: CreateReportInput, user: User): Promise<Report> {
+    if (!user || !user.id || user.id === 'anon-citizen') {
+      throw new Error('Authentication required: Cannot create report without authenticated user')
+    }
     if (isMockMode()) {
       await new Promise((res) => setTimeout(res, 300))
       return mockStorage.createReport(input, user)

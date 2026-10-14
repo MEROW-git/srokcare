@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -38,6 +38,9 @@ export const RegisterPage: React.FC = () => {
   const { t } = useTranslation()
   const { register: registerAuth, verifyRegistration } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const returnTo = (location.state as { from?: string })?.from || '/feed'
+
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [pendingEmail, setPendingEmail] = useState<string | null>(null)
@@ -71,7 +74,7 @@ export const RegisterPage: React.FC = () => {
       })
       if (complete) {
         toast.success(`Welcome to FixKH, ${data.nickname}!`)
-        navigate('/feed')
+        navigate(returnTo)
       } else {
         setPendingEmail(data.email)
         toast.success(t('codeSentNotice'))
@@ -91,7 +94,7 @@ export const RegisterPage: React.FC = () => {
       const details = getValues()
       await verifyRegistration({ nickname: details.nickname, email: pendingEmail, password: details.password, code })
       toast.success(`Welcome to FixKH, ${details.nickname}!`)
-      navigate('/feed')
+      navigate(returnTo)
     } catch (error) {
       toast.error(errorMessage(error, 'Verification failed. Check the code and try again.'))
     } finally {
@@ -357,7 +360,7 @@ export const RegisterPage: React.FC = () => {
 
               <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
                 {t('alreadyAccount')}{' '}
-                <Link to="/login" className="font-semibold text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 hover:underline">
+                <Link to="/login" state={{ from: returnTo }} className="font-semibold text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 hover:underline">
                   {t('loginBtn')}
                 </Link>
               </div>

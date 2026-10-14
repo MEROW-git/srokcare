@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -20,6 +20,9 @@ export const LoginPage: React.FC = () => {
   const { t } = useTranslation()
   const { login, verifyMfaLogin, loginAsDemoUser, loginAsAdmin } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const returnTo = (location.state as { from?: string })?.from || '/feed'
+
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [mfaChallenge, setMfaChallenge] = useState<string | null>(null)
@@ -49,7 +52,7 @@ export const LoginPage: React.FC = () => {
         return
       }
       toast.success('Signed in successfully!')
-      navigate('/feed')
+      navigate(returnTo)
     } catch {
       toast.error('Invalid credentials. Please verify your email and password.')
     } finally {
@@ -64,7 +67,7 @@ export const LoginPage: React.FC = () => {
     try {
       await verifyMfaLogin(mfaChallenge, mfaCode.trim())
       toast.success('Signed in successfully!')
-      navigate('/feed')
+      navigate(returnTo)
     } catch {
       toast.error('Invalid or expired authenticator code. Try again or use a recovery code.')
     } finally {
@@ -75,13 +78,13 @@ export const LoginPage: React.FC = () => {
   const handleQuickDemoUser = () => {
     loginAsDemoUser()
     toast.success('Signed in as Demo User (SOK Citizen)')
-    navigate('/feed')
+    navigate(returnTo)
   }
 
   const handleQuickDemoAdmin = () => {
     loginAsAdmin()
     toast.success('Signed in as Civic Moderator (Admin)')
-    navigate('/admin')
+    navigate(returnTo === '/reports/new' ? '/reports/new' : '/admin')
   }
 
   return (
@@ -279,7 +282,7 @@ export const LoginPage: React.FC = () => {
 
               <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
                 {t('noAccount')}{' '}
-                <Link to="/register" className="font-semibold text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 hover:underline">
+                <Link to="/register" state={{ from: returnTo }} className="font-semibold text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 hover:underline">
                   {t('registerBtn')}
                 </Link>
               </div>

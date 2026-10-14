@@ -228,6 +228,31 @@ export const translations = {
     profilePrivateNotice: 'Pseudonymous identity. Your email, internal ID, and authentication details remain strictly private.',
     profileBackToFeed: 'Back to Community Feed',
     profileViewReport: 'View Report',
+
+    // Crop & Zoom Editor
+    cropAvatarTitle: 'Crop Profile Avatar',
+    cropCoverTitle: 'Crop Cover Photo',
+    cropZoom: 'Zoom',
+    cropZoomIn: 'Zoom in',
+    cropZoomOut: 'Zoom out',
+    cropReset: 'Reset Crop',
+    cropDragHint: 'Drag to reposition or use arrow keys',
+    cropSave: 'Save Photo',
+    cropCancel: 'Cancel',
+    cropProcessing: 'Processing image...',
+    cropUploading: 'Uploading photo...',
+    cropImageTooSmall: 'Image is too small (minimum 32x32 pixels required)',
+    cropLoadFailed: 'Failed to load selected image. Please try another file.',
+
+    // Publish Report Auth Modal & Draft
+    authRequiredTitle: 'Sign in to publish report',
+    authRequiredPrompt: 'Sign in or create an account to publish your report.',
+    authRequiredDraftNotice: 'Your draft and photos are safely saved so you can review and publish right after signing in.',
+    authSignInBtn: 'Sign In',
+    authCreateAccountBtn: 'Create Account',
+    authKeepEditingBtn: 'Keep Editing',
+    draftRestoredNotice: 'Your report draft has been restored. Review your report and click Publish Report.',
+    sessionExpiredNotice: 'Your session has expired. Sign in or create an account to publish your report.',
   },
   km: {
     // App Brand
@@ -456,6 +481,31 @@ export const translations = {
     profilePrivateNotice: 'អត្តសញ្ញាណក្លែងក្លាយស្របច្បាប់។ អ៊ីមែល លេខសម្គាល់ និងទិន្នន័យសុវត្ថិភាពត្រូវបានរក្សាការសម្ងាត់។',
     profileBackToFeed: 'ត្រឡប់ទៅព័ត៌មានសហគមន៍',
     profileViewReport: 'មើលរបាយការណ៍',
+
+    // Crop & Zoom Editor
+    cropAvatarTitle: 'កាត់តម្រឹមរូបតំណាង',
+    cropCoverTitle: 'កាត់តម្រឹមរូបគម្រប',
+    cropZoom: 'ពង្រីក/បង្រួម',
+    cropZoomIn: 'ពង្រីក',
+    cropZoomOut: 'បង្រួម',
+    cropReset: 'កំណត់ឡើងវិញ',
+    cropDragHint: 'អូសដើម្បីផ្លាស់ប្តូរទីតាំង ឬប្រើគ្រាប់ចុចព្រួញ',
+    cropSave: 'រក្សាទុករូបថត',
+    cropCancel: 'បោះបង់',
+    cropProcessing: 'កំពុងដំណើរការរូបភាព...',
+    cropUploading: 'កំពុងផ្ទុកឡើងរូបថត...',
+    cropImageTooSmall: 'រូបភាពតូចពេក (ត្រូវការយ៉ាងតិច 32x32 ភីកសែល)',
+    cropLoadFailed: 'មិនអាចផ្ទុករូបភាពដែលបានជ្រើសរើសទេ។ សូមសាកល្បងឯកសារផ្សេងទៀត។',
+
+    // Publish Report Auth Modal & Draft
+    authRequiredTitle: 'ចូលប្រើប្រាស់ដើម្បីផ្សព្វផ្សាយរបាយការណ៍',
+    authRequiredPrompt: 'ចូលប្រើប្រាស់ ឬបង្កើតគណនីដើម្បីផ្សព្វផ្សាយរបាយការណ៍របស់អ្នក។',
+    authRequiredDraftNotice: 'សេចក្តីព្រាង និងរូបថតរបស់អ្នកត្រូវបានរក្សាទុកដោយសុវត្ថិភាព ដូច្នេះអ្នកអាចពិនិត្យឡើងវិញ និងផ្សព្វផ្សាយភ្លាមៗបន្ទាប់ពីចូលប្រើប្រាស់។',
+    authSignInBtn: 'ចូលប្រើប្រាស់',
+    authCreateAccountBtn: 'បង្កើតគណនី',
+    authKeepEditingBtn: 'បន្តកែសម្រួល',
+    draftRestoredNotice: 'សេចក្តីព្រាងរបាយការណ៍របស់អ្នកត្រូវបានស្តារឡើងវិញ។ សូមពិនិត្យរបាយការណ៍របស់អ្នក ហើយចុចផ្សព្វផ្សាយរបាយការណ៍។',
+    sessionExpiredNotice: 'សម័យការរបស់អ្នកបានផុតកំណត់ហើយ។ សូមចូលប្រើប្រាស់ ឬបង្កើតគណនីដើម្បីផ្សព្វផ្សាយរបាយការណ៍។',
   },
 } as const
 

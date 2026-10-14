@@ -12,7 +12,6 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { ReportCategory } from '@/types/report'
-import type { User } from '@/types/auth'
 import { reportService } from '@/services/reportService'
 import { findStreetAtPin, streetLookupAvailable } from '@/services/streetLookup'
 import { CAMBODIA_PROVINCES } from '@/data/provinces'
@@ -22,6 +21,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { LocationPickerMap } from '@/components/map/LocationPickerMap'
 import { CategoryIcon } from '@/components/common/CategoryIcon'
 import { DisclaimerBanner } from '@/components/common/DisclaimerBanner'
+import { AuthRequiredModal } from '@/components/reports/AuthRequiredModal'
+import { reportDraftService } from '@/services/reportDraftService'
+import axios from 'axios'
 
 const CATEGORIES: ReportCategory[] = [
   'ROAD_DAMAGE',
@@ -72,9 +74,12 @@ export const CreateReportPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [mapFocus, setMapFocus] = useState<{ latitude: number; longitude: number; zoom: number } | null>(null)
   const [streetLookupStatus, setStreetLookupStatus] = useState<'idle' | 'loading' | 'not-found' | 'error'>('idle')
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [isSessionExpired, setIsSessionExpired] = useState(false)
   const streetLookupRef = useRef<AbortController | null>(null)
   const streetLookupIdRef = useRef(0)
   const addressManuallyEditedRef = useRef(false)
+  const publishButtonRef = useRef<HTMLButtonElement>(null)
 
   const {
     register,
@@ -106,6 +111,40 @@ export const CreateReportPage: React.FC = () => {
   const provinceField = register('province')
   const districtField = register('district')
   const addressField = register('address')
+
+  // Restore draft on mount if previously saved during auth redirect
+  useEffect(() => {
+    let mounted = true
+    const restoreDraft = async () => {
+      try {
+        const draft = await reportDraftService.getDraft()
+        if (draft && mounted) {
+          setValue('title', draft.title, { shouldValidate: true })
+          setValue('description', draft.description, { shouldValidate: true })
+          setValue('category', draft.category, { shouldValidate: true })
+          setValue('province', draft.province, { shouldValidate: true })
+          setValue('district', draft.district, { shouldValidate: true })
+          if (draft.address) {
+            setValue('address', draft.address, { shouldValidate: true })
+            addressManuallyEditedRef.current = true
+          }
+          setValue('latitude', draft.latitude, { shouldValidate: true })
+          setValue('longitude', draft.longitude, { shouldValidate: true })
+          if (draft.images && draft.images.length > 0) {
+            setUploadedPhotos(draft.images)
+          }
+          setMapFocus({ latitude: draft.latitude, longitude: draft.longitude, zoom: 14 })
+          toast.info(t('draftRestoredNotice'))
+        }
+      } catch (err) {
+        console.warn('Failed to restore draft:', err)
+      }
+    }
+    void restoreDraft()
+    return () => {
+      mounted = false
+    }
+  }, [setValue, t])
 
   useEffect(() => () => streetLookupRef.current?.abort(), [])
 
@@ -212,17 +251,32 @@ export const CreateReportPage: React.FC = () => {
     setUploadedPhotos((prev) => prev.filter((_, i) => i !== index))
   }
 
+  // Save current form draft to storage (including photos)
+  const saveCurrentDraft = async (data: ReportFormData) => {
+    await reportDraftService.saveDraft({
+      title: data.title,
+      description: data.description,
+      category: data.category,
+      province: data.province,
+      district: data.district,
+      address: data.address,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      images: uploadedPhotos,
+    })
+  }
+
   const onSubmit = async (data: ReportFormData) => {
+    // If visitor is signed out, save draft and prompt to sign in or register
+    if (!user) {
+      await saveCurrentDraft(data)
+      setIsSessionExpired(false)
+      setIsAuthModalOpen(true)
+      return
+    }
+
     setIsSubmitting(true)
     try {
-      const author: User = user || {
-        id: 'anon-citizen',
-        nickname: 'Anonymous Citizen',
-        email: 'citizen@fixkh.gov.kh',
-        role: 'CITIZEN',
-        createdAt: new Date().toISOString(),
-      }
-
       const newReport = await reportService.createReport(
         {
           title: data.title,
@@ -235,17 +289,43 @@ export const CreateReportPage: React.FC = () => {
           longitude: data.longitude,
           images: uploadedPhotos,
         },
-        author
+        user
       )
 
+      await reportDraftService.clearDraft()
       toast.success(t('reportSuccess'))
       navigate(`/reports/${newReport.id}`)
-    } catch (err) {
-      console.error(err)
+    } catch (err: unknown) {
+      console.error('Failed to submit civic report:', err)
+      if (axios.isAxiosError(err) && err.response?.status === 401) {
+        await saveCurrentDraft(data)
+        setIsSessionExpired(true)
+        setIsAuthModalOpen(true)
+        return
+      }
       toast.error('Unable to submit civic report. Please check your network and try again.')
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const handleModalSignIn = async () => {
+    const currentValues = watch()
+    await saveCurrentDraft(currentValues)
+    setIsAuthModalOpen(false)
+    navigate('/login', { state: { from: '/reports/new' } })
+  }
+
+  const handleModalCreateAccount = async () => {
+    const currentValues = watch()
+    await saveCurrentDraft(currentValues)
+    setIsAuthModalOpen(false)
+    navigate('/register', { state: { from: '/reports/new' } })
+  }
+
+  const handleModalClose = () => {
+    setIsAuthModalOpen(false)
+    setIsSessionExpired(false)
   }
 
   return (
@@ -496,6 +576,7 @@ export const CreateReportPage: React.FC = () => {
               {t('cancel')}
             </button>
             <button
+              ref={publishButtonRef}
               type="submit"
               disabled={isSubmitting}
               className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-blue-900 hover:bg-blue-950 dark:bg-blue-600 dark:hover:bg-blue-500 active:bg-blue-950 rounded-sm shadow-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider border border-blue-950 dark:border-blue-500"
@@ -515,6 +596,16 @@ export const CreateReportPage: React.FC = () => {
           </div>
         </form>
       </div>
+
+      {/* Authentication Required Modal */}
+      <AuthRequiredModal
+        isOpen={isAuthModalOpen}
+        isSessionExpired={isSessionExpired}
+        onClose={handleModalClose}
+        onSignIn={handleModalSignIn}
+        onCreateAccount={handleModalCreateAccount}
+        triggerRef={publishButtonRef}
+      />
     </div>
   )
 }
