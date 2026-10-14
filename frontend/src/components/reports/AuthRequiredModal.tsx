@@ -124,32 +124,33 @@ export const AuthRequiredModal: React.FC<AuthRequiredModalProps> = ({
         </div>
 
         {/* Modal Footer Actions */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 px-5 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/50">
+        <div className="px-5 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/50">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={onCreateAccount}
+              className="min-h-10 inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-wider text-blue-900 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/60 rounded-xs border border-blue-800 dark:border-blue-500 transition-colors text-center"
+            >
+              <UserPlus className="w-3.5 h-3.5 shrink-0" />
+              <span>{t('authCreateAccountBtn')}</span>
+            </button>
+
+            <button
+              ref={signInButtonRef}
+              type="button"
+              onClick={onSignIn}
+              className="min-h-10 inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-wider text-white bg-blue-900 hover:bg-blue-950 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-xs transition-colors shadow-2xs border border-blue-950 dark:border-blue-400 text-center"
+            >
+              <LogIn className="w-3.5 h-3.5 shrink-0" />
+              <span>{t('authSignInBtn')}</span>
+            </button>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="order-3 sm:order-1 px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xs border border-slate-300 dark:border-slate-700 transition-colors text-center"
+            className="block mx-auto mt-3 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:underline transition-colors text-center"
           >
             {t('authKeepEditingBtn')}
-          </button>
-
-          <button
-            type="button"
-            onClick={onCreateAccount}
-            className="order-2 sm:order-2 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-blue-900 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/60 rounded-xs border border-blue-800 dark:border-blue-500 transition-colors text-center"
-          >
-            <UserPlus className="w-3.5 h-3.5" />
-            <span>{t('authCreateAccountBtn')}</span>
-          </button>
-
-          <button
-            ref={signInButtonRef}
-            type="button"
-            onClick={onSignIn}
-            className="order-1 sm:order-3 inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white bg-blue-900 hover:bg-blue-950 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-xs transition-colors shadow-2xs border border-blue-950 dark:border-blue-400 text-center"
-          >
-            <LogIn className="w-3.5 h-3.5" />
-            <span>{t('authSignInBtn')}</span>
           </button>
         </div>
       </div>
