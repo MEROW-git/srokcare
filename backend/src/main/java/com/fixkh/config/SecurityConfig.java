@@ -89,7 +89,8 @@ public class SecurityConfig {
                                 "/api/v1/reports/*/comments", "/api/v1/reports/*/images", "/api/v1/reports/*/images/*/content",
                                 "/api/v1/users/*/public-profile", "/api/v1/users/*/reports", "/api/v1/users/*/avatar", "/api/v1/users/*/cover").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/verify-registration",
-                                "/api/v1/auth/login", "/api/v1/auth/mfa/verify-login").permitAll()
+                                "/api/v1/auth/login", "/api/v1/auth/mfa/verify-login",
+                                "/api/v1/auth/forgot-password", "/api/v1/auth/reset-password").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(o -> o

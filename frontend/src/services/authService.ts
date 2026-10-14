@@ -87,6 +87,14 @@ export const authService = {
     await apiClient.post('/auth/register', { email })
   },
 
+  async requestPasswordReset(email: string): Promise<void> {
+    await apiClient.post('/auth/forgot-password', { email })
+  },
+
+  async resetPassword(email: string, code: string, password: string): Promise<void> {
+    await apiClient.post('/auth/reset-password', { email, code, password })
+  },
+
   async getCurrentUser(): Promise<User | null> {
     if (isMockMode()) {
       const rawUser = localStorage.getItem('fixkh_auth_user')

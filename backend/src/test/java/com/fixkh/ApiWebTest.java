@@ -33,6 +33,7 @@ class ApiWebTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
     @MockitoBean AuthService auth;
+    @MockitoBean PasswordResetService passwordReset;
     @MockitoBean MfaService mfa;
     @MockitoBean UserRepository users;
     @MockitoBean ReportService reports;
@@ -69,6 +70,24 @@ class ApiWebTest {
         mvc.perform(post("/api/v1/auth/verify-registration").contentType("application/json")
                 .content("{\"nickname\":\"SOK Citizen\",\"email\":\"sok@example.com\",\"password\":\"StrongPassword123!\",\"code\":\"123456\"}"))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.token").value("signed-jwt"));
+    }
+    @Test void passwordRecoveryIsPublicAndValidatesInput() throws Exception {
+        mvc.perform(post("/api/v1/auth/forgot-password").contentType("application/json")
+                .content("{\"email\":\"bad\"}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(post("/api/v1/auth/forgot-password").contentType("application/json")
+                .content("{\"email\":\"sok@example.com\"}"))
+                .andExpect(status().isAccepted())
+                .andExpect(header().string("Cache-Control", "no-store"))
+                .andExpect(jsonPath("$.code").doesNotExist());
+        verify(passwordReset).request(any());
+        mvc.perform(post("/api/v1/auth/reset-password").contentType("application/json")
+                .content("{\"email\":\"sok@example.com\",\"code\":\"bad\",\"password\":\"StrongPassword123!\"}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(post("/api/v1/auth/reset-password").contentType("application/json")
+                .content("{\"email\":\"sok@example.com\",\"code\":\"123456\",\"password\":\"StrongPassword123!\"}"))
+                .andExpect(status().isNoContent());
+        verify(passwordReset).reset(any());
     }
     @Test void jwtRequiredForMeAndLoginIsPublic() throws Exception {
         mvc.perform(get("/api/v1/auth/me")).andExpect(status().isUnauthorized()).andExpect(jsonPath("$.status").value(401));

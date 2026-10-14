@@ -73,9 +73,9 @@ Open **[http://localhost:5173](http://localhost:5173)**. The example frontend co
 
 ## Email verification
 
-Real API registration sends a six-digit code **only when someone registers**. The user enters that code to finish creating an account. Codes expire after 10 minutes and have request and attempt limits.
+Real API registration sends a six-digit code when someone registers. The user enters that code to finish creating an account. The sign-in page also offers **Forgot password?**, which sends a separate code to the account email and lets the user choose a new password. Both codes expire after 10 minutes and have request and attempt limits. Password recovery leaves authenticator MFA enabled and signs out existing sessions.
 
-Set `otp_email` to a verified **sender address** in `backend/.env`. Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, and `SMTP_PASSWORD` with credentials from your email provider. The [backend setup guide](backend/README.md#start-locally) includes a Brevo SMTP example. Without working SMTP settings, registration returns `503`; demo mode does not send email.
+Set `otp_email` to a verified **sender address** in `backend/.env`. Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, and `SMTP_PASSWORD` with credentials from your email provider. The [backend setup guide](backend/README.md#start-locally) includes a Brevo SMTP example. Without working SMTP settings, registration returns `503`; demo mode does not send email or offer password recovery.
 
 ## API docs
 

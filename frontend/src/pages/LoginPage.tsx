@@ -33,6 +33,7 @@ export const LoginPage: React.FC = () => {
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -245,6 +246,7 @@ export const LoginPage: React.FC = () => {
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                         {t('passwordField')}
                       </label>
+                      {!mock && <Link to="/forgot-password" state={{ email: getValues('email'), from: returnTo }} className="text-xs font-semibold text-blue-700 dark:text-blue-400 hover:underline">{t('forgotPasswordLink')}</Link>}
                     </div>
                     <div className="relative">
                       <input

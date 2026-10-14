@@ -19,6 +19,11 @@ public final class ApiDtos {
             @NotBlank @Size(min = 8, max = 72) @Schema(example = "StrongPassword123!") String password,
             @NotBlank @jakarta.validation.constraints.Pattern(regexp = "[0-9]{6}") @Schema(example = "123456") String code) {}
     public record RegistrationPendingResponse(String message) {}
+    public record ForgotPasswordRequest(@NotBlank @Email @Size(max = 320) String email) {}
+    public record ResetPasswordRequest(
+            @NotBlank @Email @Size(max = 320) String email,
+            @NotBlank @Pattern(regexp = "[0-9]{6}") String code,
+            @NotBlank @Size(min = 8, max = 72) String password) {}
     public record LoginRequest(@NotBlank @Email @Schema(example = "sok@example.com") String email,
             @NotBlank @Schema(example = "StrongPassword123!") String password) {}
     public record UserResponse(

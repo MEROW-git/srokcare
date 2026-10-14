@@ -8,9 +8,14 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.event.TransactionalEventListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class RegistrationEmailSender {
+    private static final Logger log = LoggerFactory.getLogger(RegistrationEmailSender.class);
     private final ObjectProvider<JavaMailSender> senders;
     private final String host;
     private final String from;
@@ -24,18 +29,50 @@ public class RegistrationEmailSender {
     }
 
     public void sendCode(String recipient, String code) {
+        send(recipient, "FixKH registration code", "Your FixKH registration code is " + code + ". It expires in 10 minutes. If you did not request it, ignore this email.");
+    }
+
+    public void sendPasswordResetCode(String recipient, String code) {
+        send(recipient, "FixKH password reset code", "Your FixKH password reset code is " + code + ". It expires in 10 minutes. If you did not request it, ignore this email. Never share this code.");
+    }
+
+    public void sendPasswordChangedNotice(String recipient) {
+        send(recipient, "Your FixKH password was changed", "Your FixKH password was changed. If you did not make this change, contact the FixKH team immediately.");
+    }
+
+    @Async("passwordResetEmailExecutor")
+    @TransactionalEventListener
+    public void onResetCodeRequested(PasswordResetService.ResetCodeEmail event) {
+        try {
+            sendPasswordResetCode(event.recipient(), event.code());
+        } catch (RuntimeException error) {
+            log.error("Password reset email delivery failed", error);
+        }
+    }
+
+    @Async("passwordResetEmailExecutor")
+    @TransactionalEventListener
+    public void onPasswordChanged(PasswordResetService.PasswordChangedEmail event) {
+        try {
+            sendPasswordChangedNotice(event.recipient());
+        } catch (RuntimeException error) {
+            log.error("Password change notice delivery failed", error);
+        }
+    }
+
+    private void send(String recipient, String subject, String body) {
         JavaMailSender sender = senders.getIfAvailable();
         if (host.isBlank() || sender == null || !validSender(from))
-            throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "Registration email is not configured");
+            throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "Email is not configured");
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(from);
         message.setTo(recipient);
-        message.setSubject("FixKH registration code");
-        message.setText("Your FixKH registration code is " + code + ". It expires in 10 minutes. If you did not request it, ignore this email.");
+        message.setSubject(subject);
+        message.setText(body);
         try {
             sender.send(message);
         } catch (MailException e) {
-            throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "Could not send registration email. Please try again later");
+            throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "Could not send email. Please try again later");
         }
     }
 

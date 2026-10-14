@@ -32,4 +32,17 @@ class RegistrationEmailSenderTest {
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE, assertThrows(ApiException.class,
                 () -> sender.sendCode("citizen@example.com", "123456")).getStatus());
     }
+
+    @Test void passwordResetEmailUsesDistinctSubjectAndNoPassword() {
+        @SuppressWarnings("unchecked") ObjectProvider<JavaMailSender> providers = mock(ObjectProvider.class);
+        JavaMailSender sender = mock(JavaMailSender.class);
+        when(providers.getIfAvailable()).thenReturn(sender);
+        new RegistrationEmailSender(providers, "smtp.example.com", "sender@example.com")
+                .sendPasswordResetCode("citizen@example.com", "654321");
+        ArgumentCaptor<SimpleMailMessage> message = ArgumentCaptor.forClass(SimpleMailMessage.class);
+        verify(sender).send(message.capture());
+        assertEquals("FixKH password reset code", message.getValue().getSubject());
+        assertTrue(message.getValue().getText().contains("654321"));
+        assertArrayEquals(new String[] { "citizen@example.com" }, message.getValue().getTo());
+    }
 }

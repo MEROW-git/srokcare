@@ -57,6 +57,8 @@ curl -X POST http://localhost:8080/api/v1/auth/register -H 'Content-Type: applic
 
 The API returns `202` and emails a code that expires after 10 minutes. Finish registration with `POST /api/v1/auth/verify-registration` and `{"nickname":"SOK Citizen","email":"sok@example.com","password":"StrongPassword123!","code":"123456"}` using the actual emailed code. This returns a JWT. Codes are hashed in PostgreSQL, allow five guesses, and can be requested at most once per minute and three times per hour per email. Log in later with `POST /api/v1/auth/login` using `{"email":"sok@example.com","password":"StrongPassword123!"}`. Copy the returned `token` into Swagger's **Authorize** dialog, then create a report with `POST /api/v1/reports` and the body below. Swagger sends `Authorization: Bearer <token>` automatically.
 
+Forgotten passwords use `POST /api/v1/auth/forgot-password` with `{"email":"sok@example.com"}`. The endpoint returns `202` with the same message whether the account exists or not. If it exists, the backend emails a separate six-digit reset code. Submit `{"email":"sok@example.com","code":"123456","password":"NewPassword123!"}` to `POST /api/v1/auth/reset-password`; success returns `204`. The code expires after 10 minutes, allows five incorrect guesses, and is single use. Requesting a new code is limited to once per minute and three times per hour per account. A successful reset revokes existing JWTs while leaving authenticator MFA enabled. The user signs in normally afterward.
+
 ```json
 {
   "title": "Large pothole on the road",

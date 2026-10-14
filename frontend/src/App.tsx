@@ -14,6 +14,7 @@ import { CreateReportPage } from '@/pages/CreateReportPage'
 import { ReportDetailsPage } from '@/pages/ReportDetailsPage'
 import { RegisterPage } from '@/pages/RegisterPage'
 import { LoginPage } from '@/pages/LoginPage'
+import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
 import { MyReportsPage } from '@/pages/MyReportsPage'
 import { ProfilePage } from '@/pages/ProfilePage'
 import { SettingsPage } from '@/pages/SettingsPage'
@@ -45,6 +46,7 @@ export const App: React.FC = () => {
                 <Route path="/reports/:id" element={<ReportDetailsPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profile/:identifier" element={<ProfilePage />} />
                 <Route path="/my-reports" element={<MyReportsPage />} />

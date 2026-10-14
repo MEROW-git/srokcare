@@ -3,6 +3,7 @@ package com.fixkh.controller;
 import com.fixkh.dto.ApiDtos.*;
 import com.fixkh.service.AuthService;
 import com.fixkh.service.MfaService;
+import com.fixkh.service.PasswordResetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,7 +16,10 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService service;
     private final MfaService mfa;
-    public AuthController(AuthService service, MfaService mfa) { this.service = service; this.mfa = mfa; }
+    private final PasswordResetService passwordReset;
+    public AuthController(AuthService service, MfaService mfa, PasswordResetService passwordReset) {
+        this.service = service; this.mfa = mfa; this.passwordReset = passwordReset;
+    }
     @PostMapping("/register") @ResponseStatus(HttpStatus.ACCEPTED) @Operation(summary = "Email a registration code to a new citizen")
     public RegistrationPendingResponse register(@Valid @RequestBody RegisterRequest request) { return service.register(request); }
     @PostMapping("/verify-registration") @ResponseStatus(HttpStatus.CREATED) @Operation(summary = "Verify email and create a citizen account")
@@ -27,6 +31,19 @@ public class AuthController {
     public AuthResponse login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         response.setHeader("Cache-Control", "no-store");
         return service.login(request);
+    }
+    @PostMapping("/forgot-password") @ResponseStatus(HttpStatus.ACCEPTED)
+    @Operation(summary = "Request a password reset code by email")
+    public RegistrationPendingResponse forgotPassword(@Valid @RequestBody ForgotPasswordRequest request, HttpServletResponse response) {
+        response.setHeader("Cache-Control", "no-store");
+        passwordReset.request(request);
+        return new RegistrationPendingResponse("If an account uses that email, a reset code will be sent");
+    }
+    @PostMapping("/reset-password") @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Set a new password using an emailed code")
+    public void resetPassword(@Valid @RequestBody ResetPasswordRequest request, HttpServletResponse response) {
+        response.setHeader("Cache-Control", "no-store");
+        passwordReset.reset(request);
     }
     @GetMapping("/me") @Operation(summary = "Get private account profile", security = @SecurityRequirement(name = "bearerAuth"))
     public UserResponse me() { return service.me(); }
