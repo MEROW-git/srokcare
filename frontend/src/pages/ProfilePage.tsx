@@ -27,6 +27,7 @@ import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ImageCropModal } from '@/components/profile/ImageCropModal'
+import { hasKhmerText } from '@/lib/utils'
 import type { Report } from '@/types/report'
 import type { PublicProfile } from '@/types/auth'
 
@@ -35,7 +36,7 @@ const REPORTS_PAGE_SIZE = 20
 export const ProfilePage: React.FC = () => {
   const { identifier } = useParams<{ identifier?: string }>()
   const { user, isAuthenticated, updateUser } = useAuth()
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
   const navigate = useNavigate()
 
   // State
@@ -672,13 +673,31 @@ export const ProfilePage: React.FC = () => {
                     </span>
                   </div>
 
-                  <h3 className="text-sm font-bold text-slate-950 dark:text-white group-hover:text-blue-900 dark:group-hover:text-blue-400 line-clamp-1 mb-1 transition-colors">
-                    {report.title}
-                  </h3>
+                  {(() => {
+                    const isKhmerTitle = hasKhmerText(report.title) || language === 'km'
+                    const isKhmerDesc = hasKhmerText(report.description) || language === 'km'
+                    return (
+                      <>
+                        <h3
+                          lang={isKhmerTitle ? 'km' : undefined}
+                          className={`text-sm font-bold text-slate-950 dark:text-white group-hover:text-blue-900 dark:group-hover:text-blue-400 line-clamp-1 mb-1 transition-colors ${
+                            isKhmerTitle ? 'font-khmer tracking-normal leading-normal py-0.5' : ''
+                          }`}
+                        >
+                          {report.title}
+                        </h3>
 
-                  <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mb-3 leading-relaxed">
-                    {report.description}
-                  </p>
+                        <p
+                          lang={isKhmerDesc ? 'km' : undefined}
+                          className={`text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mb-3 ${
+                            isKhmerDesc ? 'font-khmer tracking-normal leading-[1.75] py-0.5' : 'leading-relaxed'
+                          }`}
+                        >
+                          {report.description}
+                        </p>
+                      </>
+                    )
+                  })()}
 
                   <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-200 dark:border-slate-800">
                     <span className="flex items-center gap-1 truncate max-w-[200px]">

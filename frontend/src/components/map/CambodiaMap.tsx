@@ -7,6 +7,7 @@ import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
 import { ThumbsUp, MapPin, ExternalLink } from 'lucide-react'
 import { getMapStyle } from '@/lib/mapStyle'
+import { hasKhmerText } from '@/lib/utils'
 
 interface CambodiaMapProps {
   reports: Report[]
@@ -164,9 +165,19 @@ export const CambodiaMap: React.FC<CambodiaMapProps> = ({
             </div>
           </div>
 
-          <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 tracking-tight line-clamp-1 mb-1">
-            {activePreviewReport.title}
-          </h4>
+          {(() => {
+            const isKhmer = hasKhmerText(activePreviewReport.title)
+            return (
+              <h4
+                lang={isKhmer ? 'km' : undefined}
+                className={`text-sm font-bold text-slate-900 dark:text-slate-100 line-clamp-1 mb-1 ${
+                  isKhmer ? 'font-khmer tracking-normal leading-normal py-0.5' : 'tracking-tight'
+                }`}
+              >
+                {activePreviewReport.title}
+              </h4>
+            )
+          })()}
 
           <div className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400 mb-2.5">
             <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />

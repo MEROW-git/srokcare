@@ -19,6 +19,7 @@ import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents'
 import { isMockMode } from '@/services/apiClient'
+import { hasKhmerText } from '@/lib/utils'
 
 const ALL_STATUSES: ReportStatus[] = [
   'REPORTED',
@@ -260,12 +261,20 @@ export const AdminDashboardPage: React.FC = () => {
                     {/* Title & author */}
                     <td className="py-3 px-4 sm:px-5">
                       <div className="space-y-0.5">
-                        <Link
-                          to={`/reports/${report.id}`}
-                          className="font-bold text-slate-900 dark:text-slate-100 hover:text-blue-700 dark:hover:text-blue-400 line-clamp-1 block transition-colors"
-                        >
-                          {report.title}
-                        </Link>
+                        {(() => {
+                          const isKhmer = hasKhmerText(report.title)
+                          return (
+                            <Link
+                              to={`/reports/${report.id}`}
+                              lang={isKhmer ? 'km' : undefined}
+                              className={`font-bold text-slate-900 dark:text-slate-100 hover:text-blue-700 dark:hover:text-blue-400 line-clamp-1 block transition-colors ${
+                                isKhmer ? 'font-khmer tracking-normal leading-normal py-0.5' : ''
+                              }`}
+                            >
+                              {report.title}
+                            </Link>
+                          )
+                        })()}
                         <div className="flex items-center gap-2 text-[10px] font-mono text-slate-400 dark:text-slate-500">
                           <span>By {report.authorNickname}</span>
                           <span>•</span>

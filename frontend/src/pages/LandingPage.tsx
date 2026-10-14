@@ -261,7 +261,14 @@ export const LandingPage: React.FC = () => {
                   <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
                     {t(key)}
                   </h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-tight">
+                  <p
+                    lang={language === 'km' ? 'km' : undefined}
+                    className={`text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 ${
+                      language === 'km'
+                        ? 'font-khmer tracking-normal leading-[1.6] py-0.5'
+                        : 'leading-tight'
+                    }`}
+                  >
                     {language === 'km' ? cat.descKm : cat.descEn}
                   </p>
                 </div>

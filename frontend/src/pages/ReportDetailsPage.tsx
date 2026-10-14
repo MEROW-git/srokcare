@@ -21,7 +21,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Avatar } from '@/components/common/Avatar'
 import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
-import { formatRelativeTime } from '@/lib/utils'
+import { formatRelativeTime, hasKhmerText } from '@/lib/utils'
 import { DisclaimerBanner } from '@/components/common/DisclaimerBanner'
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents'
 import { getMapStyle } from '@/lib/mapStyle'
@@ -29,7 +29,7 @@ import { getMapStyle } from '@/lib/mapStyle'
 export const ReportDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
   const { user } = useAuth()
 
   const [report, setReport] = useState<Report | null>(null)
@@ -227,9 +227,21 @@ export const ReportDetailsPage: React.FC = () => {
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight leading-snug">
-            {report.title}
-          </h1>
+          {(() => {
+            const isKhmerTitle = hasKhmerText(report.title) || language === 'km'
+            return (
+              <h1
+                lang={isKhmerTitle ? 'km' : undefined}
+                className={`text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 ${
+                  isKhmerTitle
+                    ? 'font-khmer tracking-normal leading-[1.5] sm:leading-[1.55] py-0.5'
+                    : 'tracking-tight leading-snug'
+                }`}
+              >
+                {report.title}
+              </h1>
+            )
+          })()}
 
           {/* Author info */}
           <div className="flex items-center gap-3 pt-1">
@@ -239,7 +251,10 @@ export const ReportDetailsPage: React.FC = () => {
             <div>
               <Link
                 to={`/profile/${encodeURIComponent(report.authorNickname)}`}
-                className="text-xs font-bold text-slate-900 dark:text-slate-100 hover:underline hover:text-blue-900 dark:hover:text-blue-400 transition-colors"
+                lang={hasKhmerText(report.authorNickname) ? 'km' : undefined}
+                className={`text-xs font-bold text-slate-900 dark:text-slate-100 hover:underline hover:text-blue-900 dark:hover:text-blue-400 transition-colors ${
+                  hasKhmerText(report.authorNickname) ? 'font-khmer tracking-normal' : ''
+                }`}
               >
                 {report.authorNickname}
               </Link>
@@ -290,9 +305,21 @@ export const ReportDetailsPage: React.FC = () => {
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 font-mono">
               PROBLEM DESCRIPTION
             </h3>
-            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line font-normal">
-              {report.description}
-            </p>
+            {(() => {
+              const isKhmerDesc = hasKhmerText(report.description) || language === 'km'
+              return (
+                <p
+                  lang={isKhmerDesc ? 'km' : undefined}
+                  className={`text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line font-normal ${
+                    isKhmerDesc
+                      ? 'font-khmer tracking-normal leading-[1.8] py-0.5'
+                      : 'leading-relaxed'
+                  }`}
+                >
+                  {report.description}
+                </p>
+              )
+            })()}
           </div>
 
           {/* Location Map Preview */}
@@ -346,7 +373,7 @@ export const ReportDetailsPage: React.FC = () => {
         <div id="comments" className="bg-slate-50 dark:bg-slate-900/60 p-6 sm:p-7 border-t border-slate-200 dark:border-slate-800 space-y-5">
           <div className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4 text-blue-700 dark:text-blue-400" />
-            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 tracking-normal">
               Community Discussion ({comments.length})
             </h3>
           </div>
@@ -363,7 +390,8 @@ export const ReportDetailsPage: React.FC = () => {
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder={t('commentPlaceholder')}
-                className="w-full p-2.5 text-xs bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 rounded-sm border border-slate-300 dark:border-slate-700 focus:border-slate-800 dark:focus:border-blue-500 outline-hidden transition-colors text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                lang={language === 'km' || hasKhmerText(newComment) ? 'km' : undefined}
+                className="w-full p-2.5 text-xs bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 rounded-sm border border-slate-300 dark:border-slate-700 focus:border-slate-800 dark:focus:border-blue-500 outline-hidden transition-colors text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 leading-relaxed font-sans"
               />
               <div className="flex justify-end">
                 <button
@@ -393,27 +421,43 @@ export const ReportDetailsPage: React.FC = () => {
                 {t('noCommentsYet')}
               </p>
             ) : (
-              comments.map((cmt) => (
-                <div key={cmt.id} className="bg-white dark:bg-slate-900 p-3.5 rounded-sm border border-slate-200 dark:border-slate-800 shadow-2xs flex gap-3">
-                  <Link to={`/profile/${encodeURIComponent(cmt.authorNickname)}`} className="shrink-0">
-                    <Avatar nickname={cmt.authorNickname} size="sm" />
-                  </Link>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <Link
-                        to={`/profile/${encodeURIComponent(cmt.authorNickname)}`}
-                        className="text-xs font-bold text-slate-900 dark:text-slate-100 hover:underline hover:text-blue-900 dark:hover:text-blue-400 transition-colors"
+              comments.map((cmt) => {
+                const isKhmerCmt = hasKhmerText(cmt.content)
+                const isKhmerCmtAuthor = hasKhmerText(cmt.authorNickname)
+                return (
+                  <div key={cmt.id} className="bg-white dark:bg-slate-900 p-3.5 rounded-sm border border-slate-200 dark:border-slate-800 shadow-2xs flex gap-3">
+                    <Link to={`/profile/${encodeURIComponent(cmt.authorNickname)}`} className="shrink-0">
+                      <Avatar nickname={cmt.authorNickname} size="sm" />
+                    </Link>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <Link
+                          to={`/profile/${encodeURIComponent(cmt.authorNickname)}`}
+                          lang={isKhmerCmtAuthor ? 'km' : undefined}
+                          className={`text-xs font-bold text-slate-900 dark:text-slate-100 hover:underline hover:text-blue-900 dark:hover:text-blue-400 transition-colors ${
+                            isKhmerCmtAuthor ? 'font-khmer tracking-normal' : ''
+                          }`}
+                        >
+                          {cmt.authorNickname}
+                        </Link>
+                        <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">
+                          {formatRelativeTime(cmt.createdAt)}
+                        </span>
+                      </div>
+                      <p
+                        lang={isKhmerCmt ? 'km' : undefined}
+                        className={`text-xs text-slate-700 dark:text-slate-300 ${
+                          isKhmerCmt
+                            ? 'font-khmer tracking-normal leading-[1.75] py-0.5'
+                            : 'leading-relaxed'
+                        }`}
                       >
-                        {cmt.authorNickname}
-                      </Link>
-                      <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">
-                        {formatRelativeTime(cmt.createdAt)}
-                      </span>
+                        {cmt.content}
+                      </p>
                     </div>
-                    <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{cmt.content}</p>
                   </div>
-                </div>
-              ))
+                )
+              })
             )}
           </div>
         </div>

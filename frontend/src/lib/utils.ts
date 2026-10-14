@@ -35,3 +35,12 @@ export function formatRelativeTime(dateString: string): string {
     return 'recently'
   }
 }
+
+/**
+ * Returns true if the string contains any Khmer unicode characters (U+1780 to U+17FF or U+19E0 to U+19FF)
+ */
+export function hasKhmerText(text?: string | null): boolean {
+  if (!text) return false
+  return /[\u1780-\u17FF\u19E0-\u19FF]/.test(text)
+}
+

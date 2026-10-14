@@ -14,6 +14,10 @@ const STORAGE_KEY = 'fixkh_language'
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
+    try {
+      const qLang = new URLSearchParams(window.location.search).get('lang')
+      if (qLang === 'km' || qLang === 'en') return qLang
+    } catch {}
     const saved = localStorage.getItem(STORAGE_KEY)
     return saved === 'km' ? 'km' : 'en'
   })

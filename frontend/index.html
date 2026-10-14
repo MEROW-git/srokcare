@@ -9,12 +9,14 @@
     <!-- Fonts: Inter & Noto Sans Khmer -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Khmer:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Khmer:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <!-- Prevent theme flash on page load -->
     <script>
       (function () {
         try {
-          var stored = localStorage.getItem('fixkh_theme');
+          var params = new URLSearchParams(window.location.search);
+          var qTheme = params.get('theme');
+          var stored = qTheme || localStorage.getItem('fixkh_theme');
           var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
           if (stored === 'dark' || (!stored && prefersDark) || (stored === 'system' && prefersDark)) {
             document.documentElement.classList.add('dark');

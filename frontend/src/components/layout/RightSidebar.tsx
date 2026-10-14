@@ -4,6 +4,7 @@ import { TrendingUp, ShieldCheck, BarChart3, ThumbsUp, MessageSquare } from 'luc
 import type { Report } from '@/types/report'
 import { useTranslation } from '@/contexts/LanguageContext'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
+import { hasKhmerText } from '@/lib/utils'
 
 interface RightSidebarProps {
   trendingReports: Report[]
@@ -17,7 +18,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   trendingReports,
   stats,
 }) => {
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
 
   return (
     <aside className="w-80 shrink-0 space-y-4">
@@ -68,9 +69,21 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                   {report.province}
                 </span>
               </div>
-              <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-900 dark:group-hover:text-blue-400 line-clamp-2 transition-colors leading-snug">
-                {report.title}
-              </h4>
+              {(() => {
+                const isKhmer = hasKhmerText(report.title) || language === 'km'
+                return (
+                  <h4
+                    lang={isKhmer ? 'km' : undefined}
+                    className={`text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-900 dark:group-hover:text-blue-400 line-clamp-2 transition-colors ${
+                      isKhmer
+                        ? 'font-khmer tracking-normal leading-[1.6] py-0.5'
+                        : 'leading-snug'
+                    }`}
+                  >
+                    {report.title}
+                  </h4>
+                )
+              })()}
               <div className="flex items-center gap-3 mt-1 text-[11px] font-mono text-slate-500 dark:text-slate-400">
                 <span className="flex items-center gap-1">
                   <ThumbsUp className="w-3 h-3 text-blue-800 dark:text-blue-400" />

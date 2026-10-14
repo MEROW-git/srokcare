@@ -15,7 +15,7 @@ import { reportService } from '@/services/reportService'
 import { Avatar } from '@/components/common/Avatar'
 import { ReportStatusBadge } from './ReportStatusBadge'
 import { ReportCategoryBadge } from './ReportCategoryBadge'
-import { formatRelativeTime } from '@/lib/utils'
+import { formatRelativeTime, hasKhmerText } from '@/lib/utils'
 
 interface ReportCardProps {
   report: Report
@@ -24,6 +24,9 @@ interface ReportCardProps {
 
 export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated }) => {
   const { t, language } = useTranslation()
+  const isKhmerTitle = hasKhmerText(report.title) || language === 'km'
+  const isKhmerDesc = hasKhmerText(report.description) || language === 'km'
+  const isKhmerAuthor = hasKhmerText(report.authorNickname)
   const [isSupporting, setIsSupporting] = useState(false)
   const [supportedByMe, setSupportedByMe] = useState(report.supportedByMe)
   const [supportCount, setSupportCount] = useState(report.supportCount)
@@ -118,7 +121,10 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
                 <Link
                   to={`/profile/${encodeURIComponent(report.authorNickname)}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="text-sm font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate hover:underline hover:text-blue-900 dark:hover:text-blue-400 transition-colors"
+                  lang={isKhmerAuthor ? 'km' : undefined}
+                  className={`text-sm font-bold text-slate-900 dark:text-slate-100 truncate hover:underline hover:text-blue-900 dark:hover:text-blue-400 transition-colors ${
+                    isKhmerAuthor ? 'font-khmer tracking-normal' : 'tracking-tight'
+                  }`}
                 >
                   {report.authorNickname}
                 </Link>
@@ -148,14 +154,26 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
             <ReportCategoryBadge category={report.category} size="sm" />
           </div>
           <Link to={`/reports/${report.id}`} className="block group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors">
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-snug line-clamp-2">
+            <h3
+              lang={isKhmerTitle ? 'km' : undefined}
+              className={`text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 line-clamp-2 ${
+                isKhmerTitle
+                  ? 'font-khmer tracking-normal leading-[1.6] py-0.5'
+                  : 'tracking-tight leading-snug'
+              }`}
+            >
               {report.title}
             </h3>
           </Link>
           <p
             ref={descriptionRef}
             id={`report-description-${report.id}`}
-            className={`text-sm text-slate-600 dark:text-slate-400 whitespace-pre-line leading-relaxed ${isDescriptionExpanded ? '' : 'line-clamp-3'}`}
+            lang={isKhmerDesc ? 'km' : undefined}
+            className={`text-sm text-slate-600 dark:text-slate-400 whitespace-pre-line ${
+              isKhmerDesc
+                ? 'font-khmer tracking-normal leading-[1.75] py-0.5'
+                : 'leading-relaxed'
+            } ${isDescriptionExpanded ? '' : 'line-clamp-3'}`}
           >
             {report.description}
           </p>
@@ -165,7 +183,8 @@ export const ReportCard: React.FC<ReportCardProps> = ({ report, onReportUpdated 
               aria-controls={`report-description-${report.id}`}
               aria-expanded={isDescriptionExpanded}
               onClick={() => setIsDescriptionExpanded((expanded) => !expanded)}
-              className="text-xs font-bold text-blue-800 dark:text-blue-400 hover:text-blue-950 dark:hover:text-blue-300 hover:underline"
+              lang={language === 'km' ? 'km' : undefined}
+              className="text-xs font-bold text-blue-800 dark:text-blue-400 hover:text-blue-950 dark:hover:text-blue-300 hover:underline tracking-normal py-0.5"
             >
               {isDescriptionExpanded
                 ? (language === 'km' ? 'បង្ហាញតិច' : 'Read less')
