@@ -30,7 +30,11 @@ Community reporting for roads, drainage, waste, lighting, and other local issues
 
 The interface supports English and Khmer. The frontend also has a browser-based demo mode with sample reports, so you can explore the UI before connecting a database.
 
-Accounts using the real backend can optionally protect sign-in with an authenticator app. Setup is in Settings and includes one-time recovery codes.
+Accounts using the real backend can optionally protect sign-in with an authenticator app. Setup is in Settings and includes one-time recovery codes. Until MFA is enabled, the app shows an optional setup reminder after a randomly chosen 3–6 successful sign-ins. Choosing **Maybe later** starts another 3–6 sign-in interval; failed sign-ins and accounts with MFA enabled do not trigger the reminder.
+
+### What a report status means
+
+New reports start as **Reported**. An account with the `ADMIN` role can change a report to **Under Review**, **In Progress**, **Resolved**, or **Rejected** in the moderation dashboard. The status is a FixKH moderation decision. The current MVP does not require repair evidence, confirmation from the original reporter, or approval from a government agency before an admin selects **Resolved**. It must not be presented as independent proof that a road or other issue was physically fixed.
 
 ## Quick start
 

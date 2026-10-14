@@ -43,6 +43,8 @@ Set `TWO_FACTOR_ENCRYPTION_KEY` in the private `.env` to the Base64 encoding of 
 
 Users can opt in from frontend Settings after signing in. Setup requires their current password, displays a QR code or manual setup key, and becomes active only after they enter a valid six-digit app code. Eight one-time recovery codes are then displayed once; users must store them safely. Each login first checks the password, then requires a current authenticator code or unused recovery code before issuing a JWT. Five incorrect MFA attempts lock the account's MFA step for 15 minutes. Enabling or disabling MFA invalidates existing JWTs.
 
+For accounts without MFA, the backend counts successful password sign-ins and returns `mfaSetupReminder: true` once after a randomly chosen 3–6 sign-ins. The counter then starts a new random interval. Failed sign-ins, registration, and MFA-protected logins do not advance it. The frontend shows a dismissible reminder linking to Settings; it does not block access.
+
 The endpoints are `GET /api/v1/auth/mfa/status`, `POST /api/v1/auth/mfa/setup` with `{"password":"..."}`, `POST /api/v1/auth/mfa/confirm` with `{"code":"123456"}`, public `POST /api/v1/auth/mfa/verify-login` with `{"challengeToken":"...","code":"123456"}`, and `POST /api/v1/auth/mfa/disable` with `{"password":"...","code":"123456"}`. Setup, confirm, status, and disable require an access token. A password login for an MFA-enabled account returns `mfaRequired: true` and a short-lived challenge token instead of an access token.
 
 To create a **development-only** administrator, set `SPRING_PROFILES_ACTIVE=dev`, `FIXKH_DEV_ADMIN_EMAIL`, `FIXKH_DEV_ADMIN_PASSWORD` (at least 12 characters), and optionally `FIXKH_DEV_ADMIN_NICKNAME` before startup. Bootstrap creates the account only if the email is unused. Never enable the dev profile or bootstrap credentials in production. Public registration always creates `CITIZEN`.
@@ -72,6 +74,8 @@ Forgotten passwords use `POST /api/v1/auth/forgot-password` with `{"email":"sok@
 ```
 
 The new report starts at `REPORTED`. Use `POST /api/v1/reports/{id}/images` with multipart field `files` for photos. Uploaded images are decoded and re-encoded without original metadata. The upload directory is private to the application and is not served as a static folder.
+
+Only `ADMIN` accounts can call `PATCH /api/v1/admin/reports/{id}/status`. The admin can select `RESOLVED` and optionally add an admin note; the API does not require evidence of completed work or confirmation from the reporter or an agency. Statuses describe FixKH moderation activity, not independently verified repairs.
 
 ## React integration
 
