@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { useTranslation } from '@/contexts/LanguageContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { isMockMode } from '@/services/apiClient'
+import { safeReturnPath } from '@/lib/reportInteraction'
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -21,7 +22,7 @@ export const LoginPage: React.FC = () => {
   const { login, verifyMfaLogin, loginAsDemoUser, loginAsAdmin } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const returnTo = (location.state as { from?: string })?.from || '/feed'
+  const returnTo = safeReturnPath((location.state as { from?: string })?.from || new URLSearchParams(location.search).get('from'))
 
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)

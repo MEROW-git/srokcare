@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import type { User, LoginInput, RegisterInput, AuthResponse } from '@/types/auth'
 import { authService } from '@/services/authService'
-import { isMockMode } from '@/services/apiClient'
+import { isMockMode, SESSION_EXPIRED_EVENT } from '@/services/apiClient'
 
 interface AuthContextType {
   user: User | null
@@ -47,6 +47,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem(TOKEN_STORAGE_KEY)
     }
   }, [user])
+
+  useEffect(() => {
+    const expireSession = () => setUser(null)
+    window.addEventListener(SESSION_EXPIRED_EVENT, expireSession)
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, expireSession)
+  }, [])
 
   const login = async (input: LoginInput) => {
     const res = await authService.login(input)

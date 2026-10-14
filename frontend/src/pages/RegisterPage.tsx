@@ -9,6 +9,7 @@ import { useTranslation } from '@/contexts/LanguageContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { authService } from '@/services/authService'
 import axios from 'axios'
+import { safeReturnPath } from '@/lib/reportInteraction'
 
 const errorMessage = (error: unknown, fallback: string) =>
   axios.isAxiosError(error) && typeof error.response?.data?.message === 'string'
@@ -39,7 +40,7 @@ export const RegisterPage: React.FC = () => {
   const { register: registerAuth, verifyRegistration } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const returnTo = (location.state as { from?: string })?.from || '/feed'
+  const returnTo = safeReturnPath((location.state as { from?: string })?.from || new URLSearchParams(location.search).get('from'))
 
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)

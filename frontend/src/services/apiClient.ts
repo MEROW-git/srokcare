@@ -10,6 +10,8 @@ export const apiClient = axios.create({
   timeout: 10000,
 })
 
+export const SESSION_EXPIRED_EVENT = 'fixkh:session-expired'
+
 // Attach Bearer token if present
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('fixkh_auth_token')
@@ -25,8 +27,12 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('fixkh_auth_token')
-      localStorage.removeItem('fixkh_auth_user')
+      const requestToken = String(error.config?.headers?.Authorization || '').replace(/^Bearer /, '')
+      if (requestToken && localStorage.getItem('fixkh_auth_token') === requestToken) {
+        localStorage.removeItem('fixkh_auth_token')
+        localStorage.removeItem('fixkh_auth_user')
+        window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT))
+      }
     }
     return Promise.reject(error)
   }

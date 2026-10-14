@@ -264,6 +264,30 @@ export const translations = {
     authKeepEditingBtn: 'Keep Editing',
     draftRestoredNotice: 'Your report draft has been restored. Review your report and click Publish Report.',
     sessionExpiredNotice: 'Your session has expired. Sign in or create an account to publish your report.',
+
+    // Guest Interaction & Action-Specific Auth Modal
+    authRequiredSupportTitle: 'Sign In to Support Report',
+    authRequiredSupportPrompt: 'Please sign in or create an account to support this community issue and help increase its priority.',
+    authRequiredSupportNotice: 'Your support vote is pseudonymous. Protects your identity while raising civic awareness.',
+    authRequiredCommentTitle: 'Sign In to Join Discussion',
+    authRequiredCommentPrompt: 'Please sign in or create an account to participate in the community discussion and post comments.',
+    authRequiredCommentNotice: 'You will return directly to this report’s comments section after signing in.',
+    authRequiredShareTitle: 'Sign In to Share Report',
+    authRequiredSharePrompt: 'Please sign in or create an account to share this report with your community.',
+    authRequiredShareNotice: 'Sharing helps mobilize neighbors and municipal authorities to address the issue.',
+    sessionExpiredTitle: 'Session Expired',
+    sessionExpiredNoticeAction: 'Your session has expired. Please sign in again to continue.',
+
+    // Share Dialog
+    shareModalTitle: 'Share Civic Report',
+    shareModalSubtitle: 'Help raise awareness by sharing this incident with your community or local authorities.',
+    shareCopyLink: 'Copy Link',
+    shareCopiedSuccess: 'Report link copied to clipboard!',
+    shareCopyFailed: 'Unable to copy link to clipboard. Please copy manually.',
+    shareToFacebook: 'Share to Facebook',
+    shareViaDevice: 'Share via Device',
+    shareDeviceFailed: 'Sharing could not be completed on this device.',
+    shareDirectLink: 'Direct Report URL',
   },
   km: {
     // App Brand
@@ -528,6 +552,30 @@ export const translations = {
     authKeepEditingBtn: 'បន្តកែសម្រួល',
     draftRestoredNotice: 'សេចក្តីព្រាងរបាយការណ៍របស់អ្នកត្រូវបានស្តារឡើងវិញ។ សូមពិនិត្យរបាយការណ៍របស់អ្នក ហើយចុចផ្សព្វផ្សាយរបាយការណ៍។',
     sessionExpiredNotice: 'សម័យការរបស់អ្នកបានផុតកំណត់ហើយ។ សូមចូលប្រើប្រាស់ ឬបង្កើតគណនីដើម្បីផ្សព្វផ្សាយរបាយការណ៍។',
+
+    // Guest Interaction & Action-Specific Auth Modal
+    authRequiredSupportTitle: 'ចូលគណនីដើម្បីគាំទ្ររបាយការណ៍',
+    authRequiredSupportPrompt: 'សូមចូលគណនី ឬបង្កើតគណនី ដើម្បីគាំទ្របញ្ហាសហគមន៍នេះ និងជួយបង្កើនអាទិភាពដោះស្រាយ។',
+    authRequiredSupportNotice: 'ការគាំទ្ររបស់អ្នកគឺមិនបង្ហាញអត្តសញ្ញាណពិត។ ការពារភាពឯកជនរបស់អ្នក ខណៈពេលលើកកម្ពស់ការយល់ដឹងក្នុងសហគមន៍។',
+    authRequiredCommentTitle: 'ចូលគណនីដើម្បីចូលរួមការពិភាក្សា',
+    authRequiredCommentPrompt: 'សូមចូលគណនី ឬបង្កើតគណនី ដើម្បីចូលរួមការពិភាក្សាក្នុងសហគមន៍ និងបញ្ចេញមតិយោបល់។',
+    authRequiredCommentNotice: 'អ្នកនឹងត្រូវបាននាំត្រឡប់មកកាន់ផ្នែកមតិយោបល់នៃរបាយការណ៍នេះវិញ បន្ទាប់ពីចូលគណនី។',
+    authRequiredShareTitle: 'ចូលគណនីដើម្បីចែករំលែករបាយការណ៍',
+    authRequiredSharePrompt: 'សូមចូលគណនី ឬបង្កើតគណនី ដើម្បីចែករំលែករបាយការណ៍នេះជាមួយសហគមន៍របស់អ្នក។',
+    authRequiredShareNotice: 'ការចែករំលែកជួយជំរុញអ្នកជិតខាង និងអាជ្ញាធរមូលដ្ឋានឱ្យបានដឹង និងដោះស្រាយបញ្ហានេះ។',
+    sessionExpiredTitle: 'សម័យចូលប្រើប្រាស់បានផុតកំណត់',
+    sessionExpiredNoticeAction: 'សម័យចូលប្រើប្រាស់របស់អ្នកបានផុតកំណត់ហើយ។ សូមចូលគណនីម្តងទៀតដើម្បីបន្ត។',
+
+    // Share Dialog
+    shareModalTitle: 'ចែករំលែករបាយការណ៍សហគមន៍',
+    shareModalSubtitle: 'ជួយលើកកម្ពស់ការយល់ដឹងដោយចែករំលែកហេតុការណ៍នេះទៅកាន់សហគមន៍ ឬអាជ្ញាធរមូលដ្ឋាន។',
+    shareCopyLink: 'ចម្លងតំណភ្ជាប់',
+    shareCopiedSuccess: 'បានចម្លងតំណភ្ជាប់របាយការណ៍ទៅក្ដារតម្បៀតខ្ទាស់!',
+    shareCopyFailed: 'មិនអាចចម្លងតំណភ្ជាប់បានទេ។ សូមចម្លងដោយផ្ទាល់។',
+    shareToFacebook: 'ចែករំលែកទៅកាន់ Facebook',
+    shareViaDevice: 'ចែករំលែកតាមទូរស័ព្ទ',
+    shareDeviceFailed: 'មិនអាចចែករំលែកនៅលើឧបករណ៍នេះបានទេ។',
+    shareDirectLink: 'តំណភ្ជាប់ផ្ទាល់នៃរបាយការណ៍',
   },
 } as const
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   ArrowLeft,
   ThumbsUp,
@@ -11,6 +11,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import axios from 'axios'
 import * as maplibregl from 'maplibre-gl'
 import type { Report } from '@/types/report'
 import type { Comment } from '@/types/comment'
@@ -21,7 +22,10 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Avatar } from '@/components/common/Avatar'
 import { ReportStatusBadge } from '@/components/reports/ReportStatusBadge'
 import { ReportCategoryBadge } from '@/components/reports/ReportCategoryBadge'
+import { AuthRequiredModal, type AuthRequiredAction } from '@/components/reports/AuthRequiredModal'
+import { ShareModal } from '@/components/reports/ShareModal'
 import { formatRelativeTime, hasKhmerText } from '@/lib/utils'
+import { reportReturnPath } from '@/lib/reportInteraction'
 import { DisclaimerBanner } from '@/components/common/DisclaimerBanner'
 import { useRealtimeEvents } from '@/hooks/useRealtimeEvents'
 import { getMapStyle } from '@/lib/mapStyle'
@@ -29,6 +33,7 @@ import { getMapStyle } from '@/lib/mapStyle'
 export const ReportDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const { t, language } = useTranslation()
   const { user } = useAuth()
 
@@ -38,7 +43,18 @@ export const ReportDetailsPage: React.FC = () => {
   const [newComment, setNewComment] = useState('')
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const [activePhotoIdx, setActivePhotoIdx] = useState(0)
+
+  // Auth & Share Modals
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authModalAction, setAuthModalAction] = useState<AuthRequiredAction>('support')
+  const [isSessionExpired, setIsSessionExpired] = useState(false)
+  const [shareModalOpen, setShareModalOpen] = useState(false)
+
   const mapContainerRef = useRef<HTMLDivElement>(null)
+  const supportButtonRef = useRef<HTMLButtonElement>(null)
+  const shareButtonRef = useRef<HTMLButtonElement>(null)
+  const commentsSectionRef = useRef<HTMLDivElement>(null)
+
 
   // Fetch report and its comments
   const loadReportData = async () => {
@@ -127,8 +143,42 @@ export const ReportDetailsPage: React.FC = () => {
     }
   }, [report])
 
+  // Scroll to comments section if URL contains #comments
+  useEffect(() => {
+    if (location.hash === '#comments' && !loading && report) {
+      const timer = setTimeout(() => {
+        const commentsEl = document.getElementById('comments')
+        if (commentsEl) {
+          commentsEl.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 150)
+      return () => clearTimeout(timer)
+    }
+  }, [location.hash, loading, report])
+
   const handleSupportToggle = async () => {
     if (!report) return
+
+    // Signed-out user: do NOT call API, change count, or show error toast
+    if (!user) {
+      setAuthModalAction('support')
+      setIsSessionExpired(false)
+      setAuthModalOpen(true)
+      return
+    }
+
+    const prevSupported = report.supportedByMe
+    const prevCount = report.supportCount
+    const nextState = !prevSupported
+    const nextCount = nextState ? prevCount + 1 : Math.max(0, prevCount - 1)
+
+    // Optimistic toggle
+    setReport({
+      ...report,
+      supportCount: nextCount,
+      supportedByMe: nextState,
+    })
+
     try {
       const res = await reportService.toggleSupport(report.id)
       setReport({
@@ -139,15 +189,52 @@ export const ReportDetailsPage: React.FC = () => {
       if (res.supportedByMe) {
         toast.success(`You supported this issue! (${res.supportCount} total)`)
       }
-    } catch {
-      toast.error('Unable to update support.')
+    } catch (err: unknown) {
+      // Revert on error
+      setReport({
+        ...report,
+        supportCount: prevCount,
+        supportedByMe: prevSupported,
+      })
+      if (axios.isAxiosError(err) && err.response?.status === 401) {
+        setIsSessionExpired(true)
+        setAuthModalAction('support')
+        setAuthModalOpen(true)
+      } else {
+        toast.error('Unable to update support.')
+      }
     }
   }
 
   const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href)
-    toast.success(t('shareCopied'))
+    if (!user) {
+      setAuthModalAction('share')
+      setIsSessionExpired(false)
+      setAuthModalOpen(true)
+      return
+    }
+    setShareModalOpen(true)
   }
+
+  const handleAuthModalSignIn = () => {
+    setAuthModalOpen(false)
+    const reportId = report?.id || id
+    if (reportId) navigate('/login', { state: { from: reportReturnPath(reportId, authModalAction) } })
+  }
+
+  const handleAuthModalCreateAccount = () => {
+    setAuthModalOpen(false)
+    const reportId = report?.id || id
+    if (reportId) navigate('/register', { state: { from: reportReturnPath(reportId, authModalAction) } })
+  }
+
+  const activeTriggerRef =
+    authModalAction === 'share'
+      ? shareButtonRef
+      : authModalAction === 'comment'
+      ? commentsSectionRef
+      : supportButtonRef
+
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -160,8 +247,14 @@ export const ReportDetailsPage: React.FC = () => {
       setReport({ ...report, commentCount: report.commentCount + 1 })
       setNewComment('')
       toast.success('Comment added to discussion!')
-    } catch {
-      toast.error('Failed to post comment.')
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        setIsSessionExpired(true)
+        setAuthModalAction('comment')
+        setAuthModalOpen(true)
+      } else {
+        toast.error('Failed to post comment.')
+      }
     } finally {
       setIsSubmittingComment(false)
     }
@@ -341,7 +434,9 @@ export const ReportDetailsPage: React.FC = () => {
           <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <button
+                ref={supportButtonRef}
                 onClick={handleSupportToggle}
+                aria-label={`${report.supportedByMe ? t('supported') : t('support')} (${report.supportCount})`}
                 className={`inline-flex items-center gap-2 px-4 py-2 rounded-sm font-bold text-xs transition-colors border ${
                   report.supportedByMe
                     ? 'bg-blue-900 dark:bg-blue-600 border-blue-950 dark:border-blue-500 text-white'
@@ -355,7 +450,9 @@ export const ReportDetailsPage: React.FC = () => {
               </button>
 
               <button
+                ref={shareButtonRef}
                 onClick={handleShare}
+                aria-label={t('share')}
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-sm font-semibold text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
               >
                 <Share2 className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
@@ -370,7 +467,7 @@ export const ReportDetailsPage: React.FC = () => {
         </div>
 
         {/* Comments Section */}
-        <div id="comments" className="bg-slate-50 dark:bg-slate-900/60 p-6 sm:p-7 border-t border-slate-200 dark:border-slate-800 space-y-5">
+        <div id="comments" ref={commentsSectionRef} tabIndex={-1} className="bg-slate-50 dark:bg-slate-900/60 p-6 sm:p-7 border-t border-slate-200 dark:border-slate-800 space-y-5">
           <div className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4 text-blue-700 dark:text-blue-400" />
             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 tracking-normal">
@@ -405,12 +502,26 @@ export const ReportDetailsPage: React.FC = () => {
               </div>
             </form>
           ) : (
-            <div className="bg-white dark:bg-slate-900 p-4 rounded-sm border border-slate-300 dark:border-slate-800 text-center text-xs text-slate-600 dark:text-slate-400">
-              Please{' '}
-              <Link to="/login" className="text-blue-700 dark:text-blue-400 font-bold underline">
-                sign in
-              </Link>{' '}
-              to participate in the community discussion.
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-sm border border-slate-300 dark:border-slate-800 text-center space-y-3">
+              <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+                {language === 'km'
+                  ? 'សូមចូលគណនី ឬបង្កើតគណនី ដើម្បីចូលរួមការពិភាក្សាក្នុងសហគមន៍ និងបញ្ចេញមតិយោបល់។'
+                  : 'Sign in or create an account to participate in the community discussion.'}
+              </p>
+              <div className="flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthModalAction('comment')
+                    setIsSessionExpired(false)
+                    setAuthModalOpen(true)
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-white bg-blue-900 hover:bg-blue-950 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-xs transition-colors shadow-2xs border border-blue-950 dark:border-blue-400"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  {t('comment')}
+                </button>
+              </div>
             </div>
           )}
 
@@ -462,6 +573,28 @@ export const ReportDetailsPage: React.FC = () => {
           </div>
         </div>
       </article>
+
+      {/* Guest Authentication Modal */}
+      <AuthRequiredModal
+        isOpen={authModalOpen}
+        isSessionExpired={isSessionExpired}
+        action={authModalAction}
+        onClose={() => {
+          setAuthModalOpen(false)
+          setIsSessionExpired(false)
+        }}
+        onSignIn={handleAuthModalSignIn}
+        onCreateAccount={handleAuthModalCreateAccount}
+        triggerRef={activeTriggerRef}
+      />
+
+      {/* Share Dialog */}
+      <ShareModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        report={report}
+        triggerRef={shareButtonRef}
+      />
     </div>
   )
 }
