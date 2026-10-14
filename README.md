@@ -20,6 +20,26 @@ Community reporting for roads, drainage, waste, lighting, and other local issues
 
 > FixKH helps neighbors document public problems, find them on a map, and follow community updates. Reports use public nicknames; account email addresses stay private. A report's status describes moderation on this platform, not acceptance or resolution by a government agency.
 
+## Screenshots
+
+These screens show the local MVP with example reports. The example photos are generated illustrations, the map pins are approximate, and the incidents have not been verified.
+
+**Home — discover the latest community report**
+
+![FixKH home page showing the latest example report](docs/screenshots/home.png)
+
+**Community feed — browse reports and community support**
+
+![FixKH community feed with categories, report cards, and support counts](docs/screenshots/community-feed.png)
+
+**Explore map — find reports by location and category**
+
+![FixKH map showing example report pins across Cambodia](docs/screenshots/explore-map.png)
+
+**Report details — read the issue, image, and location**
+
+![FixKH example flooding report detail page](docs/screenshots/report-detail.png)
+
 ## Features
 
 | Explore | Participate | Moderate |
